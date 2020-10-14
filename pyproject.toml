@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "bnstats"
+version = "0.1.0"
+description = ""
+authors = ["Rendy Arya Kemal <rendyarya22@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+starlette = "^0.13.8"
+uvicorn = "^0.12.1"
+aiofiles = "^0.5.0"
+itsdangerous = "^1.1.0"
+jinja2 = "^2.11.2"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
