@@ -31,14 +31,23 @@ body {
     background-color: #1f1d24;
 }
 
-.segment.header {
+.ui.segment * {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.ui.segment .header {
     padding: 20px;
     background-color: #1f1d24;
     margin: 0;
 }
 
-.ui.segment p {
-    padding: 20px;
+.ui.segment p:first-of-type {
+    padding-top: 20px;
+}
+
+.ui.segment p:last-child {
+    padding-bottom: 20px;
 }
 
 .main.container {
