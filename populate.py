@@ -26,16 +26,18 @@ async def run():
     await Tortoise.init(db_url=DB_URL, modules={"models": ["bnstats.models"]})
     await Tortoise.generate_schemas()
 
-    print("Populating users...")
+    print("> Populating users...")
     users = await User.get_users(mock)
 
     c = len(users)
     for i, u in enumerate(users):
-        print(f"Populating data for user: {u.username} ({i+1}/{c})")
+        print(f">> Populating data for user: {u.username} ({i+1}/{c})")
         nominations = await u.get_nomination_activity(mock)
 
-        print(f"Populating maps for user: {u.username} ({i+1}/{c})")
-        for nom in nominations:
+        print(f">>> Populating maps for user: {u.username}")
+        c_maps = len(nominations)
+        for i, nom in enumerate(nominations):
+            print(f">>> Fetching: {nom.beatmapsetId} ({i+1}/{c_maps})")
             await nom.get_map()
 
     await request.s.aclose()
