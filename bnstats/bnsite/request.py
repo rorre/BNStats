@@ -4,7 +4,7 @@ import os
 import aiofiles
 import httpx
 
-s: httpx.AsyncClient = httpx.AsyncClient()
+s: httpx.AsyncClient = httpx.AsyncClient(timeout=60.0)
 api_key = ""
 
 

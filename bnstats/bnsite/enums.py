@@ -30,6 +30,7 @@ class Genre(IntEnum):
 
 class Language(IntEnum):
     Any = 0
+    Unspecified = 1
     English = 2
     Japanese = 3
     Chinese = 4
@@ -40,6 +41,8 @@ class Language(IntEnum):
     Swedish = 9
     Spanish = 10
     Italian = 11
+    Russian = 12
+    Polish = 13
     Other = 14
 
 

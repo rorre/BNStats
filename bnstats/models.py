@@ -68,8 +68,8 @@ class Nomination(models.Model):
     beatmapsetId = fields.IntField()
     userId = fields.IntField()
     artistTitle = fields.TextField()
-    creatorId = fields.IntField()
-    creatorName = fields.TextField()
+    creatorId = fields.IntField(null=True)
+    creatorName = fields.TextField(null=True)
     timestamp = fields.DatetimeField()
 
     async def get_map(self) -> BeatmapSet:
