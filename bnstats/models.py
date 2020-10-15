@@ -119,18 +119,19 @@ class User(models.Model):
             users = await cls.all()
         return users
 
-    async def _fetch_activity(self):
+    async def _fetch_activity(self, days):
         deadline = time.time() * 1000
         url = (
             self.BASE_URL
             + f"/activity?osuId={self.osuId}&"
             + f"modes={','.join(self.modes)}&"
-            + f"deadline={deadline}&mongoId={self._id}"
+            + f"deadline={deadline}&mongoId={self._id}&"
+            + f"days={days}"
         )
         activities: Dict[str, Any] = await get(url, "activity", f"{self.username}.json")
         return activities
 
-    async def get_nomination_activity(self, request) -> List[Nomination]:
+    async def get_nomination_activity(self, request, days=90) -> List[Nomination]:
         last_update = datetime.min
         update_states = request.app.state.last_update["user"]
         if self.osuId in update_states:
@@ -138,7 +139,7 @@ class User(models.Model):
         current_time = datetime.now()
 
         if current_time - last_update > timedelta(minutes=30):
-            activities = await self._fetch_activity()
+            activities = await self._fetch_activity(days)
 
             events = []
             for event in activities["uniqueNominations"]:

@@ -32,7 +32,7 @@ async def run():
     c = len(users)
     for i, u in enumerate(users):
         print(f">> Populating data for user: {u.username} ({i+1}/{c})")
-        nominations = await u.get_nomination_activity(mock)
+        nominations = await u.get_nomination_activity(mock, 999)
 
         print(f">>> Populating maps for user: {u.username}")
         c_maps = len(nominations)
