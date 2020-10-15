@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="ui segments">
+    <div class="ui segment">
+        <h3 class="header">User Info</h3>
+        <div class="ui two column very relaxed stackable grid">
+            <div class="column">
+                <h2 class="ui center aligned icon inverted header">
+                    <div class="ui circular image">
+                        <img src="https://a.ppy.sh/{{ user.osuId }}">
+                    </div>
+                    <div class="content">
+                        <a class="title">{{ user.username }}</a>
+                        <div class="sub header">
+                            <a class="ui label">Genre: {{ genre_favor }}</a>
+                            <a class="ui label">Language: {{ lang_favor }}</a>
+                            <a class="ui label">Length: {{ length_favor }}</a>
+                            <a class="ui label">Size: {{ size_favor }}</a>
+                        </div>
+                    </div>
+                </h2>
+            </div>
+            <div class="column middle aligned">
+                <div class="ui large relaxed divided inverted list">
+                    <div class="item">
+                        <i class="large check middle aligned icon"></i>
+                        <div class="content">
+                            <a class="header">{{ nominations | length }}</a>
+                            <div class="description">Nominations</div>
+                        </div>
+                    </div>
+
+                    <div class="item">
+                        <i class="large play middle aligned icon"></i>
+                        <div class="content">
+                            <a class="header">{{ avg_length }}</a>
+                            <div class="description">Average length</div>
+                        </div>
+                    </div>
+
+                    <div class="item">
+                        <i class="large star middle aligned icon"></i>
+                        <div class="content">
+                            <a class="header">{{ avg_diffs }} Difficulties</a>
+                            <div class="description">Average difficulties</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ui stackable grid">
+        <div class="two column row">
+            <div class="column">
+                <div class="ui secondary segment">
+                    <h4 class="header">Genre</h4>
+                    <div class="chart-container" style="position: relative;">
+                        <canvas id="genreChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column">
+                <div class="ui secondary segment">
+                    <h4 class="header">Language</h4>
+                    <div class="chart-container" style="position: relative;">
+                        <canvas id="langChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ui segments">
+        <div class="ui secondary segment">
+            <h3 class="header">Length</h3>
+            <div class="chart-container" style="position: relative;">
+                <canvas id="lengthChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="ui segments">
+        <div class="ui secondary segment">
+            <h3 class="header">Nominations</h3>
+            <table class="ui celled inverted table">
+                <thead>
+                    <tr>
+                        <th>Beatmap</th>
+                        <th>Genre</th>
+                        <th>Language</th>
+                        <th>Length</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for nomination in nominations %}
+                    <tr>
+                        <td><a href="https://osu.ppy.sh/s/{{ nomination.map.beatmapset_id }}">{{ nomination.map.artist }} - {{ nomination.map.title }} ({{ nomination.map.creator }})</a></td>
+                        <td>{{ nomination.map.genre.name | replace("_", " ") }}</td>
+                        <td>{{ nomination.map.language.name }}</td>
+                        <td>{{ nomination.map.map_length }} * {{ nomination.map.beatmaps | length }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+    function generateColors(n) {
+        data = []
+        for (var i = 0; i < n; i++) {
+            data.push(getRandomColor())
+        }
+        return data
+    }
+
+    var genre_data = {
+        labels: {{ labels["genre"] | tojson }},
+        datasets: [{
+            data: {{ datas["genre"] | tojson }},
+            backgroundColor: generateColors({{ datas["genre"] | length}})
+        }]
+    }
+
+    new Chart('genreChart', {
+        type: "doughnut",
+        data: genre_data,
+        options: {
+            legend: {
+                labels: {
+                    fontColor: "#fff"
+                }
+            }
+        }
+    });
+
+    var lang_data = {
+        labels: {{ labels["language"] | tojson }},
+        datasets: [{
+            data: {{ datas["language"] | tojson }},
+            backgroundColor: generateColors({{ datas["genre"] | length}})
+        }]
+    }
+    new Chart('langChart', {
+        type: "doughnut",
+        data: lang_data,
+        options: {
+            legend: {
+                labels: {
+                    fontColor: "#fff"
+                }
+            }
+        }
+    });
+
+    var length_data = {
+        labels: ["<= 1 minute", "<= 2 minutes", "<= 3 minutes", "<= 4 minutes", "<= 5 minutes", "> 5 minutes"],
+        datasets: [{
+            data: {{ length_data | tojson }},
+            backgroundColor: generateColors({{ datas["genre"] | length}}),
+        }]
+    }
+    new Chart('lengthChart', {
+        type: "bar",
+        data: length_data,
+        options: {
+            scales: {
+                xAxes: [{
+                    ticks: {
+                        fontColor: "#fff"
+                    }
+                }]
+            },
+            legend: {
+                display: false,
+            },
+            elements: {
+                rectangle: {
+                    borderColor: "#fff",
+                    borderWidth: 1
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

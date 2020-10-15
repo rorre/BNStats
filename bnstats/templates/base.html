@@ -7,12 +7,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
     <!-- Site Properties -->
-    <title>OSU</title>
+    <title>BNStats</title>
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.8.7/dist/semantic.min.css">
     <script src="https://cdn.jsdelivr.net/npm/fomantic-ui@2.8.7/dist/semantic.min.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 
 </head>
 
@@ -20,10 +21,9 @@
     <!-- Navbar -->
     <div class="ui fixed inverted secondary menu">
         <div class="ui container">
-            <a href="#" class="header item">
-                OSU
-            </a>
-            <a href="#" class="item">Home</a>
+            <a href="{{ url_for('home') }}" class="item logo"><img src="/static/logo.png"></a>
+            <a href="{{ url_for('home') }}" class="item">Home</a>
+            <a href="{{ url_for('users:list') }}" class="item">Users</a>
         </div>
     </div>
 

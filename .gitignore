@@ -138,6 +138,7 @@ dmypy.json
 cython_debug/
 
 config.json
-*.db
+*.db*
 .vscode/
 bundle.js
+cache

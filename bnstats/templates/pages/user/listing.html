@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="ui segment">
+    <h3 class="header">User List</h3>
+    <table class="ui celled padded inverted table">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Gamemode</th>
+                <th>Nominations</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td><a href="{{ url_for('users:show', user_id=user.osuId) }}">{{ user.username }}</a></td>
+                <td>{{ user.modes }}</td>
+                <td>{{ counts[loop.index0] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
