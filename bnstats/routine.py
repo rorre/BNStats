@@ -99,7 +99,6 @@ def setup_routine(app: Starlette):
 
                     for u in users:
                         events = await update_nomination_db(u)
-                        app.state.last_update["user"][u.osuId] = datetime.utcnow()
 
                         for e in events:
                             await update_maps_db(e)
@@ -110,6 +109,7 @@ def setup_routine(app: Starlette):
                     traceback.print_exception(
                         type(error), error, error.__traceback__, file=sys.stderr
                     )
+                await asyncio.sleep(300)
 
         loop = asyncio.get_event_loop()
         task = loop.create_task(routine())

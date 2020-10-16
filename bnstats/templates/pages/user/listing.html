@@ -6,7 +6,7 @@
 </div>
 <div class="ui segment">
     <h3 class="header">User List</h3>
-    <p>Last updated: {{ request.app.state.last_update["user-list"].strftime("%d-%m-%Y %H:%M:%S") }} UTC</p>
+    <p>Last updated: {{ request.app.state.last_update.strftime("%d-%m-%Y %H:%M:%S") }} UTC</p>
     <div class="table-wrapper">
         <table class="ui celled padded inverted sortable unstackable selectable table">
             <thead>
