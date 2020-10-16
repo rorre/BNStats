@@ -1,14 +1,20 @@
-from datetime import datetime
+import asyncio
 import sys
 import time
-from starlette.applications import Starlette
-from bnstats.models import User, Nomination
-from bnstats.bnsite.request import get, s
-from dateutil.parser import parse
-from typing import Dict, Any, List
-import asyncio
 import traceback
+from datetime import datetime
+from typing import Any, Dict, List
+from urllib.parse import urlencode
 
+from dateutil.parser import parse
+from starlette.applications import Starlette
+
+from bnstats.bnsite import request
+from bnstats.bnsite.enums import MapStatus
+from bnstats.bnsite.request import get, s
+from bnstats.models import Beatmap, Nomination, User
+
+API_URL = "https://osu.ppy.sh/api"
 USERS_URL = "https://bn.mappersguild.com/users"
 
 
@@ -18,6 +24,7 @@ async def update_users_db():
 
     users: List[User] = []
     for u in r["users"]:
+        u["last_updated"] = datetime.utcnow()
         user = await User.get_or_none(osuId=u["osuId"])
         if user:
             user.update_from_dict(u)
@@ -25,7 +32,6 @@ async def update_users_db():
             user = await User.create(**u)
 
         users.append(user)
-
     return users
 
 
@@ -50,12 +56,31 @@ async def update_nomination_db(user: User, days: int = 90):
             timestamp=parse(event["timestamp"]),
             userId=event["userId"],
         )
+        event["timestamp"] = parse(event["timestamp"], ignoretz=True)
+        event["user"] = user
 
         if not db_event:
             db_event = await Nomination.create(**event)
         events.append(db_event)
 
     return events
+
+
+async def update_maps_db(nomination: Nomination):
+    db_result = await Beatmap.filter(beatmapset_id=nomination.beatmapsetId).first()
+
+    if not db_result or db_result.status not in [MapStatus.Approved, MapStatus.Ranked]:
+        query = {"k": request.api_key, "s": nomination.beatmapsetId}
+        url = API_URL + "/get_beatmaps?" + urlencode(query)
+        r = await get(url)
+
+        for map in r:
+            db_diff = await Beatmap.filter(beatmap_id=map["beatmap_id"]).get_or_none()
+
+            if not db_diff:
+                await Beatmap.create(**map)
+            else:
+                db_diff.update_from_dict(map)
 
 
 task = None
@@ -77,7 +102,7 @@ def setup_routine(app: Starlette):
                         app.state.last_update["user"][u.osuId] = datetime.utcnow()
 
                         for e in events:
-                            await e.get_map()
+                            await update_maps_db(e)
                 except BaseException as error:
                     if type(error) is asyncio.CancelledError:
                         break

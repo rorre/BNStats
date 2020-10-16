@@ -9,9 +9,9 @@ from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 from tortoise.contrib.starlette import register_tortoise
 
-from bnstats.routine import setup_routine
 from bnstats.bnsite import request
 from bnstats.routes import home, users
+from bnstats.routine import setup_routine
 
 config = Config(".env")
 

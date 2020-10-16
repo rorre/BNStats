@@ -1,7 +1,8 @@
 import operator
-from itertools import groupby
 from collections import Counter
+from itertools import groupby
 from typing import List
+
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.routing import Router

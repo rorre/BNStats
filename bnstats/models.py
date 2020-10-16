@@ -1,32 +1,40 @@
 from typing import List
-from urllib.parse import urlencode
 
 from tortoise import fields, models
 
-from bnstats.bnsite import request
 from bnstats.bnsite.enums import Genre, Language, MapStatus, Mode
-from bnstats.bnsite.request import cached_request as get
 
 
-class Beatmap:
-    def __init__(self, js):
-        self.beatmapset_id: int = int(js.get("beatmapset_id"))
-        self.beatmap_id: int = int(js.get("beatmap_id"))
-        self.approved: MapStatus = MapStatus(int(js.get("approved")))
-        self.total_length: int = int(js.get("total_length"))
-        self.hit_length: int = int(js.get("hit_length"))
-        self.mode: Mode = Mode(int(js.get("mode")))
-        self.artist: str = js.get("artist")
-        self.artist_unicode: str = js.get("artist_unicode")
-        self.title: str = js.get("title")
-        self.title_unicode: str = js.get("title_unicode")
-        self.creator: str = js.get("creator")
-        self.tags: str = js.get("tags")
-        self.genre_id: int = int(js.get("genre_id"))
-        self.language_id: int = int(js.get("language_id"))
-        self.difficultyrating: float = float(js.get("difficultyrating"))
-        self.language: Language = Language(int(self.language_id))
-        self.genre: Genre = Genre(int(self.genre_id))
+class Beatmap(models.Model):
+    beatmapset_id = fields.IntField()
+    beatmap_id = fields.IntField()
+    approved = fields.IntField()
+    total_length = fields.IntField()
+    hit_length = fields.IntField()
+    mode = fields.IntField()
+    artist = fields.CharField(255)
+    title = fields.CharField(255)
+    creator = fields.CharField(255)
+    tags = fields.TextField()
+    genre_id = fields.IntField()
+    language_id = fields.IntField()
+    difficultyrating = fields.FloatField()
+
+    @property
+    def status(self):
+        return MapStatus(self.approved)
+
+    @property
+    def gamemode(self):
+        return Mode(self.mode)
+
+    @property
+    def language(self):
+        return Language(self.language_id)
+
+    @property
+    def genre(self):
+        return Genre(self.genre_id)
 
 
 class BeatmapSet:
@@ -67,14 +75,11 @@ class Nomination(models.Model):
     creatorId = fields.IntField(null=True)
     creatorName = fields.TextField(null=True)
     timestamp = fields.DatetimeField()
+    user = fields.ForeignKeyField("models.User", related_name="nominations")
 
     async def get_map(self) -> BeatmapSet:
-        query = {"k": request.api_key, "s": self.beatmapsetId}
-        url = self.BASE_URL + "/get_beatmaps?" + urlencode(query)
-
-        r = await get(url, "map", f"{self.beatmapsetId}.json")
-        beatmaps = list(map(Beatmap, r))
-        return BeatmapSet(beatmaps)
+        diffs = await Beatmap.filter(beatmapset_id=self.beatmapsetId).all()
+        return BeatmapSet(diffs)
 
 
 class User(models.Model):
@@ -87,6 +92,7 @@ class User(models.Model):
     isNat = fields.BooleanField()
     isBn = fields.BooleanField()
     modes = fields.JSONField()
+    last_updated = fields.DatetimeField(null=True)
 
     def __repr__(self):
         return f"User(osuId={self.osuId}, username={self.username})"

@@ -142,3 +142,4 @@ config.json
 .vscode/
 bundle.js
 cache
+*devel*

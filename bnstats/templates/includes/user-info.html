@@ -4,7 +4,11 @@
             <i class="large info circle middle aligned icon"></i>
             <div class="content">
                 <a class="header">
+                    {% if user.osuId not in request.app.state.last_update["user"] %}
                     {{ request.app.state.last_update["user"][user.osuId].strftime("%d-%m-%Y %H:%M:%S") }} UTC
+                    {% else %}
+                    Unknown.
+                    {% endif %}
                 </a>
                 <div class="description">Last Updated</div>
             </div>
