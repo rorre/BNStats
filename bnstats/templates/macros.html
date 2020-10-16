@@ -1,8 +1,8 @@
 {% macro chart(name, id) %}
 <div class="ui secondary segment">
     <h4 class="header">{{ name }}</h4>
-    <div class="chart-container" style="position: relative;">
-        <canvas id="{{ id }}"></canvas>
+    <div class="chart-container">
+        <canvas width="800" height="400" id="{{ id }}"></canvas>
     </div>
 </div>
 {% endmacro %}

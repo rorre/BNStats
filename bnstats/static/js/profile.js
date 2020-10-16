@@ -26,6 +26,8 @@ function createPieChart(ctx, labels, data) {
             }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: false,
             legend: {
                 labels: {
                     fontColor: "#fff"
@@ -46,6 +48,7 @@ function createBarChart(ctx, data) {
             }]
         },
         options: {
+            responsive: true,
             scales: {
                 xAxes: [{
                     ticks: {
