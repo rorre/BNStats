@@ -1,10 +1,6 @@
-import time
-from datetime import datetime, timedelta
-from typing import Any, Dict, List
+from typing import List
 from urllib.parse import urlencode
 
-from dateutil.parser import parse
-from starlette.requests import Request
 from tortoise import fields, models
 
 from bnstats.bnsite import request
@@ -96,73 +92,12 @@ class User(models.Model):
         return f"User(osuId={self.osuId}, username={self.username})"
 
     @classmethod
-    async def get_users(cls, request: Request) -> List["User"]:
-        last_update = request.app.state.last_update["user-list"]
-        current_time = datetime.now()
-
-        if current_time - last_update > timedelta(minutes=30):
-            try:
-                url = cls.BASE_URL + "/relevantInfo"
-                r = await get(url, "users", "listing.json")
-
-                users = []
-                for u in r["users"]:
-                    user = await cls.get_or_none(osuId=u["osuId"])
-                    if user:
-                        user.update_from_dict(u)
-                    else:
-                        user = await cls.create(**u)
-
-                    users.append(user)
-            except:
-                # Fallback to database incase BN site is down
-                # or our session is expired
-                users = await cls.all()
-            request.app.state.last_update["user-list"] = current_time
-        else:
-            users = await cls.all()
+    async def get_users(cls) -> List["User"]:
+        users = await cls.all()
         return users
 
-    async def _fetch_activity(self, days):
-        deadline = time.time() * 1000
-        url = (
-            self.BASE_URL
-            + f"/activity?osuId={self.osuId}&"
-            + f"modes={','.join(self.modes)}&"
-            + f"deadline={deadline}&mongoId={self._id}&"
-            + f"days={days}"
-        )
-        activities: Dict[str, Any] = await get(url, "activity", f"{self.username}.json")
-        return activities
-
-    async def get_nomination_activity(self, request, days=90) -> List[Nomination]:
-        last_update = datetime.min
-        update_states = request.app.state.last_update["user"]
-        if self.osuId in update_states:
-            last_update = update_states[self.osuId]
-        current_time = datetime.now()
-
-        if current_time - last_update > timedelta(minutes=30):
-            try:
-                activities = await self._fetch_activity(days)
-
-                events = []
-                for event in activities["uniqueNominations"]:
-                    db_event = await Nomination.get_or_none(
-                        timestamp=parse(event["timestamp"]),
-                        userId=event["userId"],
-                    )
-
-                    if not db_event:
-                        db_event = await Nomination.create(**event)
-                    events.append(db_event)
-            except:
-                # Fallback to database incase BN site is down
-                # or our session is expired
-                events = Nomination.filter(userId=self.osuId).all()
-        else:
-            events = Nomination.filter(userId=self.osuId).all()
-
+    async def get_nomination_activity(self) -> List[Nomination]:
+        events = await Nomination.filter(userId=self.osuId).all()
         return events
 
     def total_nominations(self):

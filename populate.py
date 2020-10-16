@@ -1,8 +1,8 @@
-from datetime import datetime
 from tortoise import Tortoise, run_async
-
+from typing import List
 from starlette.config import Config
 
+from bnstats.routine import update_nomination_db, update_users_db
 from bnstats.bnsite import request
 from bnstats.models import User
 
@@ -12,27 +12,18 @@ SITE_SESSION = config("BNSITE_SESSION")
 API_KEY = config("API_KEY")
 
 
-class MockClass:
-    def __init__(self):
-        self.app = self
-        self.state = self
-        self.last_update = {"user-list": datetime.min, "user": {}}
-
-
 async def run():
-    mock = MockClass()
-
     request.setup_session(SITE_SESSION, API_KEY)
     await Tortoise.init(db_url=DB_URL, modules={"models": ["bnstats.models"]})
     await Tortoise.generate_schemas()
 
     print("> Populating users...")
-    users = await User.get_users(mock)
+    users: List[User] = await update_users_db()
 
     c = len(users)
     for i, u in enumerate(users):
         print(f">> Populating data for user: {u.username} ({i+1}/{c})")
-        nominations = await u.get_nomination_activity(mock, 999)
+        nominations = await update_nomination_db(u, 999)
 
         print(f">>> Populating maps for user: {u.username}")
         c_maps = len(nominations)

@@ -51,7 +51,7 @@ def _create_nomination_chartdata(nominations: List[Nomination]):
 
 @router.route("/", name="list")
 async def listing(request: Request):
-    users = await User.get_users(request)
+    users = await User.get_users()
     counts = [await u.total_nominations() for u in users]
     ctx = {"request": request, "users": users, "counts": counts}
     return templates.TemplateResponse("pages/user/listing.html", ctx)
@@ -64,7 +64,7 @@ async def show_user(request: Request):
     if not user:
         raise HTTPException(404, "User not found.")
 
-    nominations = await user.get_nomination_activity(request)
+    nominations = await user.get_nomination_activity()
     if not nominations:
         ctx = {
             "request": request,
