@@ -101,19 +101,23 @@ class User(models.Model):
         current_time = datetime.now()
 
         if current_time - last_update > timedelta(minutes=30):
-            url = cls.BASE_URL + "/relevantInfo"
-            r = await get(url, "users", "listing.json")
+            try:
+                url = cls.BASE_URL + "/relevantInfo"
+                r = await get(url, "users", "listing.json")
 
-            users = []
-            for u in r["users"]:
-                user = await cls.get_or_none(osuId=u["osuId"])
-                if user:
-                    user.update_from_dict(u)
-                else:
-                    user = await cls.create(**u)
+                users = []
+                for u in r["users"]:
+                    user = await cls.get_or_none(osuId=u["osuId"])
+                    if user:
+                        user.update_from_dict(u)
+                    else:
+                        user = await cls.create(**u)
 
-                users.append(user)
-
+                    users.append(user)
+            except:
+                # Fallback to database incase BN site is down
+                # or our session is expired
+                users = await cls.all()
             request.app.state.last_update["user-list"] = current_time
         else:
             users = await cls.all()
@@ -139,18 +143,23 @@ class User(models.Model):
         current_time = datetime.now()
 
         if current_time - last_update > timedelta(minutes=30):
-            activities = await self._fetch_activity(days)
+            try:
+                activities = await self._fetch_activity(days)
 
-            events = []
-            for event in activities["uniqueNominations"]:
-                db_event = await Nomination.get_or_none(
-                    timestamp=parse(event["timestamp"]),
-                    userId=event["userId"],
-                )
+                events = []
+                for event in activities["uniqueNominations"]:
+                    db_event = await Nomination.get_or_none(
+                        timestamp=parse(event["timestamp"]),
+                        userId=event["userId"],
+                    )
 
-                if not db_event:
-                    db_event = await Nomination.create(**event)
-                events.append(db_event)
+                    if not db_event:
+                        db_event = await Nomination.create(**event)
+                    events.append(db_event)
+            except:
+                # Fallback to database incase BN site is down
+                # or our session is expired
+                events = Nomination.filter(userId=self.osuId).all()
         else:
             events = Nomination.filter(userId=self.osuId).all()
 
