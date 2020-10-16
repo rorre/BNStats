@@ -3,8 +3,9 @@
         <div class="item">
             <i class="large info circle middle aligned icon"></i>
             <div class="content">
-                <a
-                    class="header">{{ request.app.state.last_update["user"][user.osuId].strftime("%d-%m-%Y %H:%M:%S") }}</a>
+                <a class="header">
+                    {{ request.app.state.last_update["user"][user.osuId].strftime("%d-%m-%Y %H:%M:%S") }} UTC
+                </a>
                 <div class="description">Last Updated</div>
             </div>
         </div>
