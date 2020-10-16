@@ -95,7 +95,7 @@ def setup_routine(app: Starlette):
             while True:
                 try:
                     users = await update_users_db()
-                    app.state.last_update["user-list"] = datetime.utcnow()
+                    app.state.last_update = datetime.utcnow()
 
                     for u in users:
                         events = await update_nomination_db(u)

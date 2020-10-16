@@ -38,10 +38,7 @@ middlewares = [
 
 # Application setup
 app = Starlette(debug=DEBUG, routes=routes, middleware=middlewares)
-app.state.last_update = {
-    "user-list": datetime.min,  # User listing
-    "user": {},  # Per user activity updates
-}
+app.state.last_update = None
 tortoise_config = {
     "connections": {"default": DB_URL},
     "apps": {
