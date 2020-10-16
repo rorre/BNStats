@@ -92,7 +92,6 @@ class User(models.Model):
     isNat = fields.BooleanField()
     isBn = fields.BooleanField()
     modes = fields.JSONField()
-    last_updated = fields.DatetimeField(null=True)
 
     def __repr__(self):
         return f"User(osuId={self.osuId}, username={self.username})"

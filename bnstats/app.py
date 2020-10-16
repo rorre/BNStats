@@ -42,10 +42,18 @@ app.state.last_update = {
     "user-list": datetime.min,  # User listing
     "user": {},  # Per user activity updates
 }
+tortoise_config = {
+    "connections": {"default": DB_URL},
+    "apps": {
+        "models": {
+            "models": ["bnstats.models", "aerich.models"],
+            "default_connection": "default",
+        },
+    },
+}
 register_tortoise(
     app,
-    db_url=DB_URL,
-    modules={"models": ["bnstats.models"]},
+    tortoise_config,
     generate_schemas=True,
 )
 setup_routine(app)
