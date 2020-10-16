@@ -1,6 +1,15 @@
 <div class="column middle aligned">
     <div class="ui large relaxed divided inverted list">
         <div class="item">
+            <i class="large info circle middle aligned icon"></i>
+            <div class="content">
+                <a
+                    class="header">{{ request.app.state.last_update["user"][user.osuId].strftime("%d-%m-%Y %H:%M:%S") }}</a>
+                <div class="description">Last Updated</div>
+            </div>
+        </div>
+
+        <div class="item">
             <i class="large check middle aligned icon"></i>
             <div class="content">
                 <a class="header">{{ nominations | length }}</a>

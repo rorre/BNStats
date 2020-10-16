@@ -1,3 +1,4 @@
+from datetime import datetime
 import sys
 import time
 from starlette.applications import Starlette
@@ -15,7 +16,7 @@ async def update_users_db():
     url = USERS_URL + "/relevantInfo"
     r = await get(url)
 
-    users = []
+    users: List[User] = []
     for u in r["users"]:
         user = await User.get_or_none(osuId=u["osuId"])
         if user:
@@ -69,8 +70,12 @@ def setup_routine(app: Starlette):
             while True:
                 try:
                     users = await update_users_db()
+                    app.state.last_update["user-list"] = datetime.utcnow()
+
                     for u in users:
                         events = await update_nomination_db(u)
+                        app.state.last_update["user"][u.osuId] = datetime.utcnow()
+
                         for e in events:
                             await e.get_map()
                 except BaseException as error:
