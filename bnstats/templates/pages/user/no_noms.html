@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% import 'macros.html' as macros %}
+
+{% block content %}
+<div class="ui segments">
+    <div class="ui segment">
+        <h3 class="header">User Info</h3>
+        <div class="ui very relaxed stackable grid">
+            {% include 'includes/user-header.html' %}
+        </div>
+    </div>
+
+    <div class="ui segments">
+        <div class="ui secondary segment">
+            <h3 class="header">Error</h3>
+            <p>The sure hasn't done anything D: (at least, according to BN site)</p>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

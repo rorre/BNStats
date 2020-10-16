@@ -1,10 +1,12 @@
+import operator
+from itertools import groupby
 from collections import Counter
-
+from typing import List
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.routing import Router
 
-from bnstats.models import Beatmap, BeatmapSet, User
+from bnstats.models import Beatmap, BeatmapSet, Nomination, User
 from bnstats.plugins import templates
 
 router = Router()
@@ -33,6 +35,20 @@ def _create_length_chartdata(nominations):
     return counter
 
 
+def _create_nomination_chartdata(nominations: List[Nomination]):
+    f = operator.attrgetter("timestamp.month", "timestamp.year")
+    sorted_nominations = sorted(nominations, key=lambda x: x.timestamp)
+    nomination_groups = groupby(sorted_nominations, f)
+
+    labels = []
+    datas = []
+    for k, v in nomination_groups:
+        labels.append("/".join(map(str, k)))
+        datas.append(len(list(v)))
+
+    return labels, datas
+
+
 @router.route("/", name="list")
 async def listing(request: Request):
     users = await User.get_users(request)
@@ -49,9 +65,24 @@ async def show_user(request: Request):
         raise HTTPException(404, "User not found.")
 
     nominations = await user.get_nomination_activity(request)
+    if not nominations:
+        ctx = {
+            "request": request,
+            "user": user,
+            "error": True,
+        }
+        return templates.TemplateResponse("pages/user/no_noms.html", ctx)
 
+    invalid_nominations = []
     for nom in nominations:
         nom.map = await nom.get_map()
+
+        # Map is deleted in osu!
+        if not nom.map.beatmaps:
+            invalid_nominations.append(nom)
+
+    for nom in invalid_nominations:
+        nominations.remove(nom)
 
     graph_labels = {"genre": [], "language": []}
     graph_data = {"genre": [], "language": []}
@@ -97,6 +128,26 @@ async def show_user(request: Request):
     else:
         size = "Big"
 
+    FAVOR_THRESHOLD = 0.20
+
+    genre_favors = []
+    for genre, c in counts_genre.most_common(3)[::-1]:
+        if c / len(nominations) > FAVOR_THRESHOLD:
+            genre_favors.append(genre.name)
+
+    if not genre_favors:
+        genre_favors.append(genre.name)
+
+    lang_favors = []
+    for lang, c in counts_lang.most_common(3)[::-1]:
+        if c / len(nominations) > FAVOR_THRESHOLD:
+            lang_favors.append(lang.name)
+
+    if not lang_favors:
+        lang_favors.append(lang.name)
+
+    line_labels, line_datas = _create_nomination_chartdata(nominations)
+
     ctx = {
         "request": request,
         "user": user,
@@ -107,8 +158,10 @@ async def show_user(request: Request):
         "avg_diffs": average_diffs,
         "length_favor": length,
         "size_favor": size,
-        "genre_favor": counts_genre.most_common(1)[0][0].name,
-        "lang_favor": counts_lang.most_common(1)[0][0].name,
+        "genre_favor": genre_favors,
+        "lang_favor": lang_favors,
         "length_data": _create_length_chartdata(nominations),
+        "line_labels": line_labels,
+        "line_datas": line_datas,
     }
     return templates.TemplateResponse("pages/user/show.html", ctx)
