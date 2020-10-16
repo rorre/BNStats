@@ -6,24 +6,26 @@
 </div>
 <div class="ui segment">
     <h3 class="header">User List</h3>
-    <table class="ui celled padded inverted sortable unstackable selectable table">
-        <thead>
-            <tr>
-                <th>Username</th>
-                <th class="no-sort">Gamemode</th>
-                <th class="number">Nominations</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
-            <tr data-url="{{ url_for('users:show', user_id=user.osuId) }}">
-                <td>{{ user.username }}</td>
-                <td>{{ user.modes | join(', ') }}</td>
-                <td>{{ counts[loop.index0] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-wrapper">
+        <table class="ui celled padded inverted sortable unstackable selectable table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th class="no-sort">Gamemode</th>
+                    <th class="number">Nominations</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr data-url="{{ url_for('users:show', user_id=user.osuId) }}">
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.modes | join(', ') }}</td>
+                    <td>{{ counts[loop.index0] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 <script src="/static/js/table.js"></script>
 {% endblock %}

@@ -37,27 +37,30 @@
     <div class="ui segments">
         <div class="ui secondary segment">
             <h3 class="header">Nominations</h3>
-            <table class="ui celled inverted sortable selectable table">
-                <thead>
-                    <tr>
-                        <th>Beatmap</th>
-                        <th>Genre</th>
-                        <th>Language</th>
-                        <th class="number">Length</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for nomination in nominations %}
-                    <tr data-url="https://osu.ppy.sh/s/{{ nomination.map.beatmapset_id }}">
-                        <td>{{ nomination.map.artist }} - {{ nomination.map.title }} ({{ nomination.map.creator }})</td>
-                        <td>{{ nomination.map.genre.name | replace("_", " ") }}</td>
-                        <td>{{ nomination.map.language.name }}</td>
-                        <td data-sort-value="{{ nomination.map.total_length }}">{{ nomination.map.map_length }} *
-                            {{ nomination.map.beatmaps | length }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="table-wrapper">
+                <table class="ui celled inverted sortable selectable table">
+                    <thead>
+                        <tr>
+                            <th>Beatmap</th>
+                            <th>Genre</th>
+                            <th>Language</th>
+                            <th class="number">Length</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for nomination in nominations %}
+                        <tr data-url="https://osu.ppy.sh/s/{{ nomination.map.beatmapset_id }}">
+                            <td>{{ nomination.map.artist }} - {{ nomination.map.title }} ({{ nomination.map.creator }})
+                            </td>
+                            <td>{{ nomination.map.genre.name | replace("_", " ") }}</td>
+                            <td>{{ nomination.map.language.name }}</td>
+                            <td data-sort-value="{{ nomination.map.total_length }}">{{ nomination.map.map_length }} *
+                                {{ nomination.map.beatmaps | length }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
