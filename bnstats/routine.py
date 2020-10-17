@@ -84,7 +84,7 @@ async def update_maps_db(nomination: Nomination):
             db_diff = await Beatmap.filter(beatmap_id=map["beatmap_id"]).get_or_none()
 
             if not db_diff:
-                await Beatmap.create(**map)
+                db_diff = await Beatmap.create(**map)
             else:
                 db_diff.update_from_dict(map)
                 await db_diff.save()
