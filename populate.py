@@ -2,7 +2,12 @@ from tortoise import Tortoise, run_async
 from typing import List
 from starlette.config import Config
 
-from bnstats.routine import update_nomination_db, update_users_db, update_maps_db
+from bnstats.routine import (
+    update_nomination_db,
+    update_users_db,
+    update_maps_db,
+    update_user_details,
+)
 from bnstats.bnsite import request
 from bnstats.models import User
 
@@ -26,10 +31,16 @@ async def run():
         nominations = await update_nomination_db(u, 999)
 
         print(f">>> Populating maps for user: {u.username}")
+        user_maps = []
         c_maps = len(nominations)
         for i, nom in enumerate(nominations):
             print(f">>> Fetching: {nom.beatmapsetId} ({i+1}/{c_maps})")
-            await update_maps_db(nom)
+            m = await update_maps_db(nom)
+            user_maps.append(m)
+
+        if user_maps:
+            print(f">>> Updating details for user: {u.username}")
+            await update_user_details(u, user_maps)
 
     await request.s.aclose()
 

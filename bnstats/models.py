@@ -93,6 +93,12 @@ class User(models.Model):
     isBn = fields.BooleanField()
     modes = fields.JSONField()
     last_updated = fields.DatetimeField(null=True)
+    genre_favor = fields.JSONField(null=True)
+    lang_favor = fields.JSONField(null=True)
+    size_favor = fields.CharField(20, null=True)
+    length_favor = fields.CharField(20, null=True)
+    avg_length = fields.IntField(null=True)
+    avg_diffs = fields.IntField(null=True)
 
     def __repr__(self):
         return f"User(osuId={self.osuId}, username={self.username})"

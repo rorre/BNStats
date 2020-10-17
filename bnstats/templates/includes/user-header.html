@@ -7,16 +7,16 @@
             <a href="https://osu.ppy.sh/users/{{ user.osuId }}" class="title">{{ user.username }}</a>
             {% if error is not defined %}
             <div class="sub header">
-                {% for genre in genre_favor %}
+                {% for genre in user.genre_favor %}
                 <a class="ui label">Genre: {{ genre | replace("_", " ") }}</a>
                 {% endfor %}
 
-                {% for lang in lang_favor %}
+                {% for lang in user.lang_favor %}
                 <a class="ui label">Language: {{ lang }}</a>
                 {% endfor %}
 
-                <a class="ui label">Length: {{ length_favor }}</a>
-                <a class="ui label">Size: {{ size_favor }}</a>
+                <a class="ui label">Length: {{ user.length_favor }}</a>
+                <a class="ui label">Size: {{ user.size_favor }}</a>
             </div>
             {% endif %}
         </div>

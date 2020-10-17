@@ -66,6 +66,8 @@ async def show_user(request: Request):
         raise HTTPException(404, "User not found.")
 
     nominations = await user.get_nomination_activity()
+
+    # No nominations present, what even to show?
     if not nominations:
         ctx = {
             "request": request,
@@ -105,48 +107,6 @@ async def show_user(request: Request):
         graph_labels["language"].append(elem.name)
         graph_data["language"].append(cnt)
 
-    total_length = sum([nom.map.total_length for nom in nominations])
-    total_diffs = sum([nom.map.total_diffs for nom in nominations])
-    average_length = total_length // total_diffs
-    average_diffs = sum([len(nom.map.beatmaps) for nom in nominations]) // len(
-        nominations
-    )
-
-    if average_length < 120:
-        length = "Short"
-    elif average_length < 180:
-        length = "Medium"
-    else:
-        length = "Long"
-
-    size_factor = average_diffs * average_length
-    # Anime TV Size 100s NHIX
-    if size_factor <= 400:
-        size = "Small"
-    # Full version (3:30) HIX
-    elif size_factor <= 630:
-        size = "Medium"
-    else:
-        size = "Big"
-
-    FAVOR_THRESHOLD = 0.20
-
-    genre_favors = []
-    for genre, c in counts_genre.most_common(3)[::-1]:
-        if c / len(nominations) > FAVOR_THRESHOLD:
-            genre_favors.append(genre.name)
-
-    if not genre_favors:
-        genre_favors.append(genre.name)
-
-    lang_favors = []
-    for lang, c in counts_lang.most_common(3)[::-1]:
-        if c / len(nominations) > FAVOR_THRESHOLD:
-            lang_favors.append(lang.name)
-
-    if not lang_favors:
-        lang_favors.append(lang.name)
-
     line_labels, line_datas = _create_nomination_chartdata(nominations)
 
     ctx = {
@@ -155,12 +115,7 @@ async def show_user(request: Request):
         "nominations": nominations,
         "labels": graph_labels,
         "datas": graph_data,
-        "avg_length": _format_time(average_length),
-        "avg_diffs": average_diffs,
-        "length_favor": length,
-        "size_favor": size,
-        "genre_favor": genre_favors,
-        "lang_favor": lang_favors,
+        "avg_length": _format_time(user.avg_length),
         "length_data": _create_length_chartdata(nominations),
         "line_labels": line_labels,
         "line_datas": line_datas,
