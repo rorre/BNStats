@@ -27,7 +27,7 @@
                 {% for user in users %}
                 <tr data-url="{{ url_for('users:show', user_id=user.osuId) }}">
                     <td>{{ user.username }}</td>
-                    <td>{% include 'includes/user-labels.html' %}</td>
+                    <td class="no-clickable">{% include 'includes/user-labels.html' %}</td>
                     <td>{{ user.modes | join(', ') }}</td>
                     <td>{{ counts[loop.index0] }}</td>
                 </tr>

@@ -1,10 +1,9 @@
-$(function () {
-    $('select.dropdown').dropdown()
-})
-
-$("#applyButton").click(function () {
+function filterTable() {
     var filters = $("#filterSelect").serializeArray()
-    if (filters.length == 0) return
+    if (filters.length == 0) {
+        $("tbody > tr").show()
+        return
+    }
 
     $("tbody > tr").hide()
 
@@ -33,9 +32,25 @@ $("#applyButton").click(function () {
     endResult.forEach(function (v) {
         $(v).show()
     })
-})
+}
 
-$("#resetButton").click(function () {
-    $(".dropdown").dropdown('clear')
-    $("tbody > tr").show()
+$(function () {
+    $('select.dropdown').dropdown()
+    $("#applyButton").click(filterTable)
+
+    $("#resetButton").click(function () {
+        $(".dropdown").dropdown('clear')
+        $("tbody > tr").show()
+    })
+
+    // Disabled for now as the entire row is clickable.
+    /* $("td > a.ui.label").click(function () {
+        var $this = $(this)
+        var name = $this.data("name")
+        var value = $this.data("value")
+        var selectElem = $("select[name='" + name + "']")
+        selectElem.parent().dropdown('set selected', value)
+
+        filterTable()
+    }) */
 })
