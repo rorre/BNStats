@@ -55,7 +55,7 @@ async def update_nomination_db(user: User, days: int = 90):
     events: List[Nomination] = []
     for event in activities["uniqueNominations"]:
         db_event = await Nomination.get_or_none(
-            timestamp=parse(event["timestamp"]),
+            beatmapsetId=event["beatmapsetId"],
             userId=event["userId"],
         )
         event["timestamp"] = parse(event["timestamp"], ignoretz=True)
