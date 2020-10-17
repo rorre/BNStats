@@ -40,7 +40,43 @@ def _create_length_chartdata(nominations):
 def _create_nomination_chartdata(nominations: List[Nomination]):
     f = operator.attrgetter("timestamp.month", "timestamp.year")
     sorted_nominations = sorted(nominations, key=lambda x: x.timestamp)
-    nomination_groups = groupby(sorted_nominations, f)
+    grouped = groupby(sorted_nominations, f)
+    nomination_groups = []
+    for k, v in grouped:
+        nomination_groups.append([k, list(v)])
+
+    # To anyone reading this:
+    # If you know a better way to fill in the chart graph,
+    # then please let me know.
+    # Current one works, but I'm very uncertain about the performance.
+    i = len(nomination_groups) - 1
+    while i > 0:
+        current = nomination_groups[i][0]
+        last = nomination_groups[i - 1][0]
+
+        yeargap = 0
+        delta = 0
+        if current[1] != last[1]:
+            if current[0] == 1 and last[0] == 12:
+                i -= 1
+                continue
+            yeargap += 1
+
+        if current[0] - last[0] == 1:
+            i -= 1
+            continue
+
+        delta += current[0] + 12 * yeargap - last[0]
+
+        new_year = current[1]
+        for j in range(1, delta + 1):
+            new_month = current[0] - j
+            if new_month < 1:
+                new_month += 12
+                new_year -= 1
+            nomination_groups.insert(i, ((new_month, new_year), []))
+
+        i -= 1
 
     labels = []
     datas = []
