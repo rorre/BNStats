@@ -118,3 +118,25 @@ div.divider-wrap {
 .table-wrapper {
     overflow: auto;
 }
+
+td > a.ui.label {
+    margin-bottom: 0.5em;
+}
+
+.ui.selection.dropdown {
+    background: #1f1d24 !important;
+}
+
+.ui.selection.dropdown .menu>.item {
+    background: #1f1d24;
+    color: white;
+    border-top-color: #403d46;
+}
+
+.ui.selection.dropdown .menu>.item:hover {
+    -webkit-filter: brightness(70%);
+}
+
+.ui.label > .delete.icon {
+    color: rgba(0,0,0,.87);
+}

@@ -1,0 +1,19 @@
+{% if user.genre_favor %}
+{% for genre in user.genre_favor %}
+<a class="ui label">Genre: {{ genre | replace("_", " ") }}</a>
+{% endfor %}
+{% endif %}
+
+{% if user.lang_favor %}
+{% for lang in user.lang_favor %}
+<a class="ui label">Language: {{ lang }}</a>
+{% endfor %}
+{% endif %}
+
+{% if user.length_favor %}
+<a class="ui label">Length: {{ user.length_favor }}</a>
+{% endif %}
+
+{% if user.size_favor %}
+<a class="ui label">Size: {{ user.size_favor }}</a>
+{% endif %}

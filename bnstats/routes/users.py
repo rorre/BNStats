@@ -1,3 +1,4 @@
+from bnstats.bnsite.enums import Genre, Language
 import operator
 from collections import Counter
 from itertools import groupby
@@ -54,7 +55,13 @@ def _create_nomination_chartdata(nominations: List[Nomination]):
 async def listing(request: Request):
     users = await User.get_users()
     counts = [await u.total_nominations() for u in users]
-    ctx = {"request": request, "users": users, "counts": counts}
+    ctx = {
+        "request": request,
+        "users": users,
+        "counts": counts,
+        "genres": [g.name.replace("_", " ") for g in Genre],
+        "languages": [lang.name for lang in Language],
+    }
     return templates.TemplateResponse("pages/user/listing.html", ctx)
 
 

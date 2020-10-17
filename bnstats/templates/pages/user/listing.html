@@ -1,18 +1,25 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="ui red inverted message">
-    <p>TODO: Filters.</p>
-</div>
 <div class="ui segment">
     <h3 class="header">User List</h3>
-    <p>Last updated: {{ request.app.state.last_update.strftime("%d-%m-%Y %H:%M:%S") }} UTC</p>
+    <p>Last updated:
+        {% if request.app.state.last_update %}
+        {{ request.app.state.last_update.strftime("%d-%m-%Y %H:%M:%S") }} UTC
+        {% else %}
+        Happens outside the app instance.
+        {% endif %}
+    </p>
+
+    {% include 'includes/list-filters.html' %}
+    <br>
     <div class="table-wrapper">
         <table class="ui celled padded inverted sortable unstackable selectable table">
             <thead>
                 <tr>
                     <th>Username</th>
-                    <th class="no-sort">Gamemode</th>
+                    <th class="no-sort">Attributes</th>
+                    <th class="no-sort">Game mode</th>
                     <th class="number">Nominations</th>
                 </tr>
             </thead>
@@ -20,6 +27,7 @@
                 {% for user in users %}
                 <tr data-url="{{ url_for('users:show', user_id=user.osuId) }}">
                     <td>{{ user.username }}</td>
+                    <td>{% include 'includes/user-labels.html' %}</td>
                     <td>{{ user.modes | join(', ') }}</td>
                     <td>{{ counts[loop.index0] }}</td>
                 </tr>

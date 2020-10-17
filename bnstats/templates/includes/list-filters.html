@@ -1,0 +1,51 @@
+<form id="filterSelect" class="ui inverted form" onsubmit="return false">
+    <div class="field">
+        <label>Genre</label>
+        <select multiple name="genre" class="ui dropdown">
+            <option value="">Select Genre</option>
+            {% for genre in genres[2:] %}
+            <option value="{{ genre }}">{{ genre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="field">
+        <label>Language</label>
+        <select multiple name="language" class="ui dropdown">
+            <option value="">Select Genre</option>
+            {% for lang in languages[2:] %}
+            <option value="{{ lang }}">{{ lang }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="field">
+        <label>Length</label>
+        <select multiple name="length" class="ui dropdown">
+            <option value="">Select Length</option>
+            <option value="Short">Short</option>
+            <option value="Medium">Medium</option>
+            <option value="Long">Long</option>
+        </select>
+    </div>
+
+    <div class="field">
+        <label>Size</label>
+        <select multiple name="size" class="ui dropdown">
+            <option value="">Select Size</option>
+            <option value="Small">Small</option>
+            <option value="Medium">Medium</option>
+            <option value="Big">Big</option>
+        </select>
+    </div>
+
+    <button class="ui inverted basic button" id="applyButton">Apply filters</button>
+    <button class="ui inverted basic red button" id="resetButton">Reset filters</button>
+
+    <div class="ui blue inverted message">
+        <p>Operation in filters is AND for each type, and OR for each value.<br>
+            For example: (Anime || Rock) && (Japanese || English)</p>
+    </div>
+
+</form>
+<script src="/static/js/filter.js"></script>
