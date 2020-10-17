@@ -1,4 +1,3 @@
-from bnstats.bnsite.enums import Genre, Language
 import operator
 from collections import Counter
 from itertools import groupby
@@ -8,6 +7,7 @@ from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.routing import Router
 
+from bnstats.bnsite.enums import Genre, Language
 from bnstats.models import Beatmap, BeatmapSet, Nomination, User
 from bnstats.plugins import templates
 
