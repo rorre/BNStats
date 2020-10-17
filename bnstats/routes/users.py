@@ -46,8 +46,7 @@ def _create_nomination_chartdata(nominations: List[Nomination]):
         nomination_groups.append([k, list(v)])
 
     # To anyone reading this:
-    # If you know a better way to fill in the chart graph,
-    # then please let me know.
+    # If you know a better way to fill in the chart graph, then please let me know.
     # Current one works, but I'm very uncertain about the performance.
     i = len(nomination_groups) - 1
     while i > 0:
@@ -73,7 +72,9 @@ def _create_nomination_chartdata(nominations: List[Nomination]):
             new_month = current[0] - j
             if new_month < 1:
                 new_month += 12
-                new_year -= 1
+                if yeargap > 0:
+                    new_year -= 1
+                    yeargap -= 1
             nomination_groups.insert(i, ((new_month, new_year), []))
 
         i -= 1
