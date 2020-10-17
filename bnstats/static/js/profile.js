@@ -7,12 +7,25 @@ function getRandomColor() {
     return color;
 }
 
+const colors = [
+    "#83724e",
+    "#d4aa5c",
+    "#28a75c",
+    "#5773dc",
+    "#5c9dbe",
+    "#8440ed",
+    "#e67157",
+    "#19e399",
+    "#d231e0",
+    "#e0315a",
+    "#42bdff",
+    "#45e342",
+    "#b0e342",
+    "#e69743"
+]
+
 function generateColors(n) {
-    data = []
-    for (var i = 0; i < n; i++) {
-        data.push(getRandomColor())
-    }
-    return data
+    return colors.slice(0, n)
 }
 
 function createPieChart(ctx, labels, data) {
