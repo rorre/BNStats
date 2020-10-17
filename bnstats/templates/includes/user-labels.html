@@ -17,3 +17,7 @@
 {% if user.size_favor %}
 <a class="ui label">Size: {{ user.size_favor }}</a>
 {% endif %}
+
+{% for mode in user.modes %}
+<a class="ui label">Mode: {{ mode }}</a>
+{% endfor %}
