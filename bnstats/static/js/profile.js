@@ -54,7 +54,14 @@ function createBarChart(ctx, data) {
     new Chart(ctx, {
         type: "bar",
         data: {
-            labels: ["<= 1 minute", "<= 2 minutes", "<= 3 minutes", "<= 4 minutes", "<= 5 minutes", "> 5 minutes"],
+            labels: [
+                "0:30 - 1:00",
+                "1:01 - 2:00",
+                "2:01 - 3:00",
+                "3:01 - 4:00",
+                "4:01 - 5:00",
+                "above 5:00"
+            ],
             datasets: [{
                 data: data,
                 backgroundColor: generateColors(6),
