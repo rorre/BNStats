@@ -105,7 +105,7 @@ class User(models.Model):
 
     @classmethod
     async def get_users(cls) -> List["User"]:
-        users = await cls.all()
+        users = await cls.all().order_by("username")
         return users
 
     async def get_nomination_activity(self) -> List[Nomination]:
