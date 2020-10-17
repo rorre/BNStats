@@ -1,25 +1,41 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="ui segments">
-    <div class="ui raised segment">
-        <h3 class="header">Introduction</h3>
-        <p>Welcome to BNStats! A place made by -Keitaro to look over statistics of osu! BNs performance and its details.</p>
-        <p>The site is made for better understanding on many of the BN individuals, as knowing them better could hopefully lead to a better rate of acceptance.</p>
-        <p>The site will provide the following stats:</p>
-        <ul>
-            <li>Total nominations</li>
-            <li>Maps nominated</li>
-            <li>Genre of maps nominated</li>
-            <li>Drain time of maps nominated (per difficulty and entire mapset)</li>
-            <li>Number of difficulties of maps nominated</li>
-        </ul>
 
-        <h3>Motivation</h3>
-        <p>Often times we're stuck at finding BNs due to not knowing the BN's song preference and many other factors. This site is made to easily filter BNs that might not be interested in your genre, mapset length, or how big the set is.</p>
+<div class="ui raised segment">
+    <h3 class="header">Introduction</h3>
+    <p>Welcome to BNStats! A place made by -Keitaro to look over statistics of osu! BNs performance and its details.
+    </p>
+    <p>The site is made for better understanding on many of the BN individuals, as knowing them better could
+        hopefully lead to a better rate of acceptance.</p>
+    <p>The site will provide the following stats:</p>
+    <ul>
+        <li>Total nominations</li>
+        <li>Maps nominated</li>
+        <li>Genre of maps nominated</li>
+        <li>Drain time of maps nominated (per difficulty and entire mapset)</li>
+    </ul>
 
-        <h3>Help</h3>
-        <p>If you have any question, please PM -Keitaro on osu!.</p>
-    </div>
+    <h3>Motivation</h3>
+    <p>Often times we're stuck at finding BNs due to not knowing the BN's song preference and many other factors.
+        This site is made to easily filter BNs that might not be interested in your genre, mapset length, or how big
+        the set is.</p>
+
+    <h3>Help</h3>
+    <p>If you have any question, please PM -Keitaro on osu!.</p>
+</div>
+
+<div class="ui raised segment">
+    <h3 class="header">Thanks</h3>
+    <p>This site is made possible thanks to pishifat's <a href="https://bn.mappersguild.com/">BN site</a>. All of
+        the data are fetched from that site.</p>
+    <p>It is also made possible with these libraries:</p>
+    <ul>
+        <li><a href="https://www.starlette.io/">Starlette</a> (Web framework)</li>
+        <li><a href="https://www.uvicorn.org/">Uvicorn</a> (ASGI server)</li>
+        <li><a href="https://www.python-httpx.org/">HTTPX</a> (HTTP request)</li>
+        <li><a href="https://github.com/tortoise/tortoise-orm">Tortoise ORM</a></li>
+        <li><a href="https://fomantic-ui.com/">Fomantic UI</a></li>
+    </ul>
 </div>
 {% endblock %}
