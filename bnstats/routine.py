@@ -173,12 +173,11 @@ def setup_routine(app: Starlette):
 
                     for u in users:
                         events = await update_nomination_db(u)
-
-                        user_maps = []
                         for e in events:
-                            m = await update_maps_db(e)
-                            user_maps.append(m)
+                            await update_maps_db(e)
 
+                        all_noms = await u.get_nomination_activity()
+                        user_maps = [await n.get_map() for n in all_noms]
                         if user_maps:
                             await update_user_details(u, user_maps)
                 except BaseException as error:
