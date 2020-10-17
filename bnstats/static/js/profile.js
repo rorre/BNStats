@@ -24,7 +24,7 @@ const colors = [
     "#e69743"
 ]
 
-function generateColors(n) {
+function getColors(n) {
     return colors.slice(0, n)
 }
 
@@ -35,7 +35,7 @@ function createPieChart(ctx, labels, data) {
             labels: labels,
             datasets: [{
                 data: data,
-                backgroundColor: generateColors(data.length)
+                backgroundColor: getColors(data.length)
             }]
         },
         options: {
@@ -64,7 +64,7 @@ function createBarChart(ctx, data) {
             ],
             datasets: [{
                 data: data,
-                backgroundColor: generateColors(6),
+                backgroundColor: getColors(6),
             }]
         },
         options: {
