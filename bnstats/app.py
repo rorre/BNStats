@@ -28,6 +28,7 @@ routes = [
     Route("/", home.homepage, name="home"),
     Mount("/users", users.router, name="users"),
     Mount("/static", StaticFiles(directory="bnstats/static")),
+    Mount("/", StaticFiles(directory="bnstats/root")),
 ]
 
 # Middlewares
