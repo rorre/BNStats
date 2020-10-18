@@ -1,4 +1,5 @@
 import asyncio
+import json
 import sys
 import time
 import traceback
@@ -21,7 +22,13 @@ USERS_URL = "https://bn.mappersguild.com/users"
 
 async def update_users_db():
     url = USERS_URL + "/relevantInfo"
-    r = await get(url)
+    try:
+        r = await get(url)
+    except json.decoder.JSONDecodeError:
+        # Session expired.
+        # Just return an empty list so that it doesn't go any further.
+        # TODO: Notify or something
+        return []
 
     users: List[User] = []
     for u in r["users"]:
@@ -51,7 +58,14 @@ async def _fetch_activity(user, days):
 
 
 async def update_nomination_db(user: User, days: int = 90):
-    activities = await _fetch_activity(user, days)
+    try:
+        activities = await _fetch_activity(user, days)
+    except json.decoder.JSONDecodeError:
+        # Session expired.
+        # Just return an empty list so that it doesn't go any further.
+        # TODO: Notify or something
+        return []
+
     events: List[Nomination] = []
     for event in activities["uniqueNominations"]:
         db_event = await Nomination.get_or_none(
