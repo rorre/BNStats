@@ -30,6 +30,14 @@ async def update_users_db():
         # TODO: Notify or something
         return []
 
+    db_uids = await User.all().values_list("osuId", flat=True)
+    current_uids = [u["osuId"] for u in r["users"]]
+
+    # Remove all kicked users
+    deleted_users = filter(lambda x: x not in current_uids, db_uids)
+    for u in deleted_users:
+        await (await User.get(osuId=u)).delete()
+
     users: List[User] = []
     for u in r["users"]:
         u["last_updated"] = datetime.utcnow()
