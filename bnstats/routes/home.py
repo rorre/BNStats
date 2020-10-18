@@ -1,5 +1,4 @@
 from starlette.requests import Request
-from starlette.routing import Route
 
 from bnstats.plugins import templates
 
