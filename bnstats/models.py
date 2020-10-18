@@ -67,8 +67,6 @@ class BeatmapSet:
 
 
 class Nomination(models.Model):
-    BASE_URL = "https://osu.ppy.sh/api"
-
     beatmapsetId = fields.IntField()
     userId = fields.IntField()
     artistTitle = fields.TextField()
@@ -83,8 +81,6 @@ class Nomination(models.Model):
 
 
 class User(models.Model):
-    BASE_URL = "https://bn.mappersguild.com/users"
-
     _id = fields.TextField()
     osuId = fields.IntField(pk=True)
     username = fields.TextField()
