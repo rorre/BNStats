@@ -36,6 +36,6 @@ uvicorn bnstats:app
 Look at [Uvicorn's deployment docs](https://www.uvicorn.org/deployment/).
 
 ## TODOs
-- Find and delete kicked BNs when the listing changes
+- ~~Find and delete kicked BNs when the listing changes~~
 - Star rating graph + label + avg
 - Specific timespan option
