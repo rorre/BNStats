@@ -123,7 +123,7 @@ td > a.ui.label {
     margin-bottom: 0.5em;
 }
 
-.ui.selection.dropdown {
+select.ui.dropdown, .ui.selection.dropdown {
     background: #1f1d24 !important;
 }
 
