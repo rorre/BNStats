@@ -145,6 +145,12 @@ async def update_user_details(user: User, maps: List[BeatmapSet]):
     if not lang_favors:
         lang_favors.append(lang.name)
 
+    diff_favors = []
+    counts_top = Counter([m.top_difficulty.difficulty for m in maps])
+    for diff, c in counts_top.most_common(3)[::-1]:
+        if c / len(maps) > FAVOR_THRESHOLD:
+            diff_favors.append(diff.name)
+
     total_length = sum([m.total_length for m in maps])
     total_diffs = sum([m.total_diffs for m in maps])
     average_length = total_length // total_diffs
@@ -174,6 +180,7 @@ async def update_user_details(user: User, maps: List[BeatmapSet]):
         "size_favor": size,
         "genre_favor": genre_favors,
         "lang_favor": lang_favors,
+        "topdiff_favor": diff_favors,
     }
     user.update_from_dict(updates)
     await user.save()

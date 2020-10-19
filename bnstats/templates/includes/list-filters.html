@@ -20,6 +20,16 @@
     </div>
 
     <div class="field">
+        <label>Difficulty</label>
+        <select multiple name="diff" class="ui dropdown">
+            <option value="">Select Difficulty</option>
+            {% for diff in diffs %}
+            <option value="{{ diff }}">{{ diff }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="field">
         <label>Length</label>
         <select multiple name="length" class="ui dropdown">
             <option value="">Select Length</option>

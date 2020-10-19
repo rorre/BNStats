@@ -1,4 +1,4 @@
-from enum import IntEnum
+from enum import Enum, IntEnum
 
 
 class MapStatus(IntEnum):
@@ -51,3 +51,27 @@ class Mode(IntEnum):
     Taiko = 1
     Catch = 2
     Mania = 3
+
+
+class Difficulty(Enum):
+    Easy = 0
+    Normal = 1
+    Hard = 2
+    Insane = 3
+    Extra = 4
+    Extreme = 5
+
+    @classmethod
+    def from_sr(cls, sr: float):
+        if sr >= 6.5:
+            return cls.Extreme
+        elif sr >= 5.3:
+            return cls.Extra
+        elif sr >= 4.0:
+            return cls.Insane
+        elif sr >= 2.7:
+            return cls.Hard
+        elif sr >= 2.0:
+            return cls.Normal
+        else:
+            return cls.Easy

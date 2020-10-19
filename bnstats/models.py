@@ -2,7 +2,7 @@ from typing import List
 
 from tortoise import fields, models
 
-from bnstats.bnsite.enums import Genre, Language, MapStatus, Mode
+from bnstats.bnsite.enums import Difficulty, Genre, Language, MapStatus, Mode
 from bnstats.helper import format_time
 
 
@@ -37,6 +37,10 @@ class Beatmap(models.Model):
     def genre(self):
         return Genre(self.genre_id)
 
+    @property
+    def difficulty(self):
+        return Difficulty.from_sr(self.difficultyrating)
+
 
 class BeatmapSet:
     def __init__(self, beatmaps: List[Beatmap]):
@@ -57,6 +61,10 @@ class BeatmapSet:
     @property
     def map_length(self):
         return format_time(self.longest_length)
+
+    @property
+    def top_difficulty(self):
+        return max([b for b in self.beatmaps], key=lambda x: x.difficultyrating)
 
     def __getattr__(self, attr):
         return self.beatmaps[0].__getattribute__(attr)
@@ -87,6 +95,7 @@ class User(models.Model):
     last_updated = fields.DatetimeField(null=True)
     genre_favor = fields.JSONField(null=True)
     lang_favor = fields.JSONField(null=True)
+    topdiff_favor = fields.JSONField(null=True)
     size_favor = fields.CharField(20, null=True)
     length_favor = fields.CharField(20, null=True)
     avg_length = fields.IntField(null=True)

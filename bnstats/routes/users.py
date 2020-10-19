@@ -7,7 +7,7 @@ from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.routing import Router
 
-from bnstats.bnsite.enums import Genre, Language
+from bnstats.bnsite.enums import Difficulty, Genre, Language
 from bnstats.helper import format_time
 from bnstats.models import Beatmap, BeatmapSet, Nomination, User
 from bnstats.plugins import templates
@@ -91,6 +91,7 @@ async def listing(request: Request):
         "counts": counts,
         "genres": [g.name.replace("_", " ") for g in Genre],
         "languages": [lang.name for lang in Language],
+        "diffs": [diff.name for diff in Difficulty],
     }
     return templates.TemplateResponse("pages/user/listing.html", ctx)
 
@@ -124,8 +125,8 @@ async def show_user(request: Request):
     for nom in invalid_nominations:
         nominations.remove(nom)
 
-    graph_labels = {"genre": [], "language": []}
-    graph_data = {"genre": [], "language": []}
+    graph_labels = {"genre": [], "language": [], "sr-top": [], "sr-all": []}
+    graph_data = {"genre": [], "language": [], "sr-top": [], "sr-all": []}
 
     # Elem is not Beatmap, but BeatmapSet.
     # But since all attr for BeatmapSet redirects to Beatmap, we will just
@@ -143,6 +144,25 @@ async def show_user(request: Request):
     for elem, cnt in counts_lang.items():
         graph_labels["language"].append(elem.name)
         graph_data["language"].append(cnt)
+
+    counts_top = list(
+        Counter([nom.map.top_difficulty.difficulty for nom in nominations]).items()
+    )
+    counts_top.sort(key=lambda x: x[0].value)
+    for elem, cnt in counts_top:
+        graph_labels["sr-top"].append(elem.name)
+        graph_data["sr-top"].append(cnt)
+
+    difficulties = []
+    for nom in nominations:
+        for map in nom.map.beatmaps:
+            difficulties.append(map.difficulty)
+
+    counts_diff = list(Counter(difficulties).items())
+    counts_diff.sort(key=lambda x: x[0].value)
+    for elem, cnt in counts_diff:
+        graph_labels["sr-all"].append(elem.name)
+        graph_data["sr-all"].append(cnt)
 
     line_labels, line_datas = _create_nomination_chartdata(nominations)
 

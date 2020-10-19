@@ -18,6 +18,12 @@
 <a class="ui label" data-name="size" data-value="{{ user.size_favor }}">Size: {{ user.size_favor }}</a>
 {% endif %}
 
+{% if user.topdiff_favor %}
+{% for diff in user.topdiff_favor %}
+<a class="ui label" data-name="size" data-value="{{ diff }}">Top Difficulty: {{ diff }}</a>
+{% endfor %}
+{% endif %}
+
 {% for mode in user.modes %}
 <a class="ui label" data-name="mode" data-value="{{ mode }}">Mode: {{ mode }}</a>
 {% endfor %}

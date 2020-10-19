@@ -1,0 +1,8 @@
+{
+  "upgrade": [
+    "ALTER TABLE \"user\" ADD \"topdiff_favor\" JSONB"
+  ],
+  "downgrade": [
+    "ALTER TABLE \"user\" DROP COLUMN \"topdiff_favor\""
+  ]
+}

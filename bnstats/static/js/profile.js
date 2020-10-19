@@ -50,22 +50,33 @@ function createPieChart(ctx, labels, data) {
     });
 }
 
-function createBarChart(ctx, data) {
+function createBarChart(ctx, labels, datas, show_legend) {
+    var datasets = []
+
+    for (let i = 0; i < datas.length; i++) {
+        const element = datas[i];
+
+        if (typeof (element[0]) === "number") {
+            datasets.push({
+                data: element,
+                backgroundColor: getColors(6),
+            })
+        } else {
+            datasets.push({
+                label: element[0],
+                data: element[1],
+                backgroundColor: getColors(6),
+            })
+
+        }
+    }
+    console.log(datasets)
+
     new Chart(ctx, {
         type: "bar",
         data: {
-            labels: [
-                "0:30 - 1:00",
-                "1:01 - 2:00",
-                "2:01 - 3:00",
-                "3:01 - 4:00",
-                "4:01 - 5:00",
-                "above 5:00"
-            ],
-            datasets: [{
-                data: data,
-                backgroundColor: getColors(6),
-            }]
+            labels: labels,
+            datasets: datasets
         },
         options: {
             responsive: true,
@@ -77,7 +88,7 @@ function createBarChart(ctx, data) {
                 }]
             },
             legend: {
-                display: false,
+                display: show_legend,
             },
             elements: {
                 rectangle: {
