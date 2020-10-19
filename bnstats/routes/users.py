@@ -8,18 +8,11 @@ from starlette.requests import Request
 from starlette.routing import Router
 
 from bnstats.bnsite.enums import Genre, Language
+from bnstats.helper import format_time
 from bnstats.models import Beatmap, BeatmapSet, Nomination, User
 from bnstats.plugins import templates
 
 router = Router()
-
-
-def _format_time(total):
-    minutes = total // 60
-    seconds = total % 60
-    if seconds < 10:
-        seconds = f"0{seconds}"
-    return f"{minutes}:{seconds}"
 
 
 def _create_length_chartdata(nominations):
@@ -159,7 +152,7 @@ async def show_user(request: Request):
         "nominations": nominations,
         "labels": graph_labels,
         "datas": graph_data,
-        "avg_length": _format_time(user.avg_length),
+        "avg_length": format_time(user.avg_length),
         "length_data": _create_length_chartdata(nominations),
         "line_labels": line_labels,
         "line_datas": line_datas,

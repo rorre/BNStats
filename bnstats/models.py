@@ -3,6 +3,7 @@ from typing import List
 from tortoise import fields, models
 
 from bnstats.bnsite.enums import Genre, Language, MapStatus, Mode
+from bnstats.helper import format_time
 
 
 class Beatmap(models.Model):
@@ -55,12 +56,7 @@ class BeatmapSet:
 
     @property
     def map_length(self):
-        longest = self.longest_length
-        minutes = longest // 60
-        seconds = longest % 60
-        if seconds < 10:
-            seconds = f"0{seconds}"
-        return f"{minutes}:{seconds}"
+        return format_time(self.longest_length)
 
     def __getattr__(self, attr):
         return self.beatmaps[0].__getattribute__(attr)
