@@ -26,8 +26,15 @@ routes = [
     Route("/", home.homepage, name="home"),
     Mount("/users", users.router, name="users"),
     Mount("/static", StaticFiles(directory="bnstats/static")),
-    Mount("/", StaticFiles(directory="bnstats/root")),
 ]
+try:
+    from bnstats.routes import secret
+
+    routes.append(Mount("/secret", secret.router, name="secret"))
+except ImportError:
+    pass
+finally:
+    routes.append(Mount("/", StaticFiles(directory="bnstats/root")))
 
 # Middlewares
 middlewares = [
