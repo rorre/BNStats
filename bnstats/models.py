@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 
 from tortoise import fields, models
@@ -109,8 +110,13 @@ class User(models.Model):
         users = await cls.all().order_by("username")
         return users
 
-    async def get_nomination_activity(self) -> List[Nomination]:
-        events = await Nomination.filter(userId=self.osuId).all()
+    async def get_nomination_activity(self, date: datetime = None) -> List[Nomination]:
+        if not date:
+            events = await Nomination.filter(userId=self.osuId).all()
+        else:
+            events = await Nomination.filter(
+                userId=self.osuId, timestamp__gte=date
+            ).all()
         return events
 
     def total_nominations(self):
