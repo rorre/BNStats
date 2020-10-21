@@ -124,6 +124,7 @@ td > a.ui.label {
 }
 
 select.ui.dropdown, .ui.selection.dropdown {
+    color: white !important;
     background: #1f1d24 !important;
 }
 
@@ -139,4 +140,8 @@ select.ui.dropdown, .ui.selection.dropdown {
 
 .ui.label > .delete.icon {
     color: rgba(0,0,0,.87);
+}
+
+.ui.selection.visible.dropdown>.text:not(.default) {
+    color: white !important;
 }

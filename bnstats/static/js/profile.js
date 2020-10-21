@@ -153,3 +153,10 @@ function createLineChart(ctx, labels, data) {
         }
     })
 }
+
+$(function () {
+    $('select.dropdown').dropdown()
+    $("form").change(function () {
+        $(this).submit()
+    })
+})

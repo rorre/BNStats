@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import operator
 from collections import Counter
 from itertools import groupby
@@ -103,7 +104,18 @@ async def show_user(request: Request):
     if not user:
         raise HTTPException(404, "User not found.")
 
-    nominations = await user.get_nomination_activity()
+    day_limit: int = request.query_params.get("days")
+    if type(day_limit) == str:
+        if day_limit.isnumeric():
+            day_limit = int(day_limit)
+        else:
+            day_limit = None
+
+    datetime_limit = None
+    if day_limit and day_limit in (30, 90, 360):
+        datetime_limit = datetime.utcnow() - timedelta(day_limit)
+
+    nominations = await user.get_nomination_activity(datetime_limit)
 
     # No nominations present, what even to show?
     if not nominations:

@@ -9,6 +9,19 @@
             {% include 'includes/user-header.html' %}
             {% include 'includes/user-info.html'%}
         </div>
+
+        <form class="ui inverted form">
+            <div class="field">
+                <label>Timespan</label>
+                {% set days = request.query_params['days'] | default(-1) %}
+                <select name="days" class="ui dropdown">
+                    <option value="0" {% if days == -1 %}selected{% endif %}>All time</option>
+                    <option value="30" {% if days == '30' %}selected{% endif %}>30 days</option>
+                    <option value="90" {% if days == '90' %}selected{% endif %}>90 days</option>
+                    <option value="360" {% if days == '360' %}selected{% endif %}>360 days</option>
+                </select>
+            </div>
+        </form>
     </div>
 
     <div class="ui segments">
