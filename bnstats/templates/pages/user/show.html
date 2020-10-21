@@ -10,10 +10,10 @@
             {% include 'includes/user-info.html'%}
         </div>
 
+        {% set days = request.query_params['days'] | default(-1) %}
         <form class="ui inverted form">
             <div class="field">
                 <label>Timespan</label>
-                {% set days = request.query_params['days'] | default(-1) %}
                 <select name="days" class="ui dropdown">
                     <option value="0" {% if days == -1 %}selected{% endif %}>All time</option>
                     <option value="30" {% if days == '30' %}selected{% endif %}>30 days</option>
@@ -24,9 +24,18 @@
         </form>
     </div>
 
+    {% if days != '30' %}
     <div class="ui segments">
         {{ macros.chart("Nominations", "nomChart") }}
     </div>
+    {% else %}
+    <div class="ui segments">
+        <div class="ui secondary segment">
+            <h4 class="header">Nominations</h4>
+            <p>Data is not be displayed because of one month timespan.</p>
+        </div>
+    </div>
+    {% endif %}
 
     <div class="ui stackable grid">
         <div class="two column row">
