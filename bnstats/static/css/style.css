@@ -135,6 +135,7 @@ select.ui.dropdown, .ui.selection.dropdown {
 }
 
 .ui.selection.dropdown .menu>.item:hover {
+    filter: brightness(70%);
     -webkit-filter: brightness(70%);
 }
 
