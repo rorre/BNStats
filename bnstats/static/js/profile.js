@@ -149,6 +149,7 @@ function createLineChart(ctx, labels, data) {
                         fontColor: "#fff"
                     },
                     ticks: {
+                        precision: 0,
                         fontColor: "#fff"
                     }
                 }]
