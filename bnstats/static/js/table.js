@@ -9,7 +9,7 @@ $(function () {
         return new Number(num);
     });
 
-    $('tr').click(function () {
+    $('tr').on('click', function () {
         var $this = $(this)
         var target = $this.data("url")
 

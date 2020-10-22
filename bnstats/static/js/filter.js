@@ -39,9 +39,9 @@ function filterTable() {
 
 $(function () {
     $('select.dropdown').dropdown()
-    $("#applyButton").click(filterTable)
+    $("#applyButton").on('click', filterTable)
 
-    $("#resetButton").click(function () {
+    $("#resetButton").on('click', function () {
         $(".dropdown").dropdown('clear')
         $("tbody > tr").show()
     })
