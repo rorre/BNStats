@@ -1,3 +1,6 @@
+/// <reference path="vendor/jquery.js" />
+/// <reference path="vendor/semantic.js" />
+
 $(function () {
     $('table').tablesort()
 

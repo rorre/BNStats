@@ -31,12 +31,13 @@
         content="A website to look over osu! Beatmap Nominator activity and learn more about their nominations.">
     <meta property="twitter:image" content="">
 
-    <link rel="stylesheet" type="text/css" href="/static/css/semantic.min.css">
-    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
-    <script src="/static/js/jquery.min.js"></script>
-    <script src="/static/js/semantic.min.js"></script>
-    <script src="/static/js/chart.js"></script>
-    <script src="/static/js/tablesort.js"></script>
+    {% assets "css_all" %}
+    <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
+    {% endassets %}
+
+    {% assets "js_all" %}
+    <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+    {% endassets %}
 
 </head>
 

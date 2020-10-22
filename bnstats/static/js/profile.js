@@ -1,3 +1,6 @@
+/// <reference path="vendor/chart.js" />
+/// <reference path="vendor/jquery.js" />
+
 function getRandomColor() {
     var letters = '0123456789ABCDEF';
     var color = '#';

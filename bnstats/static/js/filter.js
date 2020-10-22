@@ -1,3 +1,6 @@
+/// <reference path="vendor/jquery.js" />
+/// <reference path="vendor/semantic.js" />
+
 function filterTable() {
     var filters = $("#filterSelect").serializeArray()
     if (filters.length == 0) {
