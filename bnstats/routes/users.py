@@ -62,7 +62,7 @@ def _create_nomination_chartdata(nominations: List[Nomination]):
         delta += current[0] + 12 * yeargap - last[0]
 
         new_year = current[1]
-        for j in range(1, delta + 1):
+        for j in range(1, delta):
             new_month = current[0] - j
             if new_month < 1:
                 new_month += 12
