@@ -144,3 +144,4 @@ bundle.js
 cache
 *devel*
 *secret*
+*bundle*
