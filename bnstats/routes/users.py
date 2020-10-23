@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import operator
 from collections import Counter
 from itertools import groupby
-from typing import List
+from typing import Dict, List, Tuple, Union
 
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
@@ -10,7 +10,7 @@ from starlette.routing import Router
 
 from bnstats.bnsite.enums import Difficulty, Genre, Language
 from bnstats.helper import format_time
-from bnstats.models import Beatmap, BeatmapSet, Nomination, User
+from bnstats.models import BeatmapSet, Nomination, User
 from bnstats.plugins import templates
 
 router = Router()
@@ -35,7 +35,11 @@ def _create_nomination_chartdata(nominations: List[Nomination]):
     f = operator.attrgetter("timestamp.month", "timestamp.year")
     sorted_nominations = sorted(nominations, key=lambda x: x.timestamp)
     grouped = groupby(sorted_nominations, f)
-    nomination_groups = []
+
+    Timestamp = Tuple[int, int]
+    nomination_groups: List[List[Union[Timestamp, List[Nomination]]]] = []
+
+    k: Timestamp
     for k, v in grouped:
         nomination_groups.append([k, list(v)])
 
@@ -137,26 +141,35 @@ async def show_user(request: Request):
     for nom in invalid_nominations:
         nominations.remove(nom)
 
-    graph_labels = {"genre": [], "language": [], "sr-top": [], "sr-all": []}
-    graph_data = {"genre": [], "language": [], "sr-top": [], "sr-all": []}
-
-    # Elem is not Beatmap, but BeatmapSet.
-    # But since all attr for BeatmapSet redirects to Beatmap, we will just
-    # mark it as Beatmap for better code prediction.
-    elem: Beatmap
+    graph_labels: Dict[str, List[str]] = {
+        "genre": [],
+        "language": [],
+        "sr-top": [],
+        "sr-all": [],
+    }
+    graph_data: Dict[str, List[int]] = {
+        "genre": [],
+        "language": [],
+        "sr-top": [],
+        "sr-all": [],
+    }
 
     # Count for genres
+    elem: Genre
     counts_genre = Counter([nom.map.genre for nom in nominations])
     for elem, cnt in counts_genre.items():
         graph_labels["genre"].append(elem.name.replace("_", " "))
         graph_data["genre"].append(cnt)
 
     # Count for languages
+    elem: Language
     counts_lang = Counter([nom.map.language for nom in nominations])
     for elem, cnt in counts_lang.items():
         graph_labels["language"].append(elem.name)
         graph_data["language"].append(cnt)
 
+    # Count for difficulty
+    elem: Difficulty
     counts_top = list(
         Counter([nom.map.top_difficulty.difficulty for nom in nominations]).items()
     )

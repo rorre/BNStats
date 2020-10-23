@@ -1,3 +1,5 @@
+from datetime import datetime
+from typing import Optional
 from starlette.applications import Starlette
 from starlette.config import Config
 from starlette.middleware import Middleware
@@ -13,12 +15,13 @@ from bnstats.routine import setup_routine
 
 config = Config(".env")
 
-DEBUG = config("DEBUG", cast=bool, default=False)
-SECRET = config("SECRET")
-DB_URL = config("DB_URL")
-SITE_SESSION = config("BNSITE_SESSION")
-API_KEY = config("API_KEY")
+DEBUG: bool = config("DEBUG", cast=bool, default=False)
+SECRET: str = config("SECRET")
+DB_URL: str = config("DB_URL")
+SITE_SESSION: str = config("BNSITE_SESSION")
+API_KEY: str = config("API_KEY")
 
+# Setup session for HTTPX
 request.setup_session(SITE_SESSION, API_KEY)
 
 # Routes
@@ -27,6 +30,7 @@ routes = [
     Mount("/users", users.router, name="users"),
     Mount("/static", StaticFiles(directory="bnstats/static")),
 ]
+
 try:
     from bnstats.routes import secret
 
@@ -43,8 +47,10 @@ middlewares = [
 ]
 
 # Application setup
-app = Starlette(debug=DEBUG, routes=routes, middleware=middlewares)
-app.state.last_update = None
+app: Starlette = Starlette(debug=DEBUG, routes=routes, middleware=middlewares)
+app.state.last_update: Optional[datetime] = None  # type: ignore
+
+# Database setup
 tortoise_config = {
     "connections": {"default": DB_URL},
     "apps": {
@@ -59,4 +65,6 @@ register_tortoise(
     tortoise_config,
     generate_schemas=True,
 )
+
+# Routine/background job
 setup_routine(app)

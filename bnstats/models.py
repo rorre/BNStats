@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import Any, Awaitable, List
 
 from tortoise import fields, models
 
@@ -23,23 +23,23 @@ class Beatmap(models.Model):
     difficultyrating = fields.FloatField()
 
     @property
-    def status(self):
+    def status(self) -> MapStatus:
         return MapStatus(self.approved)
 
     @property
-    def gamemode(self):
+    def gamemode(self) -> Mode:
         return Mode(self.mode)
 
     @property
-    def language(self):
+    def language(self) -> Language:
         return Language(self.language_id)
 
     @property
-    def genre(self):
+    def genre(self) -> Genre:
         return Genre(self.genre_id)
 
     @property
-    def difficulty(self):
+    def difficulty(self) -> Difficulty:
         return Difficulty.from_sr(self.difficultyrating)
 
 
@@ -48,26 +48,26 @@ class BeatmapSet:
         self.beatmaps = beatmaps
 
     @property
-    def total_diffs(self):
+    def total_diffs(self) -> int:
         return len(self.beatmaps)
 
     @property
-    def total_length(self):
+    def total_length(self) -> int:
         return sum([b.total_length for b in self.beatmaps])
 
     @property
-    def longest_length(self):
+    def longest_length(self) -> int:
         return max([b.total_length for b in self.beatmaps])
 
     @property
-    def map_length(self):
+    def map_length(self) -> str:
         return format_time(self.longest_length)
 
     @property
-    def top_difficulty(self):
+    def top_difficulty(self) -> Beatmap:
         return max([b for b in self.beatmaps], key=lambda x: x.difficultyrating)
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr: str) -> Any:
         return self.beatmaps[0].__getattribute__(attr)
 
 
@@ -78,7 +78,10 @@ class Nomination(models.Model):
     creatorId = fields.IntField(null=True)
     creatorName = fields.TextField(null=True)
     timestamp = fields.DatetimeField()
-    user = fields.ForeignKeyField("models.User", related_name="nominations")
+    user: fields.ForeignKeyRelation["User"] = fields.ForeignKeyField(
+        "models.User", related_name="nominations"
+    )
+    map: BeatmapSet
 
     async def get_map(self) -> BeatmapSet:
         diffs = await Beatmap.filter(beatmapset_id=self.beatmapsetId).all()
@@ -101,6 +104,7 @@ class User(models.Model):
     length_favor = fields.CharField(20, null=True)
     avg_length = fields.IntField(null=True)
     avg_diffs = fields.IntField(null=True)
+    nominations: fields.ManyToManyRelation[Nomination]
 
     def __repr__(self):
         return f"User(osuId={self.osuId}, username={self.username})"
@@ -119,5 +123,6 @@ class User(models.Model):
             ).all()
         return events
 
-    def total_nominations(self):
-        return Nomination.filter(userId=self.osuId).count()
+    def total_nominations(self) -> Awaitable[int]:
+        # As we only redirect the function, we can just use def instead async def.
+        return Nomination.filter(userId=self.osuId).count()  # type: ignore

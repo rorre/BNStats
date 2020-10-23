@@ -6,7 +6,7 @@ from webassets.ext.jinja2 import AssetsExtension
 assets_env = AssetsEnvironment("./bnstats/static", "/static")
 templates = Jinja2Templates(directory="bnstats/templates")
 templates.env.add_extension(AssetsExtension)
-templates.env.assets_environment = assets_env
+templates.env.assets_environment = assets_env  # type: ignore
 
 js_bundle = Bundle(
     Bundle(
