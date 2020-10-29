@@ -37,5 +37,6 @@ Look at [Uvicorn's deployment docs](https://www.uvicorn.org/deployment/).
 
 ## TODOs
 - ~~Find and delete kicked BNs when the listing changes~~
-- Star rating graph + label + avg
-- Specific timespan option
+- ~~Star rating graph + label + avg~~
+- ~~Specific timespan option~~
+- Move database update routine out of application
