@@ -70,6 +70,25 @@ class BeatmapSet:
     def __getattr__(self, attr: str) -> Any:
         return self.beatmaps[0].__getattribute__(attr)
 
+    # typings derived from 'Beatmap'
+    beatmapset_id: int
+    beatmap_id: int
+    approved: int
+    hit_length: int
+    mode: int
+    artist: str
+    title: str
+    creator: str
+    tags: str
+    genre_id: int
+    language_id: int
+    difficultyrating: float
+    gamemode: Mode
+    status: MapStatus
+    language: Language
+    genre: Genre
+    difficulty: Difficulty
+
 
 class Nomination(models.Model):
     beatmapsetId = fields.IntField()
