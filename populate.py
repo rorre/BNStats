@@ -17,7 +17,7 @@ SITE_SESSION = config("BNSITE_SESSION")
 API_KEY = config("API_KEY")
 
 
-async def run():
+async def run(days):
     request.setup_session(SITE_SESSION, API_KEY)
     await Tortoise.init(db_url=DB_URL, modules={"models": ["bnstats.models"]})
     await Tortoise.generate_schemas()
@@ -28,7 +28,7 @@ async def run():
     c = len(users)
     for i, u in enumerate(users):
         print(f">> Populating data for user: {u.username} ({i+1}/{c})")
-        nominations = await update_nomination_db(u, 999)
+        nominations = await update_nomination_db(u, days)
 
         print(f">>> Populating maps for user: {u.username}")
         user_maps = []
@@ -45,4 +45,13 @@ async def run():
     await request.s.aclose()
 
 
-run_async(run())
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-d", "--days", type=int, default=999, help="Number of days to fetch."
+    )
+
+    args = parser.parse_args()
+    run_async(run(args.days))
