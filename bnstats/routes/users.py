@@ -90,6 +90,9 @@ def _create_nomination_chartdata(nominations: List[Nomination]):
 async def listing(request: Request):
     users = await User.get_users()
     counts = [await u.total_nominations() for u in users]
+    for u in users:
+        u.score = await u.get_score()
+
     ctx = {
         "request": request,
         "users": users,
@@ -188,6 +191,7 @@ async def show_user(request: Request):
         graph_data["sr-all"].append(cnt)
 
     line_labels, line_datas = _create_nomination_chartdata(nominations)
+    user.score = await user.get_score()
 
     ctx = {
         "request": request,

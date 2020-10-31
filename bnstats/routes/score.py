@@ -10,16 +10,6 @@ from bnstats.plugins import templates
 router = Router()
 
 
-@router.route("/", name="list")
-async def listing(request: Request):
-    users = await User.get_users()
-    for u in users:
-        u.score = await u.get_score()
-    users.sort(key=lambda x: x.score, reverse=True)
-    ctx = {"request": request, "users": users, "title": "Leaderboard"}
-    return templates.TemplateResponse("score/listing.html", ctx)
-
-
 @router.route("/{user_id:int}", name="show")
 async def show_user(request: Request):
     uid: int = request.path_params["user_id"]
@@ -44,4 +34,4 @@ async def show_user(request: Request):
         "nominations": nominations,
         "title": user.username,
     }
-    return templates.TemplateResponse("score/show.html", ctx)
+    return templates.TemplateResponse("pages/user/score_show.html", ctx)

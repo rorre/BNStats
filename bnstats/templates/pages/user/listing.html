@@ -21,6 +21,7 @@
                     <th class="no-sort">Attributes</th>
                     <th class="no-sort">Game mode</th>
                     <th class="number">Nominations</th>
+                    <th class="float">Rating</th>
                 </tr>
             </thead>
             <tbody>
@@ -30,6 +31,7 @@
                     <td class="no-clickable">{% include 'includes/user-labels.html' %}</td>
                     <td>{{ user.modes | join(', ') }}</td>
                     <td>{{ counts[loop.index0] }}</td>
+                    <td>{{ '%0.2f' | format(user.score) }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
