@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Optional
+
 from starlette.applications import Starlette
 from starlette.config import Config
 from starlette.middleware import Middleware
@@ -10,9 +11,9 @@ from starlette.staticfiles import StaticFiles
 from tortoise.contrib.starlette import register_tortoise
 
 from bnstats.bnsite import request
-from bnstats.routes import home, users, score
-from bnstats.routine import setup_routine
 from bnstats.middlewares.maintenance import MaintenanceMiddleware
+from bnstats.routes import home, score, users
+from bnstats.routine import setup_routine
 
 config = Config(".env")
 

@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.routing import Router
+
 from bnstats.models import User
 from bnstats.plugins import templates
 

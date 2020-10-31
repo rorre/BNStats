@@ -1,8 +1,8 @@
-from datetime import datetime, timedelta
 import math
+from datetime import datetime, timedelta
 
-from bnstats.models import BeatmapSet, User
 from bnstats.bnsite.enums import MapStatus
+from bnstats.models import BeatmapSet, User
 
 BASE_SCORE = 0.5
 BASE_REDUCTION = 0.5  # OBV/SEV reduction

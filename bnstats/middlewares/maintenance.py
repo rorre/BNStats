@@ -1,7 +1,8 @@
 import os
-from starlette.responses import PlainTextResponse, Response
-from starlette.requests import Request
+
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+from starlette.requests import Request
+from starlette.responses import PlainTextResponse, Response
 
 
 class MaintenanceMiddleware(BaseHTTPMiddleware):
