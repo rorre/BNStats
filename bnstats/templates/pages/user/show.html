@@ -11,7 +11,7 @@
         </div>
 
         {% set days = request.query_params['days'] | default(-1) %}
-        <form class="ui inverted form">
+        <form class="ui inverted form" id="timespanForm">
             <div class="field">
                 <label>Timespan</label>
                 <select name="days" class="ui dropdown">
