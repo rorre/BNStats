@@ -31,10 +31,15 @@
                             <td>
                                 {{ s.map.artist }} - {{ s.map.title }} ({{ s.map.creator }})
                             </td>
+                            {% if s.ambiguous_mode %}
+                            <td colspan="4">Can't tell which mode the nominator is trying to nominate, please tell
+                                Keitaro!.</td>
+                            {% else %}
                             <td>{{ '%0.2f' | format(s.score) }}</td>
                             <td>{{ '%0.2f' | format(s.ranked_score) }}</td>
                             <td>{{ '%0.2f' | format(s.mapper_score) }}</td>
                             <td>{{ '%0.2f' | format(s.mapset_score) }}</td>
+                            {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>

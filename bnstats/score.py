@@ -7,6 +7,7 @@ from bnstats.models import BeatmapSet, User
 BASE_SCORE = 0.5
 BASE_REDUCTION = 0.5  # OBV/SEV reduction
 BASE_MAPPER = 1  # 100%
+MODES = {"osu": 0, "taiko": 1, "catch": 2, "mania": 3}
 
 
 def calculate_mapset(beatmap: BeatmapSet):
@@ -47,6 +48,26 @@ async def calculate_user(user: User):
         if not beatmap.beatmaps:
             # Skip beatmaps that doesn't exist anymore.
             continue
+
+        # Filter beatmaps only to the mode being nominated.
+        user_modes = [MODES[m] for m in user.modes]
+        map_modes = set([diff.mode for diff in beatmap.beatmaps])
+
+        nomination_mode = nom.as_mode
+        if not nomination_mode:
+            for mode in user_modes:
+                if mode in map_modes:
+                    if nomination_mode:
+                        # Hybrid map with hybrid BN, can't tell which mode is it.
+                        nom.ambiguous_mode = True
+                        await nom.save()
+                        return
+                    else:
+                        nomination_mode = mode
+
+        beatmap = BeatmapSet(
+            list(filter(lambda x: x.mode == nomination_mode, beatmap.beatmaps))
+        )
 
         mapper = beatmap.creator
         mapper_score = BASE_MAPPER

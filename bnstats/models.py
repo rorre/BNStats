@@ -100,6 +100,8 @@ class Nomination(models.Model):
     user: fields.ForeignKeyRelation["User"] = fields.ForeignKeyField(
         "models.User", related_name="nominations"
     )
+    as_mode = fields.IntField(null=True)
+    ambiguous_mode = fields.BooleanField(default=False)
     mapset_score = fields.FloatField(default=0.0)
     mapper_score = fields.FloatField(default=0.0)
     ranked_score = fields.FloatField(default=0.0)
