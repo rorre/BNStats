@@ -37,8 +37,8 @@
                             {% else %}
                             <td>{{ '%0.2f' | format(s.score) }}</td>
                             <td>{{ '%0.2f' | format(s.ranked_score) }}</td>
-                            <td>{{ '%0.2f' | format(s.mapper_score) }}</td>
-                            <td>{{ '%0.2f' | format(s.mapset_score) }}</td>
+                            <td>{{ '%d' | format(s.mapper_score * 100) }}%</td>
+                            <td>{{ '%d' | format(s.mapset_score * 100) }}%</td>
                             {% endif %}
                         </tr>
                         {% endfor %}
