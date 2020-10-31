@@ -31,7 +31,10 @@
             <div class="content">
                 <a href="{{ url_for('score:show', user_id=user.osuId) }}"
                     class="header">{{ '%0.2f' | format(user.score) }}</a>
-                <div class="description">Rating</div>
+                <div class="description tooltip" data-content="Rating is an experimental nomination scoring system."
+                    data-variation="inverted">
+                    Rating
+                </div>
             </div>
         </div>
     </div>
