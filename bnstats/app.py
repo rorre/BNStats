@@ -66,5 +66,6 @@ register_tortoise(
     generate_schemas=True,
 )
 
-# Routine/background job
-setup_routine(app)
+# Routine/background job only if it's in debug.
+if DEBUG:
+    setup_routine(app)

@@ -101,7 +101,7 @@ async def update_maps_db(nomination: Nomination):
         url = API_URL + "/get_beatmaps?" + urlencode(query)
         r = await get(url)
 
-        db_result: List[Beatmap] = []
+        db_result: List[Beatmap] = []  # type: ignore
         for map in r:
             db_diff = await Beatmap.filter(beatmap_id=map["beatmap_id"]).get_or_none()
 
@@ -181,6 +181,7 @@ async def update_user_details(user: User, maps: List[BeatmapSet]):
         "genre_favor": genre_favors,
         "lang_favor": lang_favors,
         "topdiff_favor": diff_favors,
+        "last_updated": datetime.utcnow(),
     }
     user.update_from_dict(updates)
     await user.save()

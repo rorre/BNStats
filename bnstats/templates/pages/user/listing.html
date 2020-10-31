@@ -4,8 +4,8 @@
 <div class="ui segment">
     <h3 class="header">User List</h3>
     <p>Last updated:
-        {% if request.app.state.last_update %}
-        {{ request.app.state.last_update.strftime("%d-%m-%Y %H:%M:%S") }} UTC
+        {% if last_update %}
+        {{ last_update.strftime("%d-%m-%Y %H:%M:%S") }} UTC
         {% else %}
         Happens outside the app instance.
         {% endif %}

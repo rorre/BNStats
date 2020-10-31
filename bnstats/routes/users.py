@@ -97,6 +97,7 @@ async def listing(request: Request):
         "genres": [g.name.replace("_", " ") for g in Genre],
         "languages": [lang.name for lang in Language],
         "diffs": [diff.name for diff in Difficulty],
+        "last_update": max(users, key=lambda x: x.last_updated).last_updated,
     }
     return templates.TemplateResponse("pages/user/listing.html", ctx)
 
@@ -201,5 +202,6 @@ async def show_user(request: Request):
         "length_data": _create_length_chartdata(nominations),
         "line_labels": line_labels,
         "line_datas": line_datas,
+        "last_update": user.last_updated,
     }
     return templates.TemplateResponse("pages/user/show.html", ctx)
