@@ -10,7 +10,7 @@ from starlette.staticfiles import StaticFiles
 from tortoise.contrib.starlette import register_tortoise
 
 from bnstats.bnsite import request
-from bnstats.routes import home, users
+from bnstats.routes import home, users, score
 from bnstats.routine import setup_routine
 
 config = Config(".env")
@@ -28,6 +28,7 @@ request.setup_session(SITE_SESSION, API_KEY)
 routes = [
     Route("/", home.homepage, name="home"),
     Mount("/users", users.router, name="users"),
+    Mount("/score", score.router, name="score"),
     Mount("/static", StaticFiles(directory="bnstats/static")),
 ]
 

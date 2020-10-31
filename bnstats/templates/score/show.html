@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% import 'macros.html' as macros %}
+
+{% block content %}
+<div class="ui segments">
+    <div class="ui segment">
+        <h3 class="header">User Info</h3>
+        <div class="ui very relaxed stackable grid">
+            {% include 'includes/user-header.html' %}
+        </div>
+    </div>
+
+    <div class="ui segments">
+        <div class="ui secondary segment">
+            <h3 class="header">Nominations</h3>
+            <div class="table-wrapper">
+                <table class="ui celled inverted sortable selectable table">
+                    <thead>
+                        <tr>
+                            <th>Beatmap</th>
+                            <th class="float">Score</th>
+                            <th class="float">Ranked bonus</th>
+                            <th class="float">Mapper%</th>
+                            <th class="float">MapsetSize%</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in nominations %}
+                        <tr data-url="https://osu.ppy.sh/s/{{ s.map.beatmapset_id }}">
+                            <td>
+                                {{ s.map.artist }} - {{ s.map.title }} ({{ s.map.creator }})
+                            </td>
+                            <td>{{ '%0.2f' | format(s.score) }}</td>
+                            <td>{{ '%0.2f' | format(s.ranked_score) }}</td>
+                            <td>{{ '%0.2f' | format(s.mapper_score) }}</td>
+                            <td>{{ '%0.2f' | format(s.mapset_score) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

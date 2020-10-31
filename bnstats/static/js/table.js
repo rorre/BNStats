@@ -9,6 +9,11 @@ $(function () {
         return new Number(num);
     });
 
+    $('thead th.float').data('sortBy', function (th, td, tablesort) {
+        var num = td.data("sort-value") | td.text()
+        return parseFloat(num);
+    });
+
     $('tr').on('click', function () {
         var $this = $(this)
         var target = $this.data("url")

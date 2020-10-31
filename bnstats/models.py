@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Awaitable, List
 
 from tortoise import fields, models
@@ -100,6 +100,10 @@ class Nomination(models.Model):
     user: fields.ForeignKeyRelation["User"] = fields.ForeignKeyField(
         "models.User", related_name="nominations"
     )
+    mapset_score = fields.FloatField(default=0.0)
+    mapper_score = fields.FloatField(default=0.0)
+    ranked_score = fields.FloatField(default=0.0)
+    score = fields.FloatField(default=0.0)
     map: BeatmapSet
 
     async def get_map(self) -> BeatmapSet:
@@ -135,12 +139,21 @@ class User(models.Model):
 
     async def get_nomination_activity(self, date: datetime = None) -> List[Nomination]:
         if not date:
-            events = await Nomination.filter(userId=self.osuId).all()
+            events = (
+                await Nomination.filter(userId=self.osuId).all().order_by("timestamp")
+            )
         else:
-            events = await Nomination.filter(
-                userId=self.osuId, timestamp__gte=date
-            ).all()
+            events = (
+                await Nomination.filter(userId=self.osuId, timestamp__gte=date)
+                .all()
+                .order_by("timestamp")
+            )
         return events
+
+    async def get_score(self, days: int = 90) -> float:
+        date = datetime.utcnow() - timedelta(days)
+        activities = await self.get_nomination_activity(date)
+        return sum([a.score for a in activities])
 
     def total_nominations(self) -> Awaitable[int]:
         # As we only redirect the function, we can just use def instead async def.

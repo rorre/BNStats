@@ -8,6 +8,7 @@ from bnstats.routine import (
     update_maps_db,
     update_user_details,
 )
+from bnstats.score import calculate_user
 from bnstats.bnsite import request
 from bnstats.models import User
 
@@ -28,7 +29,7 @@ async def run(days):
     c = len(users)
     for i, u in enumerate(users):
         print(f">> Populating data for user: {u.username} ({i+1}/{c})")
-        nominations = await update_nomination_db(u, days)
+        nominations = []  # await update_nomination_db(u, days)
 
         print(f">>> Populating maps for user: {u.username}")
         user_maps = []
@@ -41,6 +42,9 @@ async def run(days):
         if user_maps:
             print(f">>> Updating details for user: {u.username}")
             await update_user_details(u, user_maps)
+
+        print(f">>> Calculating score for user: {u.username}")
+        await calculate_user(u)
 
     await request.s.aclose()
 
