@@ -29,7 +29,7 @@ async def run(days):
     c = len(users)
     for i, u in enumerate(users):
         print(f">> Populating data for user: {u.username} ({i+1}/{c})")
-        nominations = []  # await update_nomination_db(u, days)
+        nominations = await update_nomination_db(u, days)
 
         print(f">>> Populating maps for user: {u.username}")
         user_maps = []
