@@ -12,6 +12,7 @@ from tortoise.contrib.starlette import register_tortoise
 from bnstats.bnsite import request
 from bnstats.routes import home, users, score
 from bnstats.routine import setup_routine
+from bnstats.middlewares.maintenance import MaintenanceMiddleware
 
 config = Config(".env")
 
@@ -45,6 +46,7 @@ finally:
 middlewares = [
     Middleware(SessionMiddleware, secret_key=SECRET),
     Middleware(GZipMiddleware, minimum_size=1000),
+    Middleware(MaintenanceMiddleware),
 ]
 
 # Application setup
