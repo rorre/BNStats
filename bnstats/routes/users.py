@@ -98,6 +98,7 @@ async def listing(request: Request):
         "languages": [lang.name for lang in Language],
         "diffs": [diff.name for diff in Difficulty],
         "last_update": max(users, key=lambda x: x.last_updated).last_updated,
+        "title": "User Listing",
     }
     return templates.TemplateResponse("pages/user/listing.html", ctx)
 
@@ -124,11 +125,7 @@ async def show_user(request: Request):
 
     # No nominations present, what even to show?
     if not nominations:
-        ctx = {
-            "request": request,
-            "user": user,
-            "error": True,
-        }
+        ctx = {"request": request, "user": user, "error": True, "title": user.username}
         return templates.TemplateResponse("pages/user/no_noms.html", ctx)
 
     invalid_nominations = []
@@ -203,5 +200,6 @@ async def show_user(request: Request):
         "line_labels": line_labels,
         "line_datas": line_datas,
         "last_update": user.last_updated,
+        "title": user.username,
     }
     return templates.TemplateResponse("pages/user/show.html", ctx)

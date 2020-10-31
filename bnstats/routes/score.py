@@ -15,7 +15,7 @@ async def listing(request: Request):
     for u in users:
         u.score = await u.get_score()
     users.sort(key=lambda x: x.score, reverse=True)
-    ctx = {"request": request, "users": users}
+    ctx = {"request": request, "users": users, "title": "Leaderboard"}
     return templates.TemplateResponse("score/listing.html", ctx)
 
 
@@ -30,16 +30,17 @@ async def show_user(request: Request):
     nominations = await user.get_nomination_activity(d)
 
     if not nominations:
-        ctx = {
-            "request": request,
-            "user": user,
-            "error": True,
-        }
+        ctx = {"request": request, "user": user, "error": True, "title": user.username}
         return templates.TemplateResponse("pages/user/no_noms.html", ctx)
 
     for nom in nominations:
         nom.map = await nom.get_map()
 
     nominations.sort(key=lambda x: x.score, reverse=True)
-    ctx = {"request": request, "user": user, "nominations": nominations}
+    ctx = {
+        "request": request,
+        "user": user,
+        "nominations": nominations,
+        "title": user.username,
+    }
     return templates.TemplateResponse("score/show.html", ctx)

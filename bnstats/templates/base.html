@@ -10,15 +10,15 @@
     <meta name="keywords"
         content="osu, beatmap, nominator, bn, nomination, maps, mapset, beatmaps, taiko, mania, catch, ctb">
     <!-- Primary Meta Tags -->
-    <title>BNStats</title>
-    <meta name="title" content="BNStats">
+    <title>{{ title | default('Index') }} / BNStats</title>
+    <meta name="title" content="{{ title | default('Index') }} / BNStats">
     <meta name="description"
         content="A website to look over osu! Beatmap Nominator activity and learn more about their nominations.">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://bnstats.rorre.xyz/">
-    <meta property="og:title" content="BNStats">
+    <meta property="og:title" content="{{ title | default('Index') }} / BNStats">
     <meta property="og:description"
         content="A website to look over osu! Beatmap Nominator activity and learn more about their nominations.">
     <meta property="og:image" content="">
@@ -26,7 +26,7 @@
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://bnstats.rorre.xyz/">
-    <meta property="twitter:title" content="BNStats">
+    <meta property="twitter:title" content="{{ title | default('Index') }} / BNStats">
     <meta property="twitter:description"
         content="A website to look over osu! Beatmap Nominator activity and learn more about their nominations.">
     <meta property="twitter:image" content="">
