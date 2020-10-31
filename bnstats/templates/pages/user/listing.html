@@ -5,7 +5,7 @@
     <h3 class="header">User List</h3>
     <p>Last updated:
         {% if last_update %}
-        {{ last_update.strftime("%d-%m-%Y %H:%M:%S") }} UTC
+        <time class="timeago" datetime="{{ last_update.isoformat(timespec='seconds') }}Z"></time>
         {% else %}
         Happens outside the app instance.
         {% endif %}

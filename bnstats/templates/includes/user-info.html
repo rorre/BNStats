@@ -4,7 +4,7 @@
             <i class="large info circle middle aligned icon"></i>
             <div class="content">
                 <a class="header">
-                    {{ user.last_updated.strftime("%d-%m-%Y %H:%M:%S") }} UTC
+                    <time class="timeago" datetime="{{ user.last_updated.isoformat(timespec='seconds') }}Z"></time>
                 </a>
                 <div class="description">Last Updated</div>
             </div>

@@ -2,4 +2,7 @@
 /// <reference path="vendor/jquery.timeago.js" />
 /// <reference path="vendor/semantic.js" />
 
-$(".tooltip").popup()
+$(function () {
+    $(".tooltip").popup()
+    $("time.timeago").timeago()
+})

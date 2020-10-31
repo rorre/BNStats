@@ -11,11 +11,13 @@ templates.env.assets_environment = assets_env  # type: ignore
 js_bundle = Bundle(
     Bundle(
         "js/vendor/jquery.js",
+        "js/vendor/jquery.timeago.js",
         "js/vendor/semantic.js",
         "js/vendor/tablesort.js",
         "js/vendor/chart.js",
     ),
     Bundle(
+        "js/global.js",
         "js/filter.js",
         "js/profile.js",
         "js/table.js",
