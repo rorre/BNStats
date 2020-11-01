@@ -87,8 +87,10 @@ async def calculate_user(user: User):
         nom.ranked_score = (beatmap.status == MapStatus.Ranked) / 2
         nom.mapper_score = mapper_score
         nom.mapset_score = calculate_mapset(beatmap)
+        nom.penalty = penalty_multiplier * 0.5
+
         nom.score = round(BASE_SCORE * nom.mapper_score * nom.mapset_score, 2)
         nom.score += nom.ranked_score
-        nom.score -= penalty_multiplier * 0.5
+        nom.score -= nom.penalty
 
         await nom.save()

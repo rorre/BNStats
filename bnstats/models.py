@@ -105,6 +105,7 @@ class Nomination(models.Model):
     mapset_score = fields.FloatField(default=0.0)
     mapper_score = fields.FloatField(default=0.0)
     ranked_score = fields.FloatField(default=0.0)
+    penalty = fields.FloatField(default=0.0)
     score = fields.FloatField(default=0.0)
     map: BeatmapSet
 

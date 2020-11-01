@@ -1,0 +1,8 @@
+{
+  "upgrade": [
+    "ALTER TABLE \"nomination\" ADD \"penalty\" DOUBLE PRECISION NOT NULL  DEFAULT 0"
+  ],
+  "downgrade": [
+    "ALTER TABLE \"nomination\" DROP COLUMN \"penalty\""
+  ]
+}

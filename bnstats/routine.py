@@ -13,6 +13,7 @@ from starlette.applications import Starlette
 
 from bnstats.bnsite import request
 from bnstats.bnsite.enums import MapStatus
+from bnstats.bnsite.request import cached_request as cget
 from bnstats.bnsite.request import get, s
 from bnstats.models import Beatmap, BeatmapSet, Nomination, Reset, User
 
@@ -127,7 +128,7 @@ async def update_maps_db(nomination: Nomination):
     ]:
         query = {"k": request.api_key, "s": nomination.beatmapsetId}
         url = API_URL + "/get_beatmaps?" + urlencode(query)
-        r = await get(url)
+        r = await cget(url, "map", f"{nomination.beatmapsetId}.json")
 
         db_result: List[Beatmap] = []  # type: ignore
         for map in r:
