@@ -18,6 +18,17 @@ SITE_SESSION = config("BNSITE_SESSION")
 API_KEY = config("API_KEY")
 
 
+async def run_calculate():
+    await Tortoise.init(db_url=DB_URL, modules={"models": ["bnstats.models"]})
+    await Tortoise.generate_schemas()
+
+    users = await User.get_users()
+    c = len(users)
+    for i, u in enumerate(users):
+        print(f">>> Calculating score for user: {u.username} ({i+1}/{c})")
+        await calculate_user(u)
+
+
 async def run(days):
     request.setup_session(SITE_SESSION, API_KEY)
     await Tortoise.init(db_url=DB_URL, modules={"models": ["bnstats.models"]})
@@ -56,6 +67,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "-d", "--days", type=int, default=999, help="Number of days to fetch."
     )
+    parser.add_argument(
+        "--only-recalculate", help="Only recalculate users.", action="store_true"
+    )
 
     args = parser.parse_args()
-    run_async(run(args.days))
+    if args.only_recalculate:
+        run_async(run_calculate())
+    else:
+        run_async(run(args.days))
