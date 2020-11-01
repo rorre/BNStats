@@ -79,10 +79,16 @@ async def calculate_user(user: User):
                 mapper_score *= 0.25
         nominated_mappers.append(mapper)
 
+        resets = await user.resets.filter(beatmapsetId=nom.beatmapsetId).all()
+        penalty_multiplier = 0
+        for r in resets:
+            penalty_multiplier += r.severity + r.obviousness
+
         nom.ranked_score = (beatmap.status == MapStatus.Ranked) / 2
         nom.mapper_score = mapper_score
         nom.mapset_score = calculate_mapset(beatmap)
         nom.score = round(BASE_SCORE * nom.mapper_score * nom.mapset_score, 2)
         nom.score += nom.ranked_score
+        nom.score -= penalty_multiplier * 0.5
 
         await nom.save()

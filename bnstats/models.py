@@ -113,6 +113,24 @@ class Nomination(models.Model):
         return BeatmapSet(diffs)
 
 
+class Reset(models.Model):
+    id = fields.TextField(pk=True)
+    beatmapsetId = fields.IntField()
+    userId = fields.IntField()
+    artistTitle = fields.TextField()
+    creatorId = fields.IntField(null=True)
+    creatorName = fields.TextField(null=True)
+    timestamp = fields.DatetimeField()
+    content = fields.TextField(null=True)
+    discussionId = fields.IntField(null=True)
+    obviousness = fields.IntField(default=0)
+    severity = fields.IntField(default=0)
+    type = fields.CharField(50)
+    user_affected: fields.ManyToManyRelation["User"] = fields.ManyToManyField(
+        "models.User", related_name="resets", through="user_reset"
+    )
+
+
 class User(models.Model):
     _id = fields.TextField()
     osuId = fields.IntField(pk=True)
@@ -130,6 +148,7 @@ class User(models.Model):
     avg_length = fields.IntField(null=True)
     avg_diffs = fields.IntField(null=True)
     nominations: fields.ManyToManyRelation[Nomination]
+    resets: fields.ManyToManyRelation[Reset]
 
     def __repr__(self):
         return f"User(osuId={self.osuId}, username={self.username})"

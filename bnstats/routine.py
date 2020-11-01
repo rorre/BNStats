@@ -14,7 +14,7 @@ from starlette.applications import Starlette
 from bnstats.bnsite import request
 from bnstats.bnsite.enums import MapStatus
 from bnstats.bnsite.request import get, s
-from bnstats.models import Beatmap, BeatmapSet, Nomination, User
+from bnstats.models import Beatmap, BeatmapSet, Nomination, Reset, User
 
 API_URL = "https://osu.ppy.sh/api"
 USERS_URL = "https://bn.mappersguild.com/users"
@@ -86,6 +86,34 @@ async def update_nomination_db(user: User, days: int = 90):
         if not db_event:
             db_event = await Nomination.create(**event)
         events.append(db_event)
+
+    resets = activities["nominationsDisqualified"] + activities["nominationsPopped"]
+    for event in resets:
+        event["id"] = event["_id"]
+        event["timestamp"] = parse(event["timestamp"], ignoretz=True)
+
+        # Hack because pishi mongodb zzz
+        if "obviousness" in event and not event["obviousness"]:
+            event["obviousness"] = 0
+        if "severity" in event and not event["severity"]:
+            event["severity"] = 0
+
+        db_event = await Reset.get_or_none(id=event["id"])
+        if not db_event:
+            db_event = await Reset.create(**event)
+
+        await db_event.fetch_related("user_affected")
+        if user not in db_event.user_affected:
+            await db_event.user_affected.add(user)
+
+    resets_done = activities["disqualifications"] + activities["pops"]
+    for event in resets_done:
+        event["id"] = event["_id"]
+        event["timestamp"] = parse(event["timestamp"], ignoretz=True)
+
+        db_event = await Reset.get_or_none(id=event["id"])
+        if not db_event:
+            db_event = await Reset.create(**event)
 
     return events
 
