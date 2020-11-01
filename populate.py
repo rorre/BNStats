@@ -43,16 +43,14 @@ async def run(days):
         nominations = await update_nomination_db(u, days)
 
         print(f">>> Populating maps for user: {u.username}")
-        user_maps = []
         c_maps = len(nominations)
         for i, nom in enumerate(nominations):
             print(f">>> Fetching: {nom.beatmapsetId} ({i+1}/{c_maps})")
-            m = await update_maps_db(nom)
-            user_maps.append(m)
+            await update_maps_db(nom)
 
-        if user_maps:
-            print(f">>> Updating details for user: {u.username}")
-            await update_user_details(u, user_maps)
+        user_maps = u.get_nomination_activity()
+        print(f">>> Updating details for user: {u.username}")
+        await update_user_details(u, user_maps)
 
         print(f">>> Calculating score for user: {u.username}")
         await calculate_user(u)
