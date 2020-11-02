@@ -101,17 +101,17 @@ async def new_entry(request: Request):
         "Authorization" not in request.headers
         or request.headers["Authorization"] != QAT_KEY
     ):
-        return JSONResponse({"error": "Unauthorized."}, 401)
+        return JSONResponse({"status": 500, "message": "Unauthorized."}, 401)
 
     req_data: Dict[str, Any] = await request.json()
 
     data_type: str = req_data["type"]
     if data_type not in classes.keys():
-        return JSONResponse({"error": "Invalid type."}, 400)
+        return JSONResponse({"status": 500, "message": "Invalid type."}, 400)
 
     func: Model = classes[data_type]
 
     try:
         return await func()
     except:
-        return JSONResponse({"status": 500, "message": "An exception occured."})
+        return JSONResponse({"status": 500, "message": "An exception occured."}, 500)
