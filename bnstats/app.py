@@ -12,7 +12,7 @@ from tortoise.contrib.starlette import register_tortoise
 
 from bnstats.bnsite import request
 from bnstats.middlewares.maintenance import MaintenanceMiddleware
-from bnstats.routes import home, score, users
+from bnstats.routes import home, score, users, qat
 from bnstats.routine import setup_routine
 
 config = Config(".env")
@@ -30,6 +30,7 @@ request.setup_session(SITE_SESSION, API_KEY)
 routes = [
     Route("/", home.homepage, name="home"),
     Mount("/users", users.router, name="users"),
+    Mount("/qat", qat.router, name="qat"),
     Mount("/score", score.router, name="score"),
     Mount("/static", StaticFiles(directory="bnstats/static")),
 ]
@@ -71,5 +72,5 @@ register_tortoise(
 )
 
 # Routine/background job only if it's in debug.
-if DEBUG:
-    setup_routine(app)
+# if DEBUG:
+#    setup_routine(app)
