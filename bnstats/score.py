@@ -2,7 +2,7 @@ import math
 from datetime import datetime, timedelta
 
 from bnstats.bnsite.enums import MapStatus
-from bnstats.models import BeatmapSet, User
+from bnstats.models import BeatmapSet, Nomination, User
 
 BASE_SCORE = 0.5
 BASE_REDUCTION = 0.25  # OBV/SEV reduction
@@ -11,31 +11,12 @@ MODES = {"osu": 0, "taiko": 1, "catch": 2, "mania": 3}
 
 
 def calculate_mapset(beatmap: BeatmapSet):
-    drain_times = [diff.hit_length for diff in beatmap.beatmaps]
-    drain_time = sum(drain_times)
+    multiplier = 0
+    for i, b in enumerate(beatmap.beatmaps):
+        multiplier += b.hit_length * math.pow(0.8, i)
+    multiplier /= 300
 
-    # Expect all maps to be above 300s (5:00) of total drain time
-    # This would be:
-    # 5:00 * 1 diff
-    # 1:30 * 4 diff
-    #
-    # If there are more diffs, we expect the map to have longer drain time
-    # so that it is more or less normalized.
-    mapset_base = 300 + (120 * beatmap.total_diffs / 4) * (
-        math.log(beatmap.total_diffs / 4) + 0.601
-    )
-
-    # Bigger mapset means extra checking for each difficulty
-    # And with that, we give bonus to bigger sets.
-    bonus_drain = 0
-    for diff in beatmap.beatmaps:
-        # Easier diffs tend to be much easier to check
-        # Of course, this is extremely naive especially with how slider is treated.
-        bonus_drain += diff.hit_length * diff.difficultyrating / 5.5
-    bonus_drain *= math.log(beatmap.total_diffs, 4)
-
-    final_score = (drain_time + bonus_drain) / mapset_base
-    return round(final_score / 2, 2)
+    return math.log(1 + multiplier, 2)
 
 
 async def calculate_user(user: User):
@@ -69,31 +50,70 @@ async def calculate_user(user: User):
             list(filter(lambda x: x.mode == nomination_mode, beatmap.beatmaps))
         )
 
-        mapper = beatmap.creator
+        mapper = beatmap.creator_id
         mapper_score = BASE_MAPPER
 
-        # For every found mapper, reduce the score by 75%.
-        # Basically, (1/4)^n.
-        for u in nominated_mappers:
-            if mapper == u:
-                mapper_score *= 0.25
-        nominated_mappers.append(mapper)
+        d = datetime.now() - timedelta(90)
+        current_nominator_count = (
+            await Nomination.filter(
+                creatorId=mapper,
+                timestamp__gte=d,
+                timestamp__lt=nom.timestamp,
+                userId=user.osuId,
+                beatmapsetId__not=nom.beatmapsetId,
+            )
+            .only("beatmapsetId")
+            .distinct()
+            .count()
+        )
+
+        if beatmap.status != MapStatus.Pending:
+            other_nominator = (
+                await Nomination.filter(
+                    beatmapsetId=nom.beatmapsetId, userId__not=user.osuId
+                )
+                .order_by("-timestamp")
+                .only("userId")
+                .first()
+            )
+        else:
+            other_nominator = None
+
+        if other_nominator:
+            other_nominator_count = (
+                await Nomination.filter(
+                    creatorId=mapper,
+                    timestamp__gte=d,
+                    timestamp__lt=nom.timestamp,
+                    userId=other_nominator.userId,
+                    beatmapsetId__not=nom.beatmapsetId,
+                )
+                .only("beatmapsetId")
+                .distinct()
+                .count()
+            )
+        else:
+            other_nominator_count = 0
+
+        if nom.beatmapsetId == 1208022:
+            print(current_nominator_count)
+            print(other_nominator_count)
+        mapper_score = (0.4 ** current_nominator_count) * (0.9 ** other_nominator_count)
 
         resets = await user.resets.filter(beatmapsetId=nom.beatmapsetId).all()
         penalty = 0
         for r in resets:
             total = r.obviousness + r.severity
             # If total is 0, then don't bother calculating.
-            if total:
-                penalty += (2 ** total) / 8
+            if total > 1:
+                penalty += 0.5 * math.pow(2, total - 2)
 
-        nom.ranked_score = (beatmap.status == MapStatus.Ranked) / 2
+        nom.ranked_score = math.pow((beatmap.status == MapStatus.Ranked) + 1, 2) / 4
         nom.mapper_score = mapper_score
         nom.mapset_score = calculate_mapset(beatmap)
         nom.penalty = penalty
 
-        nom.score = round(BASE_SCORE * nom.mapper_score * nom.mapset_score, 2)
-        nom.score += nom.ranked_score
+        nom.score = round(nom.mapper_score * nom.mapset_score * nom.ranked_score, 2)
         nom.score -= nom.penalty
 
         await nom.save()

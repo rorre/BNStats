@@ -176,7 +176,12 @@ class User(models.Model):
     async def get_score(self, days: int = 90) -> float:
         date = datetime.utcnow() - timedelta(days)
         activities = await self.get_nomination_activity(date)
-        return sum([a.score for a in activities])
+
+        total_score = 0
+        weight = 0.9
+        for i, a in enumerate(activities):
+            total_score += a.score * (weight ** i)
+        return total_score
 
     def total_nominations(self) -> Awaitable[int]:
         # As we only redirect the function, we can just use def instead async def.

@@ -19,7 +19,7 @@
                     <thead>
                         <tr>
                             <th>Beatmap</th>
-                            <th class="float">Ranked bonus</th>
+                            <th class="float">Rank%</th>
                             <th class="float">Mapper%</th>
                             <th class="float">MapsetSize%</th>
                             <th class="float">Penalty</th>
@@ -36,7 +36,7 @@
                             <td colspan="4">Can't tell which mode the nominator is trying to nominate, please tell
                                 Keitaro!.</td>
                             {% else %}
-                            <td>{{ '%0.2f' | format(s.ranked_score) }}</td>
+                            <td>{{ '%d' | format(s.ranked_score * 100) }}%</td>
                             <td>{{ '%d' | format(s.mapper_score * 100) }}%</td>
                             <td>{{ '%d' | format(s.mapset_score * 100) }}%</td>
                             <td>{{ '%0.2f' | format(s.penalty) }}</td>
