@@ -17,6 +17,7 @@ class Beatmap(models.Model):
     artist = fields.CharField(255)
     title = fields.CharField(255)
     creator = fields.CharField(255)
+    creator_id = fields.IntField(default=0)
     tags = fields.TextField()
     genre_id = fields.IntField()
     language_id = fields.IntField()
