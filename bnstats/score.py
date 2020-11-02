@@ -4,15 +4,15 @@ from datetime import datetime, timedelta
 from bnstats.bnsite.enums import MapStatus
 from bnstats.models import BeatmapSet, Nomination, User
 
-BASE_SCORE = 0.5
-BASE_REDUCTION = 0.25  # OBV/SEV reduction
-BASE_MAPPER = 1  # 100%
 MODES = {"osu": 0, "taiko": 1, "catch": 2, "mania": 3}
 
 
 def calculate_mapset(beatmap: BeatmapSet):
+    """Calculate a mapset value."""
+    length_sorted = sorted(beatmap.beatmaps, key=lambda x: x.hit_length, reverse=True)
+
     multiplier = 0
-    for i, b in enumerate(beatmap.beatmaps):
+    for i, b in enumerate(length_sorted):
         multiplier += b.hit_length * math.pow(0.8, i)
     multiplier /= 300
 
@@ -20,8 +20,7 @@ def calculate_mapset(beatmap: BeatmapSet):
 
 
 async def calculate_user(user: User):
-    nominated_mappers = []
-
+    """Calculate all of user score and save to database."""
     d = datetime.now() - timedelta(90)
     activity = await user.get_nomination_activity(d)
     for nom in activity:
@@ -51,8 +50,8 @@ async def calculate_user(user: User):
         )
 
         mapper = beatmap.creator_id
-        mapper_score = BASE_MAPPER
 
+        # Find if the nominator has nominated other maps from the same mapper
         d = datetime.now() - timedelta(90)
         current_nominator_count = (
             await Nomination.filter(
@@ -67,6 +66,7 @@ async def calculate_user(user: User):
             .count()
         )
 
+        # If a map is not in pending, then find 2nd BN as they're qualified/ranked.
         if beatmap.status != MapStatus.Pending:
             other_nominator = (
                 await Nomination.filter(
@@ -80,6 +80,7 @@ async def calculate_user(user: User):
             other_nominator = None
 
         if other_nominator:
+            # Find if 2nd nominator has nominated other maps from the same mapper
             other_nominator_count = (
                 await Nomination.filter(
                     creatorId=mapper,
@@ -95,19 +96,17 @@ async def calculate_user(user: User):
         else:
             other_nominator_count = 0
 
-        if nom.beatmapsetId == 1208022:
-            print(current_nominator_count)
-            print(other_nominator_count)
         mapper_score = (0.4 ** current_nominator_count) * (0.9 ** other_nominator_count)
-
         resets = await user.resets.filter(beatmapsetId=nom.beatmapsetId).all()
         penalty = 0
         for r in resets:
             total = r.obviousness + r.severity
-            # If total is 0, then don't bother calculating.
+            # If total is 0 or 1, then don't bother calculating.
             if total > 1:
                 penalty += 0.5 * math.pow(2, total - 2)
 
+        # Qualified/Pending: 25%
+        # Ranked: 100%
         nom.ranked_score = math.pow((beatmap.status == MapStatus.Ranked) + 1, 2) / 4
         nom.mapper_score = mapper_score
         nom.mapset_score = calculate_mapset(beatmap)
