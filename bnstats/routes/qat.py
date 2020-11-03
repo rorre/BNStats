@@ -5,8 +5,10 @@ from starlette.responses import JSONResponse
 from starlette.routing import Router
 from starlette.config import Config
 
+from bnstats.helper import generate_mongo_id
 from bnstats.models import User, Nomination, Reset
 from dateutil.parser import parse
+import traceback
 
 router = Router()
 
@@ -20,12 +22,13 @@ if DEFAULT_KEY == QAT_KEY and not DEBUG:
 
 
 async def nomination_update(event: Dict[str, Any]) -> JSONResponse:
+    event["timestamp"] = parse(event["timestamp"], ignoretz=True)
+    event["user"] = await User.get_or_none(osuId=event["userId"])
     db_event = await Nomination.get_or_none(
         beatmapsetId=event["beatmapsetId"],
         userId=event["userId"],
+        timestamp=event["timestamp"],
     )
-    event["timestamp"] = parse(event["timestamp"], ignoretz=True)
-    event["user"] = await User.get_or_none(osuId=event["userId"])
 
     if not db_event:
         db_event = await Nomination.create(**event)
@@ -36,8 +39,19 @@ async def nomination_update(event: Dict[str, Any]) -> JSONResponse:
 
 async def reset_update(event: Dict[str, Any]) -> JSONResponse:
     event["timestamp"] = parse(event["timestamp"], ignoretz=True)
-    db_event = await Reset.get_or_none(id=event["id"])
+    db_event = await Reset.get_or_none(
+        beatmapsetId=event["beatmapsetId"],
+        userId=event["userId"],
+        timestamp=event["timestamp"],
+    )
+
+    if "obviousness" in event and not event["obviousness"]:
+        event["obviousness"] = 0
+    if "severity" in event and not event["severity"]:
+        event["severity"] = 0
+
     if not db_event:
+        event["id"] = generate_mongo_id()
         db_event = await Reset.create(**event)
     else:
         db_event.update_from_dict(event)
@@ -69,7 +83,8 @@ async def new_entry(request: Request):
         func: Callable[[Dict[str, Any]], Awaitable] = classes[data_type]
         try:
             await func(event)
-        except:
+        except BaseException as e:
+            traceback.print_exc()
             return JSONResponse(
                 {"status": 500, "message": "An exception occured."}, 500
             )
