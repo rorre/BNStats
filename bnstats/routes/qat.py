@@ -53,45 +53,9 @@ async def reset_update(req_data: Dict[str, Any]):
     return JSONResponse({"status": 200, "message": "OK"})
 
 
-async def beatmap_update(req_data: Dict[str, Any]):
-    for bmap in req_data["beatmaps"]:
-        db_diff = await Beatmap.filter(beatmap_id=bmap["beatmap_id"]).get_or_none()
-
-        if not db_diff:
-            db_diff = await Beatmap.create(**bmap)
-        else:
-            db_diff.update_from_dict(bmap)
-            await db_diff.save()
-
-    return JSONResponse({"status": 200, "message": "OK"})
-
-
-async def user_update(req_data: Dict[str, Any]):
-    db_uids = await User.all().values_list("osuId", flat=True)
-    current_uids = [u["osuId"] for u in req_data["users"]]
-
-    # Remove all kicked users
-    deleted_users = filter(lambda x: x not in current_uids, db_uids)
-    for u in deleted_users:
-        await (await User.get(osuId=u)).delete()
-
-    for u in req_data["users"]:
-        u["last_updated"] = datetime.utcnow()
-        user = await User.get_or_none(osuId=u["osuId"])
-        if user:
-            user.update_from_dict(u)
-            await user.save()
-        else:
-            user = await User.create(**u)
-
-    return JSONResponse({"status": 200, "message": "OK"})
-
-
 classes = {
     "nominate": nomination_update,
     "reset": reset_update,
-    "beatmap": user_update,
-    "user": beatmap_update,
 }
 
 
@@ -101,13 +65,13 @@ async def new_entry(request: Request):
         "Authorization" not in request.headers
         or request.headers["Authorization"] != QAT_KEY
     ):
-        return JSONResponse({"status": 500, "message": "Unauthorized."}, 401)
+        return JSONResponse({"status": 401, "message": "Unauthorized."}, 401)
 
     req_data: Dict[str, Any] = await request.json()
 
     data_type: str = req_data["type"]
     if data_type not in classes.keys():
-        return JSONResponse({"status": 500, "message": "Invalid type."}, 400)
+        return JSONResponse({"status": 400, "message": "Invalid type."}, 400)
 
     func: Model = classes[data_type]
 
