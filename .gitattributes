@@ -1,4 +1,6 @@
-*.html linguist-vendored
-*.json linguist-vendored
-*.css linguist-vendored
-*.js linguist-vendored
+tests/data/* linguist-vendored
+static/components/* linguist-vendored
+static/js/vendor/* linguist-vendored
+static/themes/* linguist-vendored
+static/css/semantic.css linguist-vendored
+static/css/chart.css linguist-vendored
