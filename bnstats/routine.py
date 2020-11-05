@@ -142,6 +142,19 @@ async def update_nomination_db(user: User, days: int = 90):
             )
             db_event = await Reset.create(**event)
 
+        await db_event.fetch_related("user_affected")
+        map_nominations = await Nomination.filter(
+            beatmapsetId=event["beatmapsetId"]
+        ).order_by("-timestamp")
+        limit = 1 + (event["type"] == "disqualify")
+        
+        for nom in map_nominations[:limit]:
+            user = await nom.user
+            if user not in db_event.user_affected:
+                await db_event.user_affected.add(user)
+
+        await db_event.save()
+
     return events
 
 

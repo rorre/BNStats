@@ -112,6 +112,8 @@ async def calculate_user(user: User):
             other_nominator_count = 0
 
         mapper_score = (0.4 ** current_nominator_count) * (0.9 ** other_nominator_count)
+        logger.debug(f"Mapper%: {mapper_score}")
+
         resets = await user.resets.filter(beatmapsetId=nom.beatmapsetId).all()
         penalty = 0
         for r in resets:
