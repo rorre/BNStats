@@ -1,9 +1,11 @@
+import logging
 import math
 from datetime import datetime, timedelta
 
 from bnstats.bnsite.enums import MapStatus
 from bnstats.models import BeatmapSet, User
 
+logger = logging.getLogger("bnstats.score")
 BASE_SCORE = 0.5
 BASE_REDUCTION = 0.25  # OBV/SEV reduction
 BASE_MAPPER = 1  # 100%
@@ -11,6 +13,9 @@ MODES = {"osu": 0, "taiko": 1, "catch": 2, "mania": 3}
 
 
 def calculate_mapset(beatmap: BeatmapSet):
+    logger.info(
+        f"Calculating score for beatmap: ({beatmap.beatmapset_id}) {beatmap.artist} - {beatmap.title} [{beatmap.creator}]"
+    )
     drain_times = [diff.hit_length for diff in beatmap.beatmaps]
     drain_time = sum(drain_times)
 
@@ -24,6 +29,7 @@ def calculate_mapset(beatmap: BeatmapSet):
     mapset_base = 300 + (120 * beatmap.total_diffs / 4) * (
         math.log(beatmap.total_diffs / 4) + 0.601
     )
+    logger.debug(f"Mapset base: {mapset_base}")
 
     # Bigger mapset means extra checking for each difficulty
     # And with that, we give bonus to bigger sets.
@@ -33,19 +39,27 @@ def calculate_mapset(beatmap: BeatmapSet):
         # Of course, this is extremely naive especially with how slider is treated.
         bonus_drain += diff.hit_length * diff.difficultyrating / 5.5
     bonus_drain *= math.log(beatmap.total_diffs, 4)
+    logger.debug(f"Bonus drain: {bonus_drain}")
 
-    final_score = (drain_time + bonus_drain) / mapset_base
-    return round(final_score / 2, 2)
+    final_score = round((drain_time + bonus_drain) / mapset_base / 2, 2)
+    logger.debug(f"Final score: {final_score}")
+    return final_score
 
 
 async def calculate_user(user: User):
+    logger.info(f"Calculating user: {user.username}")
     nominated_mappers = []
 
+    logger.info("Fetching activity for last 90 days.")
     d = datetime.now() - timedelta(90)
     activity = await user.get_nomination_activity(d)
     for nom in activity:
+        logger.info(
+            f"Calculating nomination score for beatmap: ({nom.beatmapsetId}) {nom.artistTitle} [{nom.creatorName})]"
+        )
         beatmap = await nom.get_map()
         if not beatmap.beatmaps:
+            logger.warn("Beatmap no longer exists in osu!. Skipping.")
             # Skip beatmaps that doesn't exist anymore.
             continue
 
@@ -58,12 +72,16 @@ async def calculate_user(user: User):
             for mode in user_modes:
                 if mode in map_modes:
                     if nomination_mode:
+                        logger.warn(
+                            f"Cannot determine nominated mode for user {user.username}. Skipping"
+                        )
                         # Hybrid map with hybrid BN, can't tell which mode is it.
                         nom.ambiguous_mode = True
                         await nom.save()
                         return
                     else:
                         nomination_mode = mode
+        logger.debug(f"Mode for nomination: {nomination_mode}")
 
         beatmap = BeatmapSet(
             list(filter(lambda x: x.mode == nomination_mode, beatmap.beatmaps))
@@ -78,6 +96,7 @@ async def calculate_user(user: User):
             if mapper == u:
                 mapper_score *= 0.25
         nominated_mappers.append(mapper)
+        logger.debug(f"Mapper value: {mapper_score}%")
 
         resets = await user.resets.filter(beatmapsetId=nom.beatmapsetId).all()
         penalty = 0
@@ -86,6 +105,7 @@ async def calculate_user(user: User):
             # If total is 0, then don't bother calculating.
             if total:
                 penalty += (2 ** total) / 8
+        logger.debug(f"Penalty: {penalty}")
 
         nom.ranked_score = (beatmap.status == MapStatus.Ranked) / 2
         nom.mapper_score = mapper_score
@@ -95,5 +115,7 @@ async def calculate_user(user: User):
         nom.score = round(BASE_SCORE * nom.mapper_score * nom.mapset_score, 2)
         nom.score += nom.ranked_score
         nom.score -= nom.penalty
+        logger.debug(f"Final score: {nom.score}")
 
+        logger.info("Saving nomination data.")
         await nom.save()

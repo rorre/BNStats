@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 from typing import Any, Awaitable, List
 
@@ -5,6 +6,8 @@ from tortoise import fields, models
 
 from bnstats.bnsite.enums import Difficulty, Genre, Language, MapStatus, Mode
 from bnstats.helper import format_time
+
+logger = logging.getLogger("bnstats.models")
 
 
 class Beatmap(models.Model):
@@ -161,10 +164,12 @@ class User(models.Model):
 
     async def get_nomination_activity(self, date: datetime = None) -> List[Nomination]:
         if not date:
+            logger.info("Fetching all events.")
             events = (
                 await Nomination.filter(userId=self.osuId).all().order_by("timestamp")
             )
         else:
+            logging.info("Fetching events up until timestamp: " + str(date))
             events = (
                 await Nomination.filter(userId=self.osuId, timestamp__gte=date)
                 .all()
@@ -173,6 +178,7 @@ class User(models.Model):
         return events
 
     async def get_score(self, days: int = 90) -> float:
+        logger.info(f"Fetching score for the last {days} days.")
         date = datetime.utcnow() - timedelta(days)
         activities = await self.get_nomination_activity(date)
         return sum([a.score for a in activities])
