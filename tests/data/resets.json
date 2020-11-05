@@ -1,0 +1,42 @@
+[
+    {
+        "id": "5f9ba8200f15a3cbce42282a",
+        "type": "disqualify",
+        "timestamp": "2020-10-30T05:39:31.000Z",
+        "beatmapsetId": 1199834,
+        "creatorId": 2688103,
+        "creatorName": "IOException",
+        "modes": [
+            "osu"
+        ],
+        "discussionId": 1951923,
+        "userId": 11771,
+        "artistTitle": "Vickeblanka - Black Rover (TV Size)",
+        "content": "DQing to fix pending issues",
+        "__v": 1,
+        "createdAt": "2020-11-03T20:26:29.921Z",
+        "isBnOrNat": false,
+        "isUnique": false,
+        "obviousness": 1,
+        "qualityAssuranceCheckers": [],
+        "qualityAssuranceComments": [],
+        "responsibleNominators": [],
+        "updatedAt": "2020-11-03T20:26:30.710Z",
+        "severity": 1
+    },
+    {
+        "id": "5f85df82288d6bb80811280f",
+        "type": "disqualify",
+        "timestamp": "2020-10-13T17:04:30.000Z",
+        "beatmapsetId": 1159170,
+        "creatorId": 12042090,
+        "creatorName": "Morrighan",
+        "modes": [
+            "osu"
+        ],
+        "discussionId": 1920957,
+        "userId": 11771,
+        "artistTitle": "Nashimoto Ui - AaAaAaAAaAaAAa (Cut Ver.)",
+        "content": "https://osu.ppy.sh/beatmapsets/1159170/discussion/2527503/timeline#/1920934 Disqualifying to add missing hitsounds + add the BG artist to tags."
+    }
+]

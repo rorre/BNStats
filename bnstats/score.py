@@ -1,14 +1,19 @@
+import logging
 import math
 from datetime import datetime, timedelta
 
 from bnstats.bnsite.enums import MapStatus
 from bnstats.models import BeatmapSet, Nomination, User
 
+logger = logging.getLogger("bnstats.score")
 MODES = {"osu": 0, "taiko": 1, "catch": 2, "mania": 3}
 
 
 def calculate_mapset(beatmap: BeatmapSet):
     """Calculate a mapset value."""
+    logger.info(
+        f"Calculating score for beatmap: ({beatmap.beatmapset_id}) {beatmap.artist} - {beatmap.title} [{beatmap.creator}]"
+    )
     length_sorted = sorted(beatmap.beatmaps, key=lambda x: x.hit_length, reverse=True)
 
     multiplier = 0
@@ -21,11 +26,17 @@ def calculate_mapset(beatmap: BeatmapSet):
 
 async def calculate_user(user: User):
     """Calculate all of user score and save to database."""
+    logger.info(f"Calculating user: {user.username}")
+    logger.info("Fetching activity for last 90 days.")
     d = datetime.now() - timedelta(90)
     activity = await user.get_nomination_activity(d)
     for nom in activity:
+        logger.info(
+            f"Calculating nomination score for beatmap: ({nom.beatmapsetId}) {nom.artistTitle} [{nom.creatorName})]"
+        )
         beatmap = await nom.get_map()
         if not beatmap.beatmaps:
+            logger.warn("Beatmap no longer exists in osu!. Skipping.")
             # Skip beatmaps that doesn't exist anymore.
             continue
 
@@ -38,12 +49,16 @@ async def calculate_user(user: User):
             for mode in user_modes:
                 if mode in map_modes:
                     if nomination_mode:
+                        logger.warn(
+                            f"Cannot determine nominated mode for user {user.username}. Skipping"
+                        )
                         # Hybrid map with hybrid BN, can't tell which mode is it.
                         nom.ambiguous_mode = True
                         await nom.save()
                         return
                     else:
                         nomination_mode = mode
+        logger.debug(f"Mode for nomination: {nomination_mode}")
 
         beatmap = BeatmapSet(
             list(filter(lambda x: x.mode == nomination_mode, beatmap.beatmaps))
@@ -104,6 +119,7 @@ async def calculate_user(user: User):
             # If total is 0 or 1, then don't bother calculating.
             if total > 1:
                 penalty += 0.5 * math.pow(2, total - 2)
+        logger.debug(f"Penalty: {penalty}")
 
         # Qualified/Pending: 25%
         # Ranked: 100%
@@ -114,5 +130,7 @@ async def calculate_user(user: User):
 
         nom.score = round(nom.mapper_score * nom.mapset_score * nom.ranked_score, 2)
         nom.score -= nom.penalty
+        logger.debug(f"Final score: {nom.score}")
 
+        logger.info("Saving nomination data.")
         await nom.save()

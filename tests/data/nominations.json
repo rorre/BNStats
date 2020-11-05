@@ -1,0 +1,54 @@
+[
+    {
+        "_id": "5dd8df740698e0a71721b5c4",
+        "beatmapsetId": 1052074,
+        "userId": 1,
+        "forumPostId": 0,
+        "modes": [
+            "osu"
+        ],
+        "content": "",
+        "artistTitle": "RURUTIA - Phronesis",
+        "discussionId": 0,
+        "type": "nominate",
+        "timestamp": "2019-11-23T07:25:21.000Z"
+    },
+    {
+        "_id": "5f2f06fe07a55126b055eb0a",
+        "type": "nominate",
+        "timestamp": "2020-08-08T08:10:32.000Z",
+        "beatmapsetId": 1193634,
+        "creatorId": 3533958,
+        "creatorName": "fieryrage",
+        "modes": [
+            "osu"
+        ],
+        "discussionId": null,
+        "userId": 1,
+        "artistTitle": "Suzuki Konomi - Redo (TV Size)",
+        "content": null,
+        "__v": 1,
+        "createdAt": "2020-08-08T21:13:43.702Z",
+        "isBnOrNat": false,
+        "isUnique": false,
+        "qualityAssuranceCheckers": [],
+        "qualityAssuranceComments": [],
+        "responsibleNominators": [],
+        "updatedAt": "2020-08-08T21:14:42.845Z"
+    },
+    {
+        "_id": "5f6868275c10f03cd94528b6",
+        "type": "nominate",
+        "timestamp": "2020-09-21T08:42:04.000Z",
+        "beatmapsetId": 1208022,
+        "creatorId": 2688103,
+        "creatorName": "IOException",
+        "modes": [
+            "osu"
+        ],
+        "discussionId": null,
+        "userId": 1,
+        "artistTitle": "yuikonnu - Souzou Forest",
+        "content": null
+    }
+]

@@ -1,0 +1,16 @@
+{
+    "_id": "5c95da032478ddd59453bb90",
+    "osuId": 1,
+    "username": "SampleUser",
+    "modesInfo": [
+        {
+            "mode": "osu",
+            "level": "full"
+        }
+    ],
+    "isNat": true,
+    "isBn": false,
+    "modes": [
+        "osu"
+    ]
+}

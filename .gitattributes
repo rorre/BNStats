@@ -1,0 +1,6 @@
+tests/data/* linguist-vendored
+bnstats/static/components/* linguist-vendored
+bnstats/static/js/vendor/* linguist-vendored
+bnstats/static/themes/* linguist-vendored
+bnstats/static/css/semantic.css linguist-vendored
+bnstats/static/css/chart.css linguist-vendored
