@@ -111,7 +111,11 @@ async def update_nomination_db(user: User, days: int = 90):
         if "severity" in event and not event["severity"]:
             event["severity"] = 0
 
-        db_event = await Reset.get_or_none(id=event["id"])
+        db_event = await Reset.get_or_none(
+            beatmapsetId=event["beatmapsetId"],
+            userId=event["userId"],
+            timestamp=event["timestamp"],
+        )
         if not db_event:
             logger.info(
                 f"Creating reset event: {event['userId']} for mapset {event['beatmapsetId']}"
@@ -127,7 +131,11 @@ async def update_nomination_db(user: User, days: int = 90):
         event["id"] = event["_id"]
         event["timestamp"] = parse(event["timestamp"], ignoretz=True)
 
-        db_event = await Reset.get_or_none(id=event["id"])
+        db_event = await Reset.get_or_none(
+            beatmapsetId=event["beatmapsetId"],
+            userId=event["userId"],
+            timestamp=event["timestamp"],
+        )
         if not db_event:
             logger.info(
                 f"Creating reset event: {event['userId']} for mapset {event['beatmapsetId']}"
