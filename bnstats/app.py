@@ -14,7 +14,6 @@ from tortoise.contrib.starlette import register_tortoise
 from bnstats.bnsite import request
 from bnstats.middlewares.maintenance import MaintenanceMiddleware
 from bnstats.routes import home, score, users
-from bnstats.routine import setup_routine
 
 logger = logging.getLogger("bnstats")
 
@@ -77,7 +76,3 @@ register_tortoise(
     tortoise_config,
     generate_schemas=True,
 )
-
-# Routine/background job only if it's in debug.
-if DEBUG:
-    setup_routine(app)

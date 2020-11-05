@@ -1,20 +1,16 @@
-import asyncio
 import json
 import logging
-import sys
 import time
-import traceback
 from collections import Counter
 from datetime import datetime
 from typing import Any, Dict, List
 from urllib.parse import urlencode
 
 from dateutil.parser import parse
-from starlette.applications import Starlette
 
 from bnstats.bnsite import request
 from bnstats.bnsite.enums import MapStatus
-from bnstats.bnsite.request import get, s
+from bnstats.bnsite.request import get
 from bnstats.models import Beatmap, BeatmapSet, Nomination, Reset, User
 
 logger = logging.getLogger("bnstats.routine")
@@ -247,46 +243,3 @@ async def update_user_details(user: User, maps: List[BeatmapSet]):
     }
     user.update_from_dict(updates)
     await user.save()
-
-
-task = None
-
-
-def setup_routine(app: Starlette):
-    @app.on_event("startup")
-    async def startup():
-        global task
-
-        async def routine():
-            while True:
-                try:
-                    users = await update_users_db()
-                    app.state.last_update = datetime.utcnow()
-
-                    for u in users:
-                        events = await update_nomination_db(u)
-                        for e in events:
-                            await update_maps_db(e)
-
-                        all_noms = await u.get_nomination_activity()
-                        user_maps = [await n.get_map() for n in all_noms]
-                        if user_maps:
-                            await update_user_details(u, user_maps)
-                except BaseException as error:
-                    if type(error) is asyncio.CancelledError:
-                        break
-
-                    traceback.print_exception(
-                        type(error), error, error.__traceback__, file=sys.stderr
-                    )
-                await asyncio.sleep(60 * 60)
-
-        loop = asyncio.get_event_loop()
-        task = loop.create_task(routine())
-
-    @app.on_event("shutdown")
-    async def shutdown():
-        global task
-        task.cancel()
-        asyncio.gather(task)
-        await s.aclose()
