@@ -22,7 +22,7 @@ if DEFAULT_KEY == QAT_KEY and not DEBUG:
     raise ValueError("Cannot use default key in non-debug mode.")
 
 
-async def nomination_update(event: Dict[str, Any]) -> JSONResponse:
+async def nomination_update(event: Dict[str, Any]):
     event["timestamp"] = parse(event["timestamp"], ignoretz=True)
     event["user"] = await User.get_or_none(osuId=event["userId"])
     db_event = await Nomination.get_or_none(
@@ -36,7 +36,9 @@ async def nomination_update(event: Dict[str, Any]) -> JSONResponse:
     await update_maps_db(db_event)
 
 
-async def reset_update(event: Dict[str, Any]) -> JSONResponse:
+async def reset_update(event: Dict[str, Any]):
+    if event["userId"] == 3:
+        return
     event["timestamp"] = parse(event["timestamp"], ignoretz=True)
     db_event = await Reset.get_or_none(
         beatmapsetId=event["beatmapsetId"],
@@ -59,7 +61,7 @@ async def reset_update(event: Dict[str, Any]) -> JSONResponse:
     map_nominations = await Nomination.filter(
         beatmapsetId=event["beatmapsetId"]
     ).order_by("-timestamp")
-    limit = 1 + (event["type"] == "disqualify")
+    limit = 1 + (db_event.type == "disqualify")
 
     for nom in map_nominations[:limit]:
         user = await nom.user

@@ -146,8 +146,8 @@ async def update_nomination_db(user: User, days: int = 90):
         map_nominations = await Nomination.filter(
             beatmapsetId=event["beatmapsetId"]
         ).order_by("-timestamp")
-        limit = 1 + (event["type"] == "disqualify")
-        
+        limit = 1 + (db_event.type == "disqualify")
+
         for nom in map_nominations[:limit]:
             user = await nom.user
             if user not in db_event.user_affected:
