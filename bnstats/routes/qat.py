@@ -27,14 +27,10 @@ async def nomination_update(event: Dict[str, Any]) -> JSONResponse:
     db_event = await Nomination.get_or_none(
         beatmapsetId=event["beatmapsetId"],
         userId=event["userId"],
-        timestamp=event["timestamp"],
     )
 
     if not db_event:
         db_event = await Nomination.create(**event)
-    else:
-        db_event.update_from_dict(event)
-        await db_event.save()
 
 
 async def reset_update(event: Dict[str, Any]) -> JSONResponse:
