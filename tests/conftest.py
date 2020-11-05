@@ -9,7 +9,9 @@ from starlette.testclient import TestClient
 from tortoise.contrib.test import finalizer, initializer
 
 from bnstats import app
-from bnstats.models import Beatmap, Nomination, Reset, User
+from bnstats.models import Beatmap, BeatmapSet, Nomination, Reset, User
+from bnstats.score import calculate_user
+from bnstats.routine import update_user_details
 
 logger = logging.getLogger("bnstats")
 logger.setLevel(logging.INFO)
@@ -54,14 +56,14 @@ async def setup_db():
         u = await User.create(**json.load(f))
 
     with open("tests/data/nominations.json") as f:
-        objs = []
+        nom_objs = []
         noms = json.load(f)
         for nom in noms:
             nom["user"] = u
             nom["timestamp"] = parse(nom["timestamp"], ignoretz=True)
-            objs.append(Nomination(**nom))
+            nom_objs.append(Nomination(**nom))
 
-        await Nomination.bulk_create(objs)
+        await Nomination.bulk_create(nom_objs)
 
     with open("tests/data/resets.json") as f:
         resets = json.load(f)
@@ -77,3 +79,9 @@ async def setup_db():
             objs.append(Beatmap(**bmap))
 
         await Beatmap.bulk_create(objs)
+
+    objs = []
+    for n in nom_objs:
+        objs.append(await n.get_map())
+    await update_user_details(u, objs)
+    await calculate_user(u)
