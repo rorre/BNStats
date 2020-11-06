@@ -11,7 +11,7 @@ from tortoise.contrib.starlette import register_tortoise
 
 from bnstats.bnsite import request
 from bnstats.middlewares.maintenance import MaintenanceMiddleware
-from bnstats.routes import home, score, users, qat
+from bnstats.routes import home, qat, score, users
 from bnstats.score import CalculatorABC, get_system
 
 logger = logging.getLogger("bnstats")

@@ -1,15 +1,15 @@
+import traceback
 from typing import Any, Awaitable, Callable, Dict, List
 
+from dateutil.parser import parse
+from starlette.config import Config
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.routing import Router
-from starlette.config import Config
 
 from bnstats.helper import generate_mongo_id
-from bnstats.models import User, Nomination, Reset
+from bnstats.models import Nomination, Reset, User
 from bnstats.routine import update_maps_db
-from dateutil.parser import parse
-import traceback
 
 router = Router()
 

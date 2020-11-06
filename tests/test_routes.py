@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 from starlette.testclient import TestClient
+
 from bnstats.score import NaxessCalculator
 
 

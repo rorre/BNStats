@@ -10,8 +10,8 @@ from tortoise.contrib.test import finalizer, initializer
 
 from bnstats import app
 from bnstats.models import Beatmap, Nomination, Reset, User
-from bnstats.score import NaxessCalculator
 from bnstats.routine import update_user_details
+from bnstats.score import NaxessCalculator
 
 logger = logging.getLogger("bnstats")
 logger.setLevel(logging.DEBUG)

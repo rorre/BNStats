@@ -1,8 +1,8 @@
-from abc import ABC, abstractmethod
 import logging
 import math
+from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
-from typing import Dict, Type, List
+from typing import Dict, List, Type
 
 from bnstats.bnsite.enums import MapStatus
 from bnstats.models import BeatmapSet, Nomination, User

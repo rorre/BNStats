@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Any, Awaitable, List, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Awaitable, List
 
 from tortoise import fields, models
 

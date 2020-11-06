@@ -1,6 +1,6 @@
-import time
 import binascii
 import os
+import time
 
 
 def format_time(total: int) -> str:
