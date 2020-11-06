@@ -61,9 +61,6 @@ class NaxessCalculator(CalculatorABC):
 
     def calculate_mapset(self, beatmap: BeatmapSet):
         """Calculate a mapset value."""
-        logger.info(
-            f"Calculating score for beatmap: ({beatmap.beatmapset_id}) {beatmap.artist} - {beatmap.title} [{beatmap.creator}]"
-        )
         length_sorted = sorted(
             beatmap.beatmaps, key=lambda x: x.hit_length, reverse=True
         )
