@@ -1,0 +1,33 @@
+[
+    {
+        "type": "disqualify",
+        "timestamp": "2020-11-02T08:29:40.000Z",
+        "beatmapsetId": 1223737,
+        "creatorId": 12190421,
+        "creatorName": "Setu",
+        "discussionId": 1958308,
+        "userId": 1,
+        "artistTitle": "Aitsuki Nakuru - Melt 10th ANNIVERSARY MIX",
+        "content": "disqualified for timing as it's in last days + people agrees, see https://osu.ppy.sh/beatmapsets/1223737/discussion/-/generalAll#/1945835",
+        "obviousness": null,
+        "severity": null
+    },
+    {
+        "type": "nominate",
+        "timestamp": "2020-08-08T08:10:32.000Z",
+        "beatmapsetId": 1193634,
+        "creatorId": 3533958,
+        "creatorName": "fieryrage",
+        "userId": 1,
+        "artistTitle": "Suzuki Konomi - Redo (TV Size)"
+    },
+    {
+        "type": "nominate",
+        "timestamp": "2020-11-04T07:29:05.000Z",
+        "beatmapsetId": 1209473,
+        "creatorId": 6300910,
+        "creatorName": "Addy2607",
+        "userId": 1,
+        "artistTitle": "MONKEY MAJIK - Eden (TV Size)"
+    }
+]

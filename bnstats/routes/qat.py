@@ -9,7 +9,7 @@ from starlette.routing import Router
 
 from bnstats.helper import generate_mongo_id
 from bnstats.models import Nomination, Reset, User
-from bnstats.routine import update_maps_db
+from bnstats.routine import update_maps_db, update_users_db
 
 router = Router()
 
@@ -25,6 +25,15 @@ if DEFAULT_KEY == QAT_KEY and not DEBUG:
 async def nomination_update(event: Dict[str, Any]):
     event["timestamp"] = parse(event["timestamp"], ignoretz=True)
     event["user"] = await User.get_or_none(osuId=event["userId"])
+
+    if not event["user"]:
+        await update_users_db()
+        event["user"] = await User.get_or_none(osuId=event["userId"])
+        if not event["user"]:
+            raise ValueError(
+                "Cannot find user in database, maybe pishi site is falling behind?"
+            )
+
     db_event = await Nomination.get_or_none(
         beatmapsetId=event["beatmapsetId"],
         userId=event["userId"],
@@ -88,6 +97,7 @@ async def new_entry(request: Request):
 
     req_data: List[Dict[str, Any]] = await request.json()
 
+    exceptions = []
     for event in req_data:
         data_type: str = event["type"]
         if data_type not in classes.keys():
@@ -98,7 +108,10 @@ async def new_entry(request: Request):
             await func(event)
         except BaseException as e:
             traceback.print_exc()
-            return JSONResponse(
-                {"status": 500, "message": f"An exception occured: {e}"}, 500
-            )
+            exceptions.append(e)
+
+    if exceptions:
+        return JSONResponse(
+            {"status": 500, "messages": [str(e) for e in exceptions]}, 500
+        )
     return JSONResponse({"status": 200, "message": "OK"})
