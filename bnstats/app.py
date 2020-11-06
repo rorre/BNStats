@@ -1,6 +1,4 @@
 import logging
-from datetime import datetime
-from typing import Optional
 
 from starlette.applications import Starlette
 from starlette.config import Config
@@ -14,6 +12,7 @@ from tortoise.contrib.starlette import register_tortoise
 from bnstats.bnsite import request
 from bnstats.middlewares.maintenance import MaintenanceMiddleware
 from bnstats.routes import home, score, users, qat
+from bnstats.score import CalculatorABC, get_system
 
 logger = logging.getLogger("bnstats")
 
@@ -25,6 +24,7 @@ SECRET: str = config("SECRET")
 DB_URL: str = config("DB_URL")
 SITE_SESSION: str = config("BNSITE_SESSION")
 API_KEY: str = config("API_KEY")
+CALC_SYSTEM = get_system(config("CALC_SYSTEM"))()
 
 # Setup session for HTTPX
 logger.info("Configuring HTTPX.")
@@ -59,7 +59,7 @@ middlewares = [
 
 # Application setup
 app: Starlette = Starlette(debug=DEBUG, routes=routes, middleware=middlewares)
-app.state.last_update: Optional[datetime] = None  # type: ignore
+app.state.calc_system: CalculatorABC = CALC_SYSTEM  # type: ignore
 
 # Database setup
 logger.info("Setting up database.")

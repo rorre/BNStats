@@ -1,3 +1,4 @@
+import logging
 from tortoise import Tortoise, run_async
 from typing import List
 from starlette.config import Config
@@ -8,7 +9,7 @@ from bnstats.routine import (
     update_maps_db,
     update_user_details,
 )
-from bnstats.score import calculate_user
+from bnstats.score import get_system
 from bnstats.bnsite import request
 from bnstats.models import User
 
@@ -16,6 +17,24 @@ config = Config(".env")
 DB_URL = config("DB_URL")
 SITE_SESSION = config("BNSITE_SESSION")
 API_KEY = config("API_KEY")
+CALC_SYSTEM = get_system(config("CALC_SYSTEM"))()
+print(f"> Using calculator: {CALC_SYSTEM.name}")
+
+logger = logging.getLogger("bnstats")
+logger.setLevel(logging.DEBUG)
+
+# create console handler and set level to debug
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+
+# create formatter
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+
+# add formatter to ch
+ch.setFormatter(formatter)
+
+# add ch to logger
+logger.addHandler(ch)
 
 
 async def run_calculate():
@@ -26,7 +45,7 @@ async def run_calculate():
     c = len(users)
     for i, u in enumerate(users):
         print(f">>> Calculating score for user: {u.username} ({i+1}/{c})")
-        await calculate_user(u)
+        await CALC_SYSTEM.calculate_user(u)
 
 
 async def run(days):
@@ -59,7 +78,7 @@ async def run(days):
             await update_user_details(u, user_maps)
 
         print(f">>> Calculating score for user: {u.username}")
-        await calculate_user(u)
+        await CALC_SYSTEM.calculate_user(u)
 
     await request.s.aclose()
 

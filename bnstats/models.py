@@ -1,11 +1,14 @@
 import logging
-from datetime import datetime, timedelta
-from typing import Any, Awaitable, List
+from datetime import datetime
+from typing import Any, Awaitable, List, TYPE_CHECKING
 
 from tortoise import fields, models
 
 from bnstats.bnsite.enums import Difficulty, Genre, Language, MapStatus, Mode
 from bnstats.helper import format_time
+
+if TYPE_CHECKING:
+    from bnstats.score import CalculatorABC
 
 logger = logging.getLogger("bnstats.models")
 
@@ -178,16 +181,8 @@ class User(models.Model):
             )
         return events
 
-    async def get_score(self, days: int = 90) -> float:
-        logger.info(f"Fetching score for the last {days} days.")
-        date = datetime.utcnow() - timedelta(days)
-        activities = await self.get_nomination_activity(date)
-
-        total_score = 0
-        weight = 0.9
-        for i, a in enumerate(activities):
-            total_score += a.score * (weight ** i)
-        return total_score
+    def get_score(self, system: "CalculatorABC", days: int = 90) -> float:
+        return system.get_user_score(self, days)
 
     def total_nominations(self) -> Awaitable[int]:
         # As we only redirect the function, we can just use def instead async def.
