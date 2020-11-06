@@ -40,7 +40,18 @@
                             <td>{{ '%d' | format(s.mapper_score * 100) }}%</td>
                             <td>{{ '%d' | format(s.mapset_score * 100) }}%</td>
                             <td>{{ '%0.2f' | format(s.penalty) }}</td>
+
+                            {% set calc_system = request.app.state.calc_system %}
+                            {% if calc_system.has_weight %}
+                            <td>
+                                {{ '%0.2f' | format(s.score * (calc_system.weight ** loop.index0)) }}
+                                <span class="ui small text" data-tooltip="Unweightened score">
+                                    ({{ '%0.2f' | format(s.score) }})
+                                </span>
+                            </td>
+                            {% else %}
                             <td>{{ '%0.2f' | format(s.score) }}</td>
+                            {% endif %}
                             {% endif %}
                         </tr>
                         {% endfor %}

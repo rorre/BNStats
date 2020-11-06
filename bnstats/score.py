@@ -13,6 +13,7 @@ MODES = {"osu": 0, "taiko": 1, "catch": 2, "mania": 3}
 
 class CalculatorABC(ABC):
     name = "abstract"
+    has_weight = False
 
     @abstractmethod
     def get_activity_score(self, nominations: List[Nomination]) -> float:
@@ -49,12 +50,13 @@ class CalculatorABC(ABC):
 
 class NaxessCalculator(CalculatorABC):
     name = "naxess"
+    has_weight = True
+    weight = 0.9
 
     def get_activity_score(self, nominations: List[Nomination]) -> float:
         total_score = 0
-        weight = 0.9
         for i, a in enumerate(nominations):
-            total_score += a.score * (weight ** i)
+            total_score += a.score * (self.weight ** i)
         return total_score
 
     def calculate_mapset(self, beatmap: BeatmapSet):
