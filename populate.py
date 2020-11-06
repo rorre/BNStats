@@ -23,19 +23,6 @@ print(f"> Using calculator: {CALC_SYSTEM.name}")
 logger = logging.getLogger("bnstats")
 logger.setLevel(logging.DEBUG)
 
-# create console handler and set level to debug
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-
-# create formatter
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-
-# add formatter to ch
-ch.setFormatter(formatter)
-
-# add ch to logger
-logger.addHandler(ch)
-
 
 async def run_calculate():
     await Tortoise.init(db_url=DB_URL, modules={"models": ["bnstats.models"]})
