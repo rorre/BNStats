@@ -90,6 +90,8 @@ def _create_nomination_chartdata(nominations: List[Nomination]):
 async def listing(request: Request):
     users = await User.get_users()
     counts = [await u.total_nominations() for u in users]
+    eval_counts = [await u.total_nominations(90) for u in users]
+
     for u in users:
         u.score = await u.get_score(request.app.state.calc_system)
 
@@ -102,6 +104,7 @@ async def listing(request: Request):
         "diffs": [diff.name for diff in Difficulty],
         "last_update": max(users, key=lambda x: x.last_updated).last_updated,
         "title": "User Listing",
+        "eval_counts": eval_counts,
     }
     return templates.TemplateResponse("pages/user/listing.html", ctx)
 

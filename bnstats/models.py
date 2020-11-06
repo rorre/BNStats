@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any, Awaitable, List
 
 from tortoise import fields, models
@@ -184,6 +184,9 @@ class User(models.Model):
     def get_score(self, system: "CalculatorABC", days: int = 90) -> float:
         return system.get_user_score(self, days)
 
-    def total_nominations(self) -> Awaitable[int]:
+    def total_nominations(self, days: int = 0) -> Awaitable[int]:
         # As we only redirect the function, we can just use def instead async def.
+        if days:
+            d = datetime.now() - timedelta(days)
+            return Nomination.filter(userId=self.osuId, timestamp__gte=d).count()
         return Nomination.filter(userId=self.osuId).count()  # type: ignore
