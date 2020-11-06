@@ -9,12 +9,21 @@ from starlette.testclient import TestClient
 from tortoise.contrib.test import finalizer, initializer
 
 from bnstats import app
-from bnstats.models import Beatmap, BeatmapSet, Nomination, Reset, User
-from bnstats.score import calculate_user
+from bnstats.models import Beatmap, Nomination, Reset, User
 from bnstats.routine import update_user_details
+from bnstats.score import NaxessCalculator
 
 logger = logging.getLogger("bnstats")
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
+from freezegun import freeze_time
+
+
+@pytest.fixture(autouse=True)
+def time_freeze():
+    f = freeze_time("2020-11-03")
+    f.start()
+    yield f
+    f.stop()
 
 
 @pytest.fixture
@@ -51,6 +60,7 @@ def client_without_middleware(request):
 
 
 @pytest.fixture(autouse=True)
+@freeze_time("2020-11-05")
 async def setup_db():
     with open("tests/data/sample_user.json") as f:
         u = await User.create(**json.load(f))
@@ -84,4 +94,4 @@ async def setup_db():
     for n in nom_objs:
         objs.append(await n.get_map())
     await update_user_details(u, objs)
-    await calculate_user(u)
+    await NaxessCalculator().calculate_user(u)

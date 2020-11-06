@@ -1,0 +1,8 @@
+{
+  "upgrade": [
+    "ALTER TABLE \"beatmap\" ADD \"creator_id\" INT NOT NULL DEFAULT 0"
+  ],
+  "downgrade": [
+    "ALTER TABLE \"beatmap\" DROP COLUMN \"creator_id\""
+  ]
+}

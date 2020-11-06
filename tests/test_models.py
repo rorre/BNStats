@@ -1,8 +1,9 @@
+from datetime import datetime
+
 import pytest
 
 from bnstats.bnsite.enums import Difficulty, Genre, Language, MapStatus, Mode
 from bnstats.models import Beatmap, Nomination, Reset, User
-from datetime import datetime
 
 
 @pytest.mark.asyncio
