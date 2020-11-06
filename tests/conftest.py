@@ -4,6 +4,7 @@ import logging
 
 import pytest
 from dateutil.parser import parse
+from freezegun import freeze_time
 from starlette.config import Config
 from starlette.testclient import TestClient
 from tortoise.contrib.test import finalizer, initializer
@@ -15,7 +16,6 @@ from bnstats.score import NaxessCalculator
 
 logger = logging.getLogger("bnstats")
 logger.setLevel(logging.DEBUG)
-from freezegun import freeze_time
 
 
 @pytest.fixture(autouse=True)
