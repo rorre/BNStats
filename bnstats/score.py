@@ -54,6 +54,7 @@ class NaxessCalculator(CalculatorABC):
     weight = 0.9
 
     def get_activity_score(self, nominations: List[Nomination]) -> float:
+        nominations.sort(key=lambda x: abs(x.score), reverse=True)
         total_score = 0
         for i, a in enumerate(nominations):
             total_score += a.score * (self.weight ** i)
@@ -113,7 +114,7 @@ class NaxessCalculator(CalculatorABC):
         mapper = beatmap.creator_id
 
         # Find if the nominator has nominated other maps from the same mapper
-        d = datetime.now() - timedelta(90)
+        d = datetime.now() - timedelta(180)
         current_nominator_count = (
             await Nomination.filter(
                 creatorId=mapper,
@@ -127,37 +128,28 @@ class NaxessCalculator(CalculatorABC):
             .count()
         )
 
-        # If a map is not in pending, then find 2nd BN as they're qualified/ranked.
-        if beatmap.status != MapStatus.Pending:
-            other_nominator = (
-                await Nomination.filter(
-                    beatmapsetId=nom.beatmapsetId, userId__not=user.osuId
-                )
-                .order_by("-timestamp")
-                .only("userId")
-                .first()
-            )
-        else:
-            other_nominator = None
+        other_nominator_noms = await Nomination.filter(
+            creatorId=mapper,
+            timestamp__gte=d,
+            timestamp__lt=nom.timestamp,
+            userId__not=user.osuId,
+            beatmapsetId__not=nom.beatmapsetId,
+        ).all()
 
-        if other_nominator:
-            # Find if 2nd nominator has nominated other maps from the same mapper
-            other_nominator_count = (
-                await Nomination.filter(
-                    creatorId=mapper,
-                    timestamp__gte=d,
-                    timestamp__lt=nom.timestamp,
-                    userId=other_nominator.userId,
-                    beatmapsetId__not=nom.beatmapsetId,
-                )
-                .only("beatmapsetId")
-                .distinct()
-                .count()
-            )
-        else:
-            other_nominator_count = 0
+        other_nominator_count = 0
+        seen_maps = [nom.beatmapsetId]
+        for nomz in other_nominator_noms:
+            if nomz.beatmapsetId in seen_maps:
+                continue
+            other_nominator_count += 1
+            seen_maps.append(nomz.beatmapsetId)
 
+        if other_nominator_count < 0:
+            raise ValueError("huh")
         mapper_score = (0.4 ** current_nominator_count) * (0.9 ** other_nominator_count)
+        logger.debug(
+            f"Self: {current_nominator_count} | Other: {other_nominator_count}"
+        )
         logger.debug(f"Mapper%: {mapper_score}")
 
         resets = await user.resets.filter(beatmapsetId=nom.beatmapsetId).all()
@@ -165,8 +157,8 @@ class NaxessCalculator(CalculatorABC):
         for r in resets:
             total = r.obviousness + r.severity
             # If total is 0 or 1, then don't bother calculating.
-            if total > 1:
-                penalty += 0.5 * math.pow(2, total - 2)
+            if total:
+                penalty += 0.5 + ((total - 1) / 2 * total)
         logger.debug(f"Penalty: {penalty}")
 
         # Qualified/Pending: 25%

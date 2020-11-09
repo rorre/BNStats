@@ -27,7 +27,7 @@ async def show_user(request: Request):
     for nom in nominations:
         nom.map = await nom.get_map()
 
-    nominations.sort(key=lambda x: x.score, reverse=True)
+    nominations.sort(key=lambda x: abs(x.score), reverse=True)
     ctx = {
         "request": request,
         "user": user,
