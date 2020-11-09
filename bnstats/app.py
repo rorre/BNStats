@@ -52,9 +52,9 @@ finally:
 
 # Middlewares
 middlewares = [
+    Middleware(MaintenanceMiddleware),
     Middleware(SessionMiddleware, secret_key=SECRET),
     Middleware(GZipMiddleware, minimum_size=1000),
-    Middleware(MaintenanceMiddleware),
 ]
 
 # Application setup
