@@ -57,6 +57,15 @@ middlewares = [
     Middleware(GZipMiddleware, minimum_size=1000),
 ]
 
+# Sentry
+sentry_url = config("SENTRY_URL", default="")
+if sentry_url:
+    import sentry_sdk
+    from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
+
+    sentry_sdk.init(sentry_url)
+    middlewares.append(Middleware(SentryAsgiMiddleware))
+
 # Application setup
 app: Starlette = Starlette(debug=DEBUG, routes=routes, middleware=middlewares)
 app.state.calc_system: CalculatorABC = CALC_SYSTEM  # type: ignore
@@ -72,6 +81,7 @@ tortoise_config = {
         },
     },
 }
+
 register_tortoise(
     app,
     tortoise_config,

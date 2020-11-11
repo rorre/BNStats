@@ -23,6 +23,7 @@ rjsmin = "^1.1.0"
 gunicorn = {version = "^20.0.4", platform = "linux"}
 uvloop = {version = "^0.14.0", platform = "linux"}
 pytest-httpx = "^0.10.0"
+sentry-sdk = "^0.19.2"
 
 [tool.poetry.dev-dependencies]
 pytest = ">=5.2"
