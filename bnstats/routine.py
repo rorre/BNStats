@@ -1,6 +1,7 @@
 import json
 import logging
 import time
+import warnings
 from collections import Counter
 from datetime import datetime
 from typing import Any, Dict, List
@@ -81,7 +82,7 @@ async def update_nomination_db(user: User, days: int = 90):
         # Session expired.
         # Just return an empty list so that it doesn't go any further.
         # TODO: Notify or something
-        logger.warn("BN site down or cookie expired.")
+        warnings.warn("BN site down or cookie expired.")
         return []
 
     events: List[Nomination] = []
