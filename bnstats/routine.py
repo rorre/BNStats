@@ -28,7 +28,7 @@ async def update_users_db():
         # Session expired.
         # Just return an empty list so that it doesn't go any further.
         # TODO: Notify or something
-        logger.warn("BN site down or cookie expired.")
+        warnings.warn("BN site down or cookie expired.")
         return []
 
     db_uids = await User.all().values_list("osuId", flat=True)

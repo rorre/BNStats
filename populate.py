@@ -1,5 +1,6 @@
 import httpx
 import logging
+import warnings
 from tortoise import Tortoise, run_async
 from typing import List
 from starlette.config import Config
@@ -52,32 +53,39 @@ async def run(days):
         await Tortoise.init(db_url=DB_URL, modules={"models": ["bnstats.models"]})
         await Tortoise.generate_schemas()
 
-        print("> Populating users...")
-        users: List[User] = await update_users_db()
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
 
-        c = len(users)
-        for i, u in enumerate(users):
-            print(f">> Populating data for user: {u.username} ({i+1}/{c})")
-            nominations = await update_nomination_db(u, days)
+            print("> Populating users...")
+            users: List[User] = await update_users_db()
 
-            print(f">>> Populating maps for user: {u.username}")
-            c_maps = len(nominations)
-            for i, nom in enumerate(nominations):
-                print(f">>> Fetching: {nom.beatmapsetId} ({i+1}/{c_maps})")
-                await update_maps_db(nom)
+            c = len(users)
+            for i, u in enumerate(users):
+                print(f">> Populating data for user: {u.username} ({i+1}/{c})")
+                nominations = await update_nomination_db(u, days)
 
-            user_maps = []
-            all_noms = await u.get_nomination_activity()
-            for nom in all_noms:
-                m = await nom.get_map()
-                user_maps.append(m)
+                print(f">>> Populating maps for user: {u.username}")
+                c_maps = len(nominations)
+                for i, nom in enumerate(nominations):
+                    print(f">>> Fetching: {nom.beatmapsetId} ({i+1}/{c_maps})")
+                    await update_maps_db(nom)
 
-            if user_maps:
-                print(f">>> Updating details for user: {u.username}")
-                await update_user_details(u, user_maps)
+                user_maps = []
+                all_noms = await u.get_nomination_activity()
+                for nom in all_noms:
+                    m = await nom.get_map()
+                    user_maps.append(m)
 
-            print(f">>> Calculating score for user: {u.username}")
-            await CALC_SYSTEM.calculate_user(u)
+                if user_maps:
+                    print(f">>> Updating details for user: {u.username}")
+                    await update_user_details(u, user_maps)
+
+                print(f">>> Calculating score for user: {u.username}")
+                await CALC_SYSTEM.calculate_user(u)
+
+            if len(w):
+                e_msg = "\r\n".join(list(map(lambda x: str(x.message), w)))
+                send_webhook(f"Warnings: \r\n```\r\n{e_msg}```")
     except BaseException as e:
         send_webhook(f"An exception occured during population: \r\n```\r\n{str(e)}```")
         raise e
