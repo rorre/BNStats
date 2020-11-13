@@ -94,6 +94,11 @@ async def listing(request: Request):
 
     for u in users:
         u.score = await u.get_score(request.app.state.calc_system)
+        u.score_modes = {}
+        for mode in u.modes:
+            u.score_modes[mode] = await u.get_score(
+                request.app.state.calc_system, mode=mode
+            )
 
     ctx = {
         "request": request,
@@ -195,6 +200,11 @@ async def show_user(request: Request):
 
     line_labels, line_datas = _create_nomination_chartdata(nominations)
     user.score = await user.get_score(request.app.state.calc_system)
+    user.score_modes = {}
+    for mode in user.modes:
+        user.score_modes[mode] = await user.get_score(
+            request.app.state.calc_system, mode=mode
+        )
 
     ctx = {
         "request": request,

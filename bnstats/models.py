@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Any, Awaitable, List
+from typing import TYPE_CHECKING, Any, Awaitable, List, Union
 
 from tortoise import fields, models
 
@@ -10,6 +10,12 @@ from bnstats.helper import format_time
 if TYPE_CHECKING:
     from bnstats.score import CalculatorABC
 
+MODE_CONVERTER = {
+    "osu": 0,
+    "taiko": 1,
+    "catch": 2,
+    "mania": 3,
+}
 logger = logging.getLogger("bnstats.models")
 
 
@@ -109,6 +115,8 @@ class Nomination(models.Model):
     )
     as_mode = fields.IntField(null=True)
     ambiguous_mode = fields.BooleanField(default=False)
+
+    # Scoring
     mapset_score = fields.FloatField(default=0.0)
     mapper_score = fields.FloatField(default=0.0)
     ranked_score = fields.FloatField(default=0.0)
@@ -166,23 +174,29 @@ class User(models.Model):
         users = await cls.all().order_by("username")
         return users
 
-    async def get_nomination_activity(self, date: datetime = None) -> List[Nomination]:
-        if not date:
-            logger.info("Fetching all events.")
-            events = (
-                await Nomination.filter(userId=self.osuId).all().order_by("timestamp")
-            )
-        else:
-            logging.info("Fetching events up until timestamp: " + str(date))
-            events = (
-                await Nomination.filter(userId=self.osuId, timestamp__gte=date)
-                .all()
-                .order_by("timestamp")
-            )
+    async def get_nomination_activity(
+        self, date: datetime = None, mode: Union[Mode, str, int] = None
+    ) -> List[Nomination]:
+        filters = {"userId": self.osuId}
+        if date:
+            filters["timestamp__gte"] = date
+
+        if mode:
+            if type(mode) == Mode:
+                filters["as_mode"] = Mode.value
+            elif type(mode) == str:
+                filters["as_mode"] = MODE_CONVERTER[mode]
+            else:
+                filters["as_mode"] = mode
+
+        logger.info("Fetching events.")
+        events = await Nomination.filter(**filters).all().order_by("timestamp")
         return events
 
-    def get_score(self, system: "CalculatorABC", days: int = 90) -> float:
-        return system.get_user_score(self, days)
+    def get_score(
+        self, system: "CalculatorABC", days: int = 90, mode: Mode = None
+    ) -> float:
+        return system.get_user_score(self, days, mode)
 
     def total_nominations(self, days: int = 0) -> Awaitable[int]:
         # As we only redirect the function, we can just use def instead async def.

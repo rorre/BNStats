@@ -29,8 +29,19 @@
         <div class="item">
             <i class="large star middle aligned icon"></i>
             <div class="content">
-                <a href="{{ url_for('score:show', user_id=user.osuId) }}"
-                    class="header">{{ '%0.2f' | format(user.score) }}</a>
+                <a href="{{ url_for('score:show', user_id=user.osuId) }}" class="header">
+                    {{ '%0.2f' | format(user.score) }}
+
+                    {% set modes_count = user.modes | length %}
+                    {% if modes_count > 1 %}
+                    <span class="ui small text">(
+                        {% for k,v in user.score_modes.items() %}
+                        {{ '%0.2f' | format(v) }} {{ k }} {% if loop.index != modes_count %}, {% endif %}
+                        {% endfor %}
+                        )
+                    </span>
+                    {% endif %}
+                </a>
                 <div class="description tooltip" data-content="Rating is an experimental nomination scoring system."
                     data-variation="inverted">
                     Rating

@@ -160,7 +160,7 @@ function createLineChart(ctx, labels, data) {
 
 $(function () {
     $('select.dropdown').dropdown()
-    $("#timespanForm").on('change', function () {
+    $("#timespanForm, #modeForm").on('change', function () {
         $(this).submit()
     })
 })

@@ -13,12 +13,16 @@ router = Router()
 @router.route("/{user_id:int}", name="show")
 async def show_user(request: Request):
     uid: int = request.path_params["user_id"]
+    mode: str = request.query_params.get("mode")
+    if mode not in ["osu", "catch", "taiko", "mania"]:
+        mode = None
+
     user = await User.get_or_none(osuId=uid)
     if not user:
         raise HTTPException(404, "User not found.")
 
     d = datetime.now() - timedelta(90)
-    nominations = await user.get_nomination_activity(d)
+    nominations = await user.get_nomination_activity(d, mode=mode)
 
     if not nominations:
         ctx = {"request": request, "user": user, "error": True, "title": user.username}

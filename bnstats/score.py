@@ -2,9 +2,9 @@ import logging
 import math
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
-from typing import Dict, List, Type
+from typing import Dict, List, Type, Union
 
-from bnstats.bnsite.enums import MapStatus
+from bnstats.bnsite.enums import MapStatus, Mode
 from bnstats.models import BeatmapSet, Nomination, User
 
 logger = logging.getLogger("bnstats.score")
@@ -19,9 +19,11 @@ class CalculatorABC(ABC):
     def get_activity_score(self, nominations: List[Nomination]) -> float:
         pass
 
-    async def get_user_score(self, user: User, days: int = 90) -> float:
+    async def get_user_score(
+        self, user: User, days: int = 90, mode: Union[Mode, str] = None
+    ) -> float:
         date = datetime.utcnow() - timedelta(days)
-        activities = await user.get_nomination_activity(date)
+        activities = await user.get_nomination_activity(date, mode)
         return self.get_activity_score(activities)
 
     @abstractmethod
@@ -177,6 +179,7 @@ class NaxessCalculator(CalculatorABC):
             "mapset_score": mapset_score,
             "penalty": penalty,
             "score": score,
+            "as_mode": nomination_mode,
         }
 
         if save_to_db:

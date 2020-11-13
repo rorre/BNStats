@@ -9,6 +9,21 @@
         <div class="ui very relaxed stackable grid">
             {% include 'includes/user-header.html' %}
         </div>
+
+        {% if user.modes | length > 1 %}
+        {% set selected_mode = request.query_params['mode'] | default("ll") %}
+        <form class="ui inverted form" id="modeForm">
+            <div class="field">
+                <label>Select mode</label>
+                <select name="mode" class="ui dropdown">
+                    <option value="all" {% if selected_mode == "all" %}selected{% endif %}>All</option>
+                    {% for k in user.modes %}
+                    <option value="{{ k }}" {% if selected_mode == k %}selected{% endif %}>{{ k }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+        {% endif %}
     </div>
 
     <div class="ui segments">
