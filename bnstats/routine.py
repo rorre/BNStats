@@ -53,7 +53,7 @@ async def update_users_db():
             user.update_from_dict(u)
             await user.save()
         else:
-            logger.debug(f"New user: {user['username']}")
+            logger.debug(f"New user: {u['username']}")
             user = await User.create(**u)
 
         users.append(user)
