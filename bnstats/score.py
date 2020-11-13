@@ -311,6 +311,7 @@ class RenCalculator(CalculatorABC):
             "mapset_score": self.calculate_mapset(beatmap),
             "penalty": penalty,
             "score": score,
+            "as_mode": nomination_mode,
         }
 
         if save_to_db:
