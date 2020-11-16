@@ -140,14 +140,12 @@ class NaxessCalculator(CalculatorABC):
 
         other_nominator_count = 0
         seen_maps = [nom.beatmapsetId]
-        for nomz in other_nominator_noms:
-            if nomz.beatmapsetId in seen_maps:
+        for other_nom in other_nominator_noms:
+            if other_nom.beatmapsetId in seen_maps:
                 continue
             other_nominator_count += 1
-            seen_maps.append(nomz.beatmapsetId)
+            seen_maps.append(other_nom.beatmapsetId)
 
-        if other_nominator_count < 0:
-            raise ValueError("huh")
         mapper_score = (0.4 ** current_nominator_count) * (0.9 ** other_nominator_count)
         logger.debug(
             f"Self: {current_nominator_count} | Other: {other_nominator_count}"
