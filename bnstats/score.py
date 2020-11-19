@@ -85,7 +85,7 @@ class NaxessCalculator(CalculatorABC):
         user = await nom.user
         beatmap = await nom.get_map()
         if not beatmap.beatmaps:
-            logger.warn("Beatmap no longer exists in osu!. Skipping.")
+            logger.warning("Beatmap no longer exists in osu!. Skipping.")
             # Skip beatmaps that doesn't exist anymore.
             return
 
@@ -98,7 +98,7 @@ class NaxessCalculator(CalculatorABC):
             for mode in user_modes:
                 if mode in map_modes:
                     if nomination_mode:
-                        logger.warn(
+                        logger.warning(
                             f"Cannot determine nominated mode for user {user.username}. Skipping"
                         )
                         # Hybrid map with hybrid BN, can't tell which mode is it.
@@ -239,7 +239,7 @@ class RenCalculator(CalculatorABC):
         user = await nom.user
         beatmap = await nom.get_map()
         if not beatmap.beatmaps:
-            logger.warn("Beatmap no longer exists in osu!. Skipping.")
+            logger.warning("Beatmap no longer exists in osu!. Skipping.")
             # Skip beatmaps that doesn't exist anymore.
             return
 
@@ -252,7 +252,7 @@ class RenCalculator(CalculatorABC):
             for mode in user_modes:
                 if mode in map_modes:
                     if nomination_mode:
-                        logger.warn(
+                        logger.warning(
                             f"Cannot determine nominated mode for user {user.username}. Skipping"
                         )
                         # Hybrid map with hybrid BN, can't tell which mode is it.
