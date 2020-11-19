@@ -43,7 +43,7 @@
 
 <body>
     <!-- Navbar -->
-    <div class="ui fixed inverted secondary menu">
+    <div class="ui inverted secondary menu" style="margin-bottom:0;">
         <div class="ui container">
             <a href="{{ url_for('home') }}" class="item logo"><img src="/static/logo.png"></a>
             <a href="{{ url_for('home') }}" class="item">Home</a>
@@ -57,6 +57,14 @@
                     </a>
                 </div>
             </div>
+        </div>
+    </div>
+    <div class="ui center aligned segment" style="margin:0;">
+        <div class="ui container" style="padding:0;">
+            <a href="https://paypal.me/osuren">
+                With current donation, this service is available until <strong>January 2021</strong>.
+                If you'd like to help extend its life, please consider donating!
+            </a>
         </div>
     </div>
 
