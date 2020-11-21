@@ -1,5 +1,5 @@
 import traceback
-from typing import Any, Awaitable, Callable, Dict, List
+from typing import Any, Awaitable, Callable, Dict
 
 from dateutil.parser import parse
 from starlette.config import Config
@@ -95,23 +95,17 @@ async def new_entry(request: Request):
     ):
         return JSONResponse({"status": 401, "message": "Unauthorized."}, 401)
 
-    req_data: List[Dict[str, Any]] = await request.json()
+    event: Dict[str, Any] = await request.json()
 
-    exceptions = []
-    for event in req_data:
-        data_type: str = event["type"]
-        if data_type not in classes.keys():
-            return JSONResponse({"status": 400, "message": "Invalid type."}, 400)
+    data_type: str = event["type"]
+    if data_type not in classes.keys():
+        return JSONResponse({"status": 400, "message": "Invalid type."}, 400)
 
-        func: Callable[[Dict[str, Any]], Awaitable] = classes[data_type]
-        try:
-            await func(event)
-        except BaseException as e:
-            traceback.print_exc()
-            exceptions.append(e)
+    func: Callable[[Dict[str, Any]], Awaitable] = classes[data_type]
+    try:
+        await func(event)
+    except BaseException as e:
+        traceback.print_exc()
+        return JSONResponse({"status": 500, "messages": str(e)}, 500)
 
-    if exceptions:
-        return JSONResponse(
-            {"status": 500, "messages": [str(e) for e in exceptions]}, 500
-        )
     return JSONResponse({"status": 200, "message": "OK"})
