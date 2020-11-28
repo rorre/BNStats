@@ -82,6 +82,7 @@ async def reset_update(event: Dict[str, Any]):
 
 classes = {
     "nominate": nomination_update,
+    "qualify": nomination_update,
     "nomination_reset": reset_update,
     "disqualify": reset_update,
 }
