@@ -123,7 +123,12 @@ async def update_nomination_db(user: User, days: int = 90):
             )
             db_event = await Reset.create(**event)
         else:
-            db_event.update_from_dict(event)
+            update_data = {
+                "obviousness": event["obviousness"] if "obviousness" in event else 0,
+                "severity": event["severity"] if "severity" in event else 0,
+            }
+            db_event.update_from_dict(update_data)
+            await db_event.save()
 
         await db_event.fetch_related("user_affected")
         if user not in db_event.user_affected:
@@ -133,6 +138,12 @@ async def update_nomination_db(user: User, days: int = 90):
     for event in resets_done:
         event["id"] = event["_id"]
         event["timestamp"] = parse(event["timestamp"], ignoretz=True)
+
+        # Hack because pishi mongodb zzz
+        if "obviousness" in event and not event["obviousness"]:
+            event["obviousness"] = 0
+        if "severity" in event and not event["severity"]:
+            event["severity"] = 0
 
         db_event = await Reset.get_or_none(
             beatmapsetId=event["beatmapsetId"],
@@ -145,7 +156,12 @@ async def update_nomination_db(user: User, days: int = 90):
             )
             db_event = await Reset.create(**event)
         else:
-            db_event.update_from_dict(event)
+            update_data = {
+                "obviousness": event["obviousness"] if "obviousness" in event else 0,
+                "severity": event["severity"] if "severity" in event else 0,
+            }
+            db_event.update_from_dict(update_data)
+            await db_event.save()
 
         await db_event.fetch_related("user_affected")
         map_nominations = await Nomination.filter(
