@@ -220,7 +220,7 @@ class RenCalculator(CalculatorABC):
             # Easier diffs tend to be much easier to check
             # Of course, this is extremely naive especially with how slider is treated.
             bonus_drain += diff.hit_length * diff.difficultyrating / 5.5
-        bonus_drain *= math.log(beatmap.total_diffs, 4)
+        bonus_drain *= math.log(beatmap.total_diffs, 8)
         logger.debug(f"Bonus drain: {bonus_drain}")
 
         final_score = round((drain_time + bonus_drain) / mapset_base / 2, 2)
