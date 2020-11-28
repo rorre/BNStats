@@ -122,6 +122,8 @@ async def update_nomination_db(user: User, days: int = 90):
                 f"Creating reset event: {event['userId']} for mapset {event['beatmapsetId']}"
             )
             db_event = await Reset.create(**event)
+        else:
+            db_event.update_from_dict(event)
 
         await db_event.fetch_related("user_affected")
         if user not in db_event.user_affected:
@@ -142,6 +144,8 @@ async def update_nomination_db(user: User, days: int = 90):
                 f"Creating reset event: {event['userId']} for mapset {event['beatmapsetId']}"
             )
             db_event = await Reset.create(**event)
+        else:
+            db_event.update_from_dict(event)
 
         await db_event.fetch_related("user_affected")
         map_nominations = await Nomination.filter(
