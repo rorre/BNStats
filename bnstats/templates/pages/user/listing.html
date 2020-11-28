@@ -12,7 +12,20 @@
     </p>
 
     {% include 'includes/list-filters.html' %}
-    <br>
+    <div class="ui horizontal list" id="nominationSortSelect" style="padding-top: 10px; padding-bottom: 10px;">
+        <div class="item">Sort nominations from</div>
+        <div class="item">
+            <div class="ui buttons">
+                <button class="mini ui active button" data-sort="all">
+                    All time
+                </button>
+                <button class="mini ui button" data-sort="threemo">
+                    90 days
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="table-wrapper">
         <table class="ui celled padded inverted sortable unstackable selectable table">
             <thead>
@@ -20,7 +33,7 @@
                     <th>Username</th>
                     <th class="no-sort">Attributes</th>
                     <th class="no-sort">Game mode</th>
-                    <th class="number">Nominations</th>
+                    <th class="number" id="nominationHead">Nominations</th>
                     <th class="float">
                         Rating
                         <span class="tooltip" data-content="Rating is an experimental nomination scoring system."
@@ -37,7 +50,7 @@
                     <td class="no-clickable">{% include 'includes/user-labels.html' %}</td>
                     <td>{{ user.modes | join(', ') }}</td>
 
-                    <td data-sort-value="{{ counts[loop.index0] }}">
+                    <td data-all="{{ counts[loop.index0] }}" data-threemo="{{ eval_counts[loop.index0] }}">
                         {{ counts[loop.index0] }}
                         <span class="ui small text" data-tooltip="Last 90 days">({{ eval_counts[loop.index0] }})</span>
                     </td>
