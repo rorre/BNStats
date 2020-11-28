@@ -190,9 +190,15 @@ class NaxessCalculator(CalculatorABC):
 class RenCalculator(CalculatorABC):
     name = "ren"
     BASE_SCORE = 0.5
+    has_weight = True
+    weight = 0.975
 
     def get_activity_score(self, nominations: List[Nomination]) -> float:
-        return sum([a.score for a in nominations])
+        nominations.sort(key=lambda x: abs(x.score), reverse=True)
+        total_score = 0
+        for i, a in enumerate(nominations):
+            total_score += a.score * (self.weight ** i)
+        return total_score
 
     def calculate_mapset(self, beatmap: BeatmapSet):
         logger.info(
@@ -223,7 +229,7 @@ class RenCalculator(CalculatorABC):
         bonus_drain *= math.log(beatmap.total_diffs, 8)
         logger.debug(f"Bonus drain: {bonus_drain}")
 
-        final_score = round((drain_time + bonus_drain) / mapset_base / 2, 2)
+        final_score = round((drain_time + bonus_drain) / mapset_base, 2)
         logger.debug(f"Final score: {final_score}")
         return final_score
 
