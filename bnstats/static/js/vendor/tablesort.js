@@ -55,6 +55,10 @@
 
 			// Try to force a browser redraw
 			self.$table.css("display");
+
+			// Save current th data to self
+			self.$th = th
+			
 			// Run sorting asynchronously on a timeout to force browser redraw after
 			// `tablesort:start` callback. Also avoids locking up the browser too much.
 			setTimeout(function() {
