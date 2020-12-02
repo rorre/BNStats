@@ -7,7 +7,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.routing import Router
 
-from bnstats.helper import generate_mongo_id
+from bnstats.helper import generate_mongo_id, mode_to_db
 from bnstats.models import Nomination, Reset, User
 from bnstats.routine import update_maps_db, update_users_db
 
@@ -33,6 +33,9 @@ async def nomination_update(event: Dict[str, Any]):
             raise ValueError(
                 "Cannot find user in database, maybe pishi site is falling behind?"
             )
+
+    if "as_modes" in event:
+        event["as_modes"] = [mode_to_db(m) for m in event["as_modes"]]
 
     db_event = await Nomination.get_or_none(
         beatmapsetId=event["beatmapsetId"],
