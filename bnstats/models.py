@@ -113,7 +113,7 @@ class Nomination(models.Model):
     user: fields.ForeignKeyRelation["User"] = fields.ForeignKeyField(
         "models.User", related_name="nominations"
     )
-    as_mode = fields.IntField(null=True)
+    as_modes = fields.JSONField(null=True, default=[])
     ambiguous_mode = fields.BooleanField(default=False)
 
     # Scoring
@@ -183,11 +183,11 @@ class User(models.Model):
 
         if mode:
             if type(mode) == Mode:
-                filters["as_mode"] = Mode.value
+                filters["as_modes__contains"] = Mode.value
             elif type(mode) == str:
-                filters["as_mode"] = MODE_CONVERTER[mode]
+                filters["as_modes__contains"] = MODE_CONVERTER[mode]
             else:
-                filters["as_mode"] = mode
+                filters["as_modes__contains"] = mode
 
         logger.info("Fetching events.")
         events = await Nomination.filter(**filters).all().order_by("timestamp")

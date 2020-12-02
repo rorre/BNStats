@@ -1,0 +1,11 @@
+{
+  "upgrade": [
+    "ALTER TABLE \"nomination\" ADD \"as_modes\" JSONB",
+    "ALTER TABLE \"nomination\" DROP COLUMN \"as_mode\"",
+    "UPDATE nomination SET as_modes = '[]' WHERE as_modes is NULL;"
+  ],
+  "downgrade": [
+    "ALTER TABLE \"nomination\" ADD \"as_mode\" INT",
+    "ALTER TABLE \"nomination\" DROP COLUMN \"as_modes\""
+  ]
+}

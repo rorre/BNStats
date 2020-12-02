@@ -17,6 +17,7 @@ from bnstats.models import Beatmap, BeatmapSet, Nomination, Reset, User
 logger = logging.getLogger("bnstats.routine")
 API_URL = "https://osu.ppy.sh/api"
 USERS_URL = "https://bn.mappersguild.com/users"
+MODES = {"osu": 0, "taiko": 1, "catch": 2, "mania": 3}
 
 
 async def update_users_db():
@@ -94,11 +95,19 @@ async def update_nomination_db(user: User, days: int = 90):
         event["timestamp"] = parse(event["timestamp"], ignoretz=True)
         event["user"] = user
 
+        nomination_modes = []
+        for mode in user.modes:
+            if mode in event["modes"]:
+                nomination_modes.append(MODES[mode])
+
+        event["as_modes"] = nomination_modes
         if not db_event:
             logger.info(
                 f"Creating new nomination event: {event['userId']} for mapset {event['beatmapsetId']}"
             )
             db_event = await Nomination.create(**event)
+        else:
+            db_event.update_from_dict({"as_modes": nomination_modes})
         events.append(db_event)
 
     resets = activities["nominationsDisqualified"] + activities["nominationsPopped"]

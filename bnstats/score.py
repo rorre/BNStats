@@ -7,8 +7,8 @@ from typing import Dict, List, Type, Union
 from bnstats.bnsite.enums import MapStatus, Mode
 from bnstats.models import BeatmapSet, Nomination, User
 
-logger = logging.getLogger("bnstats.score")
 MODES = {"osu": 0, "taiko": 1, "catch": 2, "mania": 3}
+logger = logging.getLogger("bnstats.score")
 
 
 class CalculatorABC(ABC):
@@ -90,28 +90,22 @@ class NaxessCalculator(CalculatorABC):
             return
 
         # Filter beatmaps only to the mode being nominated.
+        nomination_modes = nom.as_modes
         user_modes = [MODES[m] for m in user.modes]
         map_modes = set([diff.mode for diff in beatmap.beatmaps])
 
-        nomination_mode = nom.as_mode
-        if not nomination_mode:
+        # Fallback to legacy if as_modes isnt set
+        # and select all diffs where the nominator could nominate
+        if not nomination_modes:
             for mode in user_modes:
                 if mode in map_modes:
-                    if nomination_mode:
-                        logger.warning(
-                            f"Cannot determine nominated mode for user {user.username}. Skipping"
-                        )
-                        # Hybrid map with hybrid BN, can't tell which mode is it.
-                        nom.ambiguous_mode = True
-                        await nom.save()
-                        return
-                    else:
-                        nomination_mode = mode
-        logger.debug(f"Mode for nomination: {nomination_mode}")
+                    nomination_modes.append(mode)
+        logger.debug(f"Mode for nomination: {nomination_modes}")
 
-        beatmap = BeatmapSet(
-            list(filter(lambda x: x.mode == nomination_mode, beatmap.beatmaps))
-        )
+        diffs = []
+        for mode in nomination_modes:
+            diffs.extend(list(filter(lambda x: x.mode == mode, beatmap.beatmaps)))
+        beatmap = BeatmapSet(diffs)
 
         mapper = beatmap.creator_id
 
@@ -177,7 +171,6 @@ class NaxessCalculator(CalculatorABC):
             "mapset_score": mapset_score,
             "penalty": penalty,
             "score": score,
-            "as_mode": nomination_mode,
         }
 
         if save_to_db:
@@ -248,28 +241,21 @@ class RenCalculator(CalculatorABC):
             return
 
         # Filter beatmaps only to the mode being nominated.
+        nomination_modes = nom.as_modes
         user_modes = [MODES[m] for m in user.modes]
         map_modes = set([diff.mode for diff in beatmap.beatmaps])
 
-        nomination_mode = nom.as_mode
-        if not nomination_mode:
+        # Fallback to legacy and select all diffs where the nominator could nominate
+        if not nomination_modes:
             for mode in user_modes:
                 if mode in map_modes:
-                    if nomination_mode:
-                        logger.warning(
-                            f"Cannot determine nominated mode for user {user.username}. Skipping"
-                        )
-                        # Hybrid map with hybrid BN, can't tell which mode is it.
-                        nom.ambiguous_mode = True
-                        await nom.save()
-                        return
-                    else:
-                        nomination_mode = mode
-        logger.debug(f"Mode for nomination: {nomination_mode}")
+                    nomination_modes.append(mode)
+        logger.debug(f"Mode for nomination: {nomination_modes}")
 
-        beatmap = BeatmapSet(
-            list(filter(lambda x: x.mode == nomination_mode, beatmap.beatmaps))
-        )
+        diffs = []
+        for mode in nomination_modes:
+            diffs.extend(list(filter(lambda x: x.mode == mode, beatmap.beatmaps)))
+        beatmap = BeatmapSet(diffs)
 
         # For every found mapper, reduce the score by 75%.
         # Basically, (1/4)^n.
@@ -315,7 +301,6 @@ class RenCalculator(CalculatorABC):
             "mapset_score": self.calculate_mapset(beatmap),
             "penalty": penalty,
             "score": score,
-            "as_mode": nomination_mode,
         }
 
         if save_to_db:
