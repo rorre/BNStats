@@ -6,8 +6,7 @@ from typing import Dict, List, Type, Union
 
 from bnstats.bnsite.enums import MapStatus, Mode
 from bnstats.models import BeatmapSet, Nomination, User
-
-MODES = {"osu": 0, "taiko": 1, "catch": 2, "mania": 3}
+from bnstats.helper import mode_to_db
 logger = logging.getLogger("bnstats.score")
 
 
@@ -91,7 +90,7 @@ class NaxessCalculator(CalculatorABC):
 
         # Filter beatmaps only to the mode being nominated.
         nomination_modes = nom.as_modes
-        user_modes = [MODES[m] for m in user.modes]
+        user_modes = [mode_to_db(m) for m in user.modes]
         map_modes = set([diff.mode for diff in beatmap.beatmaps])
 
         # Fallback to legacy if as_modes isnt set
@@ -242,7 +241,7 @@ class RenCalculator(CalculatorABC):
 
         # Filter beatmaps only to the mode being nominated.
         nomination_modes = nom.as_modes
-        user_modes = [MODES[m] for m in user.modes]
+        user_modes = [mode_to_db(m) for m in user.modes]
         map_modes = set([diff.mode for diff in beatmap.beatmaps])
 
         # Fallback to legacy and select all diffs where the nominator could nominate

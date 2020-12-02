@@ -13,11 +13,11 @@ from bnstats.bnsite import request
 from bnstats.bnsite.enums import MapStatus
 from bnstats.bnsite.request import get
 from bnstats.models import Beatmap, BeatmapSet, Nomination, Reset, User
+from bnstats.helper import mode_to_db
 
 logger = logging.getLogger("bnstats.routine")
 API_URL = "https://osu.ppy.sh/api"
 USERS_URL = "https://bn.mappersguild.com/users"
-MODES = {"osu": 0, "taiko": 1, "catch": 2, "mania": 3}
 
 
 async def update_users_db():
@@ -98,7 +98,7 @@ async def update_nomination_db(user: User, days: int = 90):
         nomination_modes = []
         for mode in user.modes:
             if mode in event["modes"]:
-                nomination_modes.append(MODES[mode])
+                nomination_modes.append(mode_to_db(mode))
 
         event["as_modes"] = nomination_modes
         if not db_event:
