@@ -14,12 +14,12 @@ $(function () {
     $('table').tablesort()
 
     $('thead th.number').data('sortBy', function (th, td, tablesort) {
-        var num = td.data("sort-value") | td.text()
+        var num = td.data("sortValue") || td.text()
         return new Number(num);
     });
 
     $('thead th.float').data('sortBy', function (th, td, tablesort) {
-        var num = td.data("sort-value") | td.text()
+        var num = td.data("sortValue") || td.text()
         return parseFloat(num);
     });
 

@@ -51,9 +51,9 @@
                             <td colspan="4">Can't tell which mode the nominator is trying to nominate, please tell
                                 Keitaro!.</td>
                             {% else %}
-                            <td>{{ '%d' | format(s.ranked_score * 100) }}%</td>
-                            <td>{{ '%d' | format(s.mapper_score * 100) }}%</td>
-                            <td>{{ '%d' | format(s.mapset_score * 100) }}%</td>
+                            <td data-sort-value="{{ s.ranked_score }}">{{ '%d' | format(s.ranked_score * 100) }}%</td>
+                            <td data-sort-value="{{ s.mapper_score }}">{{ '%d' | format(s.mapper_score * 100) }}%</td>
+                            <td data-sort-value="{{ s.mapset_score }}">{{ '%d' | format(s.mapset_score * 100) }}%</td>
                             <td>{{ '%0.2f' | format(s.penalty) }}</td>
 
                             {% set calc_system = request.app.state.calc_system %}
