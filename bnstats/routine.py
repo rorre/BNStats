@@ -108,6 +108,7 @@ async def update_nomination_db(user: User, days: int = 90):
             db_event = await Nomination.create(**event)
         else:
             db_event.update_from_dict({"as_modes": nomination_modes})
+            await db_event.save()
         events.append(db_event)
 
     resets = activities["nominationsDisqualified"] + activities["nominationsPopped"]
