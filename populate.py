@@ -6,13 +6,12 @@ from typing import List
 from starlette.config import Config
 
 from bnstats.routine import (
-    update_nomination_db,
+    update_events_db,
     update_users_db,
     update_maps_db,
     update_user_details,
 )
 from bnstats.score import get_system
-from bnstats.bnsite import request
 from bnstats.models import User
 
 config = Config(".env")
@@ -49,7 +48,6 @@ async def run_calculate():
 async def run(days):
     send_webhook("Population starts.")
     try:
-        request.setup_session(SITE_SESSION, API_KEY)
         await Tortoise.init(db_url=DB_URL, modules={"models": ["bnstats.models"]})
         await Tortoise.generate_schemas()
 
@@ -62,23 +60,19 @@ async def run(days):
             c = len(users)
             for i, u in enumerate(users):
                 print(f">> Populating data for user: {u.username} ({i+1}/{c})")
-                nominations = await update_nomination_db(u, days)
+                await update_events_db(u, days)
+                nominated_maps = []
 
                 print(f">>> Populating maps for user: {u.username}")
+                nominations = await u.get_nomination_activity()
                 c_maps = len(nominations)
                 for i, nom in enumerate(nominations):
                     print(f">>> Fetching: {nom.beatmapsetId} ({i+1}/{c_maps})")
-                    await update_maps_db(nom)
+                    nominated_maps.append(await update_maps_db(nom))
 
-                user_maps = []
-                all_noms = await u.get_nomination_activity()
-                for nom in all_noms:
-                    m = await nom.get_map()
-                    user_maps.append(m)
-
-                if user_maps:
+                if nominated_maps:
                     print(f">>> Updating details for user: {u.username}")
-                    await update_user_details(u, user_maps)
+                    await update_user_details(u, nominated_maps)
 
                 print(f">>> Calculating score for user: {u.username}")
                 await CALC_SYSTEM.calculate_user(u)
@@ -90,7 +84,6 @@ async def run(days):
         send_webhook(f"An exception occured during population: \r\n```\r\n{str(e)}```")
         raise e
 
-    await request.s.aclose()
     send_webhook("Population ends.")
 
 

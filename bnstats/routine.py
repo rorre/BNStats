@@ -11,20 +11,26 @@ from dateutil.parser import parse
 
 from bnstats.bnsite.enums import MapStatus
 from bnstats.bnsite.request import get
-from bnstats.config import API_KEY
+from bnstats.config import API_KEY, USE_AIESS, USE_INTEROP
 from bnstats.helper import mode_to_db
 from bnstats.models import Beatmap, BeatmapSet, Nomination, Reset, User
 
 logger = logging.getLogger("bnstats.routine")
 API_URL = "https://osu.ppy.sh/api"
+INTEROP_URL = "https://bn.mappersguild.com/interOp"
 USERS_URL = "https://bn.mappersguild.com/users"
 
+################################
+# Fetchers
+################################
 
-async def update_users_db():
+
+async def fetch_users_api():
     url = USERS_URL + "/relevantInfo"
     try:
         logger.info("Fetching user data from BN site.")
         r = await get(url)
+        return r["users"]
     except json.decoder.JSONDecodeError:
         # Session expired.
         # Just return an empty list so that it doesn't go any further.
@@ -32,8 +38,56 @@ async def update_users_db():
         warnings.warn("BN site down or cookie expired.")
         return []
 
+
+async def fetch_users_interop():
+    url = INTEROP_URL + "/users"
+    events: Dict[str, Any] = await get(url)
+    return events
+
+
+# Events
+async def fetch_events_interop(user: User, days: int = 90):
+    url = INTEROP_URL + f"/nominationResets/{user.osuId}/{days}/"
+    events: Dict[str, Any] = await get(url)
+    return events
+
+
+async def fetch_events_api(user: User, days: int = 90):
+    try:
+        logger.info(f"Fetching nomination activity for user: {user.username}")
+        deadline = time.time() * 1000
+        url = (
+            USERS_URL
+            + f"/activity?osuId={user.osuId}&"
+            + f"modes={','.join(user.modes)}&"
+            + f"deadline={deadline}&mongoId={user._id}&"
+            + f"days={days}"
+        )
+        logger.debug(f"Fetching: {url}")
+        activities: Dict[str, Any] = await get(url)
+    except json.decoder.JSONDecodeError:
+        # Session expired.
+        # Just return an empty list so that it doesn't go any further.
+        # TODO: Notify or something
+        warnings.warn("BN site down or cookie expired.")
+        return []
+    return activities
+
+
+################################
+# Routines
+################################
+
+
+async def update_users_db():
+    if USE_INTEROP:
+        fetcher = fetch_users_interop
+    else:
+        fetcher = fetch_users_api
+    r = await fetcher()
+
     db_uids = await User.all().values_list("osuId", flat=True)
-    current_uids = [u["osuId"] for u in r["users"]]
+    current_uids = [u["osuId"] for u in r]
 
     # Remove all kicked users
     logger.info("Removing all kicked users.")
@@ -46,7 +100,7 @@ async def update_users_db():
 
     logger.info("Updating users.")
     users: List[User] = []
-    for u in r["users"]:
+    for u in r:
         u["last_updated"] = datetime.utcnow()
         user = await User.get_or_none(osuId=u["osuId"])
         if user:
@@ -61,32 +115,48 @@ async def update_users_db():
     return users
 
 
-async def _fetch_activity(user, days):
-    deadline = time.time() * 1000
-    url = (
-        USERS_URL
-        + f"/activity?osuId={user.osuId}&"
-        + f"modes={','.join(user.modes)}&"
-        + f"deadline={deadline}&mongoId={user._id}&"
-        + f"days={days}"
+async def _insert_reset_event(event):
+    event["id"] = event["_id"]
+    event["timestamp"] = parse(event["timestamp"], ignoretz=True)
+
+    # Hack because pishi mongodb zzz
+    if "obviousness" in event and not event["obviousness"]:
+        event["obviousness"] = 0
+    if "severity" in event and not event["severity"]:
+        event["severity"] = 0
+
+    db_event = await Reset.get_or_none(
+        beatmapsetId=event["beatmapsetId"],
+        userId=event["userId"],
+        timestamp=event["timestamp"],
     )
-    logger.debug(f"Fetching: {url}")
-    activities: Dict[str, Any] = await get(url)
-    return activities
+    if not db_event:
+        logger.info(
+            f"Creating reset event: {event['userId']} for mapset {event['beatmapsetId']}"
+        )
+        db_event = await Reset.create(**event)
+    else:
+        update_data = {
+            "obviousness": event["obviousness"] if "obviousness" in event else 0,
+            "severity": event["severity"] if "severity" in event else 0,
+        }
+        db_event.update_from_dict(update_data)
+        await db_event.save()
+
+    return db_event
 
 
-async def update_nomination_db(user: User, days: int = 90):
-    try:
-        logger.info(f"Fetching nomination activity for user: {user.username}")
-        activities = await _fetch_activity(user, days)
-    except json.decoder.JSONDecodeError:
-        # Session expired.
-        # Just return an empty list so that it doesn't go any further.
-        # TODO: Notify or something
-        warnings.warn("BN site down or cookie expired.")
-        return []
+async def update_events_db(user: User, days: int = 90):
+    if USE_INTEROP:
+        fetcher = fetch_events_interop
+    else:
+        fetcher = fetch_events_api
+    activities = await fetcher(user, days)
 
-    events: List[Nomination] = []
+    if USE_AIESS:
+        # Skip nomination activities from bnsite, it's already provided from aiess.
+        activities["uniqueNominations"] = []
+
     for event in activities["uniqueNominations"]:
         db_event = await Nomination.get_or_none(
             beatmapsetId=event["beatmapsetId"],
@@ -109,36 +179,10 @@ async def update_nomination_db(user: User, days: int = 90):
         else:
             db_event.update_from_dict({"as_modes": nomination_modes})
             await db_event.save()
-        events.append(db_event)
 
     resets = activities["nominationsDisqualified"] + activities["nominationsPopped"]
     for event in resets:
-        event["id"] = event["_id"]
-        event["timestamp"] = parse(event["timestamp"], ignoretz=True)
-
-        # Hack because pishi mongodb zzz
-        if "obviousness" in event and not event["obviousness"]:
-            event["obviousness"] = 0
-        if "severity" in event and not event["severity"]:
-            event["severity"] = 0
-
-        db_event = await Reset.get_or_none(
-            beatmapsetId=event["beatmapsetId"],
-            userId=event["userId"],
-            timestamp=event["timestamp"],
-        )
-        if not db_event:
-            logger.info(
-                f"Creating reset event: {event['userId']} for mapset {event['beatmapsetId']}"
-            )
-            db_event = await Reset.create(**event)
-        else:
-            update_data = {
-                "obviousness": event["obviousness"] if "obviousness" in event else 0,
-                "severity": event["severity"] if "severity" in event else 0,
-            }
-            db_event.update_from_dict(update_data)
-            await db_event.save()
+        db_event = await _insert_reset_event(event)
 
         await db_event.fetch_related("user_affected")
         if user not in db_event.user_affected:
@@ -146,32 +190,7 @@ async def update_nomination_db(user: User, days: int = 90):
 
     resets_done = activities["disqualifications"] + activities["pops"]
     for event in resets_done:
-        event["id"] = event["_id"]
-        event["timestamp"] = parse(event["timestamp"], ignoretz=True)
-
-        # Hack because pishi mongodb zzz
-        if "obviousness" in event and not event["obviousness"]:
-            event["obviousness"] = 0
-        if "severity" in event and not event["severity"]:
-            event["severity"] = 0
-
-        db_event = await Reset.get_or_none(
-            beatmapsetId=event["beatmapsetId"],
-            userId=event["userId"],
-            timestamp=event["timestamp"],
-        )
-        if not db_event:
-            logger.info(
-                f"Creating reset event: {event['userId']} for mapset {event['beatmapsetId']}"
-            )
-            db_event = await Reset.create(**event)
-        else:
-            update_data = {
-                "obviousness": event["obviousness"] if "obviousness" in event else 0,
-                "severity": event["severity"] if "severity" in event else 0,
-            }
-            db_event.update_from_dict(update_data)
-            await db_event.save()
+        db_event = await _insert_reset_event(event)
 
         await db_event.fetch_related("user_affected")
         map_nominations = await Nomination.filter(
@@ -185,8 +204,6 @@ async def update_nomination_db(user: User, days: int = 90):
                 await db_event.user_affected.add(user)
 
         await db_event.save()
-
-    return events
 
 
 async def update_maps_db(nomination: Nomination):
