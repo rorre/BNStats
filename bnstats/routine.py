@@ -9,11 +9,11 @@ from urllib.parse import urlencode
 
 from dateutil.parser import parse
 
-from bnstats.bnsite import request
 from bnstats.bnsite.enums import MapStatus
 from bnstats.bnsite.request import get
-from bnstats.models import Beatmap, BeatmapSet, Nomination, Reset, User
+from bnstats.config import API_KEY
 from bnstats.helper import mode_to_db
+from bnstats.models import Beatmap, BeatmapSet, Nomination, Reset, User
 
 logger = logging.getLogger("bnstats.routine")
 API_URL = "https://osu.ppy.sh/api"
@@ -196,7 +196,7 @@ async def update_maps_db(nomination: Nomination):
         MapStatus.Approved,
         MapStatus.Ranked,
     ]:
-        query = {"k": request.api_key, "s": nomination.beatmapsetId}
+        query = {"k": API_KEY, "s": nomination.beatmapsetId}
         url = API_URL + "/get_beatmaps?" + urlencode(query)
         logger.info(f"Fetching osu! for beatmapset: {nomination.beatmapsetId}")
         r = await get(url)

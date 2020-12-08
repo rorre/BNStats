@@ -4,15 +4,10 @@ import os
 import aiofiles
 import httpx
 
+from bnstats.config import SITE_SESSION
+
 s: httpx.AsyncClient = httpx.AsyncClient(timeout=60.0)
-api_key = ""
-
-
-def setup_session(session, osu_key):
-    global api_key, s
-
-    api_key = osu_key
-    s.cookies.set(domain="bn.mappersguild.com", name="connect.sid", value=session)
+s.cookies.set(domain="bn.mappersguild.com", name="connect.sid", value=SITE_SESSION)
 
 
 async def get(url, is_json=True, attempts=5):

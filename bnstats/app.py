@@ -1,7 +1,6 @@
 import logging
 
 from starlette.applications import Starlette
-from starlette.config import Config
 from starlette.middleware import Middleware
 from starlette.middleware.gzip import GZipMiddleware
 from starlette.middleware.sessions import SessionMiddleware
@@ -9,26 +8,11 @@ from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 from tortoise.contrib.starlette import register_tortoise
 
-from bnstats.bnsite import request
+from bnstats.config import DB_URL, DEBUG, SECRET, SENTRY_URL
 from bnstats.middlewares.maintenance import MaintenanceMiddleware
 from bnstats.routes import home, qat, score, users
-from bnstats.score import CalculatorABC, get_system
 
 logger = logging.getLogger("bnstats")
-
-logger.info("Fetching settings.")
-config = Config(".env")
-
-DEBUG: bool = config("DEBUG", cast=bool, default=False)
-SECRET: str = config("SECRET")
-DB_URL: str = config("DB_URL")
-SITE_SESSION: str = config("BNSITE_SESSION")
-API_KEY: str = config("API_KEY")
-CALC_SYSTEM = get_system(config("CALC_SYSTEM"))()
-
-# Setup session for HTTPX
-logger.info("Configuring HTTPX.")
-request.setup_session(SITE_SESSION, API_KEY)
 
 # Routes
 logger.info("Configuring routes.")
@@ -58,17 +42,15 @@ middlewares = [
 ]
 
 # Sentry
-sentry_url = config("SENTRY_URL", default="")
-if sentry_url:
+if SENTRY_URL:
     import sentry_sdk
     from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 
-    sentry_sdk.init(sentry_url)
+    sentry_sdk.init(SENTRY_URL)
     middlewares.append(Middleware(SentryAsgiMiddleware))
 
 # Application setup
 app: Starlette = Starlette(debug=DEBUG, routes=routes, middleware=middlewares)
-app.state.calc_system: CalculatorABC = CALC_SYSTEM  # type: ignore
 
 # Database setup
 logger.info("Setting up database.")

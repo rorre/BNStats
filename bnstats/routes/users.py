@@ -9,6 +9,7 @@ from starlette.requests import Request
 from starlette.routing import Router
 
 from bnstats.bnsite.enums import Difficulty, Genre, Language
+from bnstats.config import CALC_SYSTEM
 from bnstats.helper import format_time
 from bnstats.models import BeatmapSet, Nomination, User
 from bnstats.plugins import templates
@@ -93,12 +94,10 @@ async def listing(request: Request):
     eval_counts = [await u.total_nominations(90) for u in users]
 
     for u in users:
-        u.score = await u.get_score(request.app.state.calc_system)
+        u.score = await u.get_score(CALC_SYSTEM)
         u.score_modes = {}
         for mode in u.modes:
-            u.score_modes[mode] = await u.get_score(
-                request.app.state.calc_system, mode=mode
-            )
+            u.score_modes[mode] = await u.get_score(CALC_SYSTEM, mode=mode)
 
     ctx = {
         "request": request,

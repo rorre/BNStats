@@ -5,8 +5,9 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Type, Union
 
 from bnstats.bnsite.enums import MapStatus, Mode
-from bnstats.models import BeatmapSet, Nomination, User
 from bnstats.helper import mode_to_db
+from bnstats.models import BeatmapSet, Nomination, User
+
 logger = logging.getLogger("bnstats.score")
 
 
