@@ -175,7 +175,9 @@ class User(models.Model):
         return users
 
     async def get_nomination_activity(
-        self, date: datetime = None, mode: Union[Mode, str, int] = None
+        self,
+        date: datetime = None,
+        mode: Union[Mode, str, int] = None,
     ) -> List[Nomination]:
         filters = {"userId": self.osuId}
         if date:
@@ -194,7 +196,10 @@ class User(models.Model):
         return events
 
     def get_score(
-        self, system: "CalculatorABC", days: int = 90, mode: Mode = None
+        self,
+        system: "CalculatorABC",
+        days: int = 90,
+        mode: Mode = None,
     ) -> float:
         return system.get_user_score(self, days, mode)
 
