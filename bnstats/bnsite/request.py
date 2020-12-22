@@ -1,3 +1,4 @@
+from typing import Union
 import json
 import os
 
@@ -11,7 +12,7 @@ s: httpx.AsyncClient = httpx.AsyncClient(timeout=60.0, headers=INTEROP_HEADERS)
 s.cookies.set(domain="bn.mappersguild.com", name="connect.sid", value=SITE_SESSION)
 
 
-async def get(url, is_json=True, attempts=5):
+async def get(url, is_json=True, attempts=5) -> Union[dict, str]:
     current_attempt = 1
     while current_attempt <= attempts:
         try:
@@ -33,7 +34,7 @@ async def get(url, is_json=True, attempts=5):
     return _result
 
 
-async def cached_request(url, t, filename, is_json=True):
+async def cached_request(url, t, filename, is_json=True) -> Union[dict, str]:
     filepath = f"cache/{t}/{filename}"
 
     os.makedirs(f"cache/{t}/", exist_ok=True)
