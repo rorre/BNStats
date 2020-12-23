@@ -20,6 +20,11 @@ logger = logging.getLogger("bnstats.models")
 
 
 class Beatmap(models.Model):
+    """osu!beatmap representation.
+
+    This class is used to represent a difficulty in an osu! beatmapset.
+    """
+
     beatmapset_id = fields.IntField()
     beatmap_id = fields.IntField()
     approved = fields.IntField()
@@ -57,7 +62,20 @@ class Beatmap(models.Model):
 
 
 class BeatmapSet:
+    """osu!mapset representation.
+
+    This class inherits all Beatmap's attribute. Which is useful to
+    fetch data effortlessly without going through one of the difficulties
+    in the mapset.
+    """
+
     def __init__(self, beatmaps: List[Beatmap]):
+        """Initializes BeatmapSet with an array of beatmaps.
+
+        Args:
+            beatmaps (List[Beatmap]): Array of beatmaps that will be put
+                together as a beatmapset.
+        """
         self.beatmaps = beatmaps
 
     @property
@@ -171,6 +189,11 @@ class User(models.Model):
 
     @classmethod
     async def get_users(cls) -> List["User"]:
+        """Get all users from database, sorted by username.
+
+        Returns:
+            List[User]: All users from database.
+        """
         users = await cls.all().order_by("username")
         return users
 
@@ -179,6 +202,15 @@ class User(models.Model):
         date: datetime = None,
         mode: Union[Mode, str, int] = None,
     ) -> List[Nomination]:
+        """Fetch user's nomination activities.
+
+        Args:
+            date (datetime, optional): Minimum date to fetch from. Defaults to None.
+            mode (Union[Mode, str, int], optional): The game mode to fetch from. Defaults to all game mode.
+
+        Returns:
+            List[Nomination]: Nominations from user from minimum date to current for specified game mode.
+        """
         filters = {"userId": self.osuId}
         if date:
             filters["timestamp__gte"] = date
@@ -201,9 +233,27 @@ class User(models.Model):
         days: int = 90,
         mode: Mode = None,
     ) -> float:
+        """Get user's score using specified system.
+
+        Args:
+            system (CalculatorABC): Scoring system that will be used to calculate.
+            days (int, optional): Number of days from now to fetch nomination from. Defaults to 90.
+            mode (Mode, optional): Game mode to be calculated. Defaults to None.
+
+        Returns:
+            float: The user's score.
+        """
         return system.get_user_score(self, days, mode)
 
     def total_nominations(self, days: int = 0) -> Awaitable[int]:
+        """Fetch total nominations of the user.
+
+        Args:
+            days (int, optional): Number of days of nominations to count from. Defaults to 0.
+
+        Returns:
+            Awaitable[int]: Total nominations done.
+        """
         # As we only redirect the function, we can just use def instead async def.
         if days:
             d = datetime.now() - timedelta(days)
