@@ -4,6 +4,7 @@ from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.routing import Router
 
+from bnstats.config import CALC_SYSTEM
 from bnstats.models import User
 from bnstats.plugins import templates
 
@@ -33,6 +34,7 @@ async def show_user(request: Request):
 
     nominations.sort(key=lambda x: abs(x.score), reverse=True)
     ctx = {
+        "calc_system": CALC_SYSTEM,
         "request": request,
         "user": user,
         "nominations": nominations,

@@ -198,12 +198,10 @@ async def show_user(request: Request):
         graph_data["sr-all"].append(cnt)
 
     line_labels, line_datas = _create_nomination_chartdata(nominations)
-    user.score = await user.get_score(request.app.state.calc_system)
+    user.score = await user.get_score(CALC_SYSTEM)
     user.score_modes = {}
     for mode in user.modes:
-        user.score_modes[mode] = await user.get_score(
-            request.app.state.calc_system, mode=mode
-        )
+        user.score_modes[mode] = await user.get_score(CALC_SYSTEM, mode=mode)
 
     ctx = {
         "request": request,

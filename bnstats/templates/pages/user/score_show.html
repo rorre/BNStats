@@ -16,9 +16,9 @@
             <div class="field">
                 <label>Select mode</label>
                 <select name="mode" class="ui dropdown">
-                    <option value="all" {% if selected_mode == "all" %}selected{% endif %}>All</option>
+                    <option value="all" {% if selected_mode=="all" %}selected{% endif %}>All</option>
                     {% for k in user.modes %}
-                    <option value="{{ k }}" {% if selected_mode == k %}selected{% endif %}>{{ k }}</option>
+                    <option value="{{ k }}" {% if selected_mode==k %}selected{% endif %}>{{ k }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -56,7 +56,6 @@
                             <td data-sort-value="{{ s.mapset_score }}">{{ '%d' | format(s.mapset_score * 100) }}%</td>
                             <td>{{ '%0.2f' | format(s.penalty) }}</td>
 
-                            {% set calc_system = request.app.state.calc_system %}
                             {% if calc_system.has_weight %}
                             <td>
                                 {{ '%0.2f' | format(s.score * (calc_system.weight ** loop.index0)) }}
