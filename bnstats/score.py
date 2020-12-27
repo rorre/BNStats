@@ -5,12 +5,22 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Type, Union
 
 from bnstats.bnsite.enums import MapStatus, Mode
-from bnstats.models import BeatmapSet, Nomination, User
 from bnstats.helper import mode_to_db
+from bnstats.models import BeatmapSet, Nomination, User
+
 logger = logging.getLogger("bnstats.score")
 
 
 class CalculatorABC(ABC):
+    """Base class for calculator.
+
+    This class must be used as function standardization in order for consistent
+    code style.
+
+    `name`, `has_weight`, `calculate_mapset`, and `calculate_nomination`
+    must be overriden for the derived classes.
+    """
+
     name = "abstract"
     has_weight = False
 
@@ -21,23 +31,61 @@ class CalculatorABC(ABC):
     async def get_user_score(
         self, user: User, days: int = 90, mode: Union[Mode, str] = None
     ) -> float:
+        """Calculate a user's score.
+
+        Args:
+            user (User): User to be calculated.
+            days (int, optional): Maximum days of nomination to be accounted. Defaults to 90.
+            mode (Union[Mode, str], optional): The game mode to be accounted. Defaults to all game mode.
+
+        Returns:
+            float: The user's score.
+        """
         date = datetime.utcnow() - timedelta(days)
         activities = await user.get_nomination_activity(date, mode)
         return self.get_activity_score(activities)
 
     @abstractmethod
     def calculate_mapset(self, beatmap: BeatmapSet) -> float:
+        """Calculate a beatmapset's score worth.
+
+        Args:
+            beatmap (BeatmapSet): The beatmapset to be calculated.
+
+        Returns:
+            float: The beatmapset's score.
+        """
         pass
 
     @abstractmethod
     async def calculate_nomination(
         self, nom: Nomination, save_to_db: bool = True
     ) -> Dict[str, float]:
+        """Calculate a nomination's score.
+
+        Args:
+            nom (Nomination): Nomination to be calculated
+            save_to_db (bool, optional): Whether to save calculated nomination data to database.
+                Defaults to True.
+
+        Returns:
+            Dict[str, float]: Result of nomination calculation.
+        """
         pass
 
     async def calculate_user(
         self, user: User, save_to_db: bool = True
     ) -> List[Dict[str, float]]:
+        """Calculate and get user's nomination values.
+
+        Args:
+            user (User): User to be calculated.
+            save_to_db (bool, optional): Whether to save calculated nomination data to database.
+                Defaults to True.
+
+        Returns:
+            List[Dict[str, float]]: Array of results of each nomination score info.
+        """
         logger.info(f"Calculating user: {user.username}")
         logger.info("Fetching activity for last 90 days.")
         d = datetime.now() - timedelta(90)
@@ -62,7 +110,6 @@ class NaxessCalculator(CalculatorABC):
         return total_score
 
     def calculate_mapset(self, beatmap: BeatmapSet):
-        """Calculate a mapset value."""
         length_sorted = sorted(
             beatmap.beatmaps, key=lambda x: x.hit_length, reverse=True
         )
@@ -310,6 +357,14 @@ class RenCalculator(CalculatorABC):
 
 
 def get_system(name: str) -> Type[CalculatorABC]:
+    """Get calculator system from name.
+
+    Args:
+        name (str): Calculator system's name to be fetched from
+
+    Returns:
+        Type[CalculatorABC]: The calculator's class.
+    """
     _AVAILABLE: Dict[str, Type[CalculatorABC]] = {
         c.name: c for c in [NaxessCalculator, RenCalculator]
     }

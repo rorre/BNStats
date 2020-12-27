@@ -63,3 +63,4 @@ Look at [Uvicorn's deployment docs](https://www.uvicorn.org/deployment/).
 - ~~Specific timespan option~~
 - ~~Move database update routine out of application~~
 - ~~Scoring system~~
+- Update tests
