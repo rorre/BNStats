@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="ui segment">
+    <h3 class="header">User List</h3>
+    <p>Last updated:
+        {% if last_update %}
+        <time class="timeago" datetime="{{ last_update.isoformat(timespec='seconds') }}Z"></time>
+        {% else %}
+        Happens outside the app instance.
+        {% endif %}
+    </p>
+
+    <div class="table-wrapper">
+        <table class="ui celled padded inverted sortable unstackable selectable table">
+            <thead>
+                <tr class="center aligned">
+                    <th class="one wide">#</th>
+                    <th class="nine wide">Username</th>
+                    <th class="no-sort two wide">Game mode</th>
+                    <th class="number four wide">Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr data-url="{{ url_for('users:show', user_id=user.osuId) }}">
+                    <td class="center aligned">{{ loop.index }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.modes | join(', ') }}</td>
+                    <td data-sort-value="{{ '%d' | format(user.score * 100) }}">
+                        {{ '%0.2f' | format(user.score) }}
+
+                        {% set modes_count = user.modes | length %}
+                        {% if modes_count > 1 %}
+                        <span class="ui small text">(
+                            {% for k,v in user.score_modes.items() %}
+                            {{ '%0.2f' | format(v) }} {{ k }} {% if loop.index != modes_count %}, {% endif %}
+                            {% endfor %}
+                            )
+                        </span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

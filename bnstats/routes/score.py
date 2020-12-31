@@ -47,4 +47,28 @@ async def show_user(request: Request):
         "nominations": nominations,
         "title": user.username,
     }
-    return templates.TemplateResponse("pages/user/score_show.html", ctx)
+    return templates.TemplateResponse("pages/score/show.html", ctx)
+
+
+@router.route("/leaderboard", name="leaderboard")
+async def leaderboard(request: Request):
+    calc_system = get_system(request.session.get("calc_system"))()
+    if not calc_system:
+        calc_system = DEFAULT_CALC_SYSTEM
+
+    users = await User.get_users()
+
+    for u in users:
+        u.score = await u.get_score(calc_system)
+        u.score_modes = {}
+        for mode in u.modes:
+            u.score_modes[mode] = await u.get_score(calc_system, mode=mode)
+    users.sort(key=lambda x: x.score, reverse=True)
+
+    ctx = {
+        "request": request,
+        "users": users,
+        "last_update": max(users, key=lambda x: x.last_updated).last_updated,
+        "title": "Leaderboard",
+    }
+    return templates.TemplateResponse("pages/score/leaderboard.html", ctx)
