@@ -342,13 +342,13 @@ class RenCalculator(CalculatorABC):
                 penalty += (2 ** total) / 8
         logger.debug(f"Penalty: {penalty}")
 
-        ranked_score = (beatmap.status == MapStatus.Ranked) / 2
+        ranked_score = ((beatmap.status == MapStatus.Ranked) + 1) / 2
         mapper_score = mapper_score
         mapset_score = self.calculate_mapset(beatmap)
 
         # Final score
         score = round(self.BASE_SCORE * mapper_score * mapset_score, 2)
-        score += ranked_score
+        score *= ranked_score
         score -= penalty
         logger.debug(f"Final score: {score}")
 
