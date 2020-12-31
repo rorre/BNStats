@@ -237,9 +237,9 @@ class NaxessCalculator(CalculatorABC):
 
 class RenCalculator(CalculatorABC):
     name = "ren"
-    BASE_SCORE = 0.5
+    BASE_SCORE = 1
     has_weight = True
-    weight = 0.975
+    weight = 0.95
 
     def get_activity_score(self, nominations: List[Nomination]) -> float:
         nominations.sort(
@@ -275,7 +275,7 @@ class RenCalculator(CalculatorABC):
         for diff in beatmap.beatmaps:
             # Easier diffs tend to be much easier to check
             # Of course, this is extremely naive especially with how slider is treated.
-            bonus_drain += diff.hit_length * diff.difficultyrating / 5.5
+            bonus_drain += diff.hit_length * (diff.difficultyrating - 5.5) / 5.5
         bonus_drain *= math.log(beatmap.total_diffs, 8)
         logger.debug(f"Bonus drain: {bonus_drain}")
 
