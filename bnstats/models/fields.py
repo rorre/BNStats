@@ -18,9 +18,12 @@ class Score(BaseModel):
 
 class ScoreField(JSONField):
     def to_db_value(self, value: Dict[str, Score], instance) -> str:
-        db_json: Dict[str, str] = {}
-        for k in value.keys():
-            db_json[k] = value[k].json()
+        if value:
+            db_json: Dict[str, str] = {}
+            for k in value.keys():
+                db_json[k] = value[k].json()
+        else:
+            db_json = None
         return super().to_db_value(db_json, instance)
 
     def to_python_value(self, value: Optional[Union[str, dict]]) -> Optional[Dict]:
