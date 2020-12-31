@@ -316,7 +316,7 @@ class RenCalculator(CalculatorABC):
 
         # For every found mapper, reduce the score by 75%.
         # Basically, (1/4)^n.
-        d = datetime.now() - timedelta(90)
+        d = datetime.now() - timedelta(180)
         mapper = beatmap.creator_id
         recurring_mapper_count = (
             await Nomination.filter(
@@ -330,7 +330,28 @@ class RenCalculator(CalculatorABC):
             .distinct()
             .count()
         )
+
+        # Look for other nominator's nominations on same mapper
+        # We can assume that if the mapper has more maps that have been nominated before,
+        # their sets are easier to check due to their experience in mapping scene.
+        other_nominator_noms = await Nomination.filter(
+            creatorId=mapper,
+            timestamp__gte=d,
+            timestamp__lt=nom.timestamp,
+            userId__not=user.osuId,
+            beatmapsetId__not=nom.beatmapsetId,
+        ).all()
+
+        other_nominator_count = 0
+        seen_maps = [nom.beatmapsetId]
+        for other_nom in other_nominator_noms:
+            if other_nom.beatmapsetId in seen_maps:
+                continue
+            other_nominator_count += 1
+            seen_maps.append(other_nom.beatmapsetId)
+
         mapper_score = 0.25 ** recurring_mapper_count
+        mapper_score *= 0.95 ** other_nominator_count
         logger.debug(f"Mapper value: {mapper_score}%")
 
         resets = await user.resets.filter(beatmapsetId=nom.beatmapsetId).all()
