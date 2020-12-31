@@ -20,9 +20,6 @@ SITE_SESSION = config("BNSITE_SESSION")
 API_KEY = config("API_KEY")
 WEBHOOK_URL = config("WEBHOOK_URL", default="")
 
-CALC_SYSTEM = get_system(config("CALC_SYSTEM"))()
-print(f"> Using calculator: {CALC_SYSTEM.name}")
-
 logger = logging.getLogger("bnstats")
 logger.setLevel(logging.DEBUG)
 
@@ -42,7 +39,11 @@ async def run_calculate():
     c = len(users)
     for i, u in enumerate(users):
         print(f">>> Calculating score for user: {u.username} ({i+1}/{c})")
-        await CALC_SYSTEM.calculate_user(u)
+
+        for system_name in ("ren", "naxess"):
+            print(">>>> Using system:", system_name)
+            calc_system = get_system(system_name)()
+            await calc_system.calculate_user(u)
 
 
 async def run(days):
@@ -75,7 +76,10 @@ async def run(days):
                     await update_user_details(u, nominated_maps)
 
                 print(f">>> Calculating score for user: {u.username}")
-                await CALC_SYSTEM.calculate_user(u)
+                for system_name in ("ren", "naxess"):
+                    print(">>>> Using system:", system_name)
+                    calc_system = get_system(system_name)()
+                    await calc_system.calculate_user(u)
 
             if len(w):
                 e_msg = "\r\n".join(list(map(lambda x: str(x.message), w)))
