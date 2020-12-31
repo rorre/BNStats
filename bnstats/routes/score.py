@@ -14,9 +14,10 @@ router = Router()
 
 @router.route("/{user_id:int}", name="show")
 async def show_user(request: Request):
-    calc_system = get_system(request.session.get("calc_system"))()
+    calc_system = get_system(request.session.get("calc_system"))
     if not calc_system:
         calc_system = DEFAULT_CALC_SYSTEM
+    calc_system = calc_system()
 
     uid: int = request.path_params["user_id"]
     mode: str = request.query_params.get("mode")
@@ -52,9 +53,10 @@ async def show_user(request: Request):
 
 @router.route("/leaderboard", name="leaderboard")
 async def leaderboard(request: Request):
-    calc_system = get_system(request.session.get("calc_system"))()
+    calc_system = get_system(request.session.get("calc_system"))
     if not calc_system:
         calc_system = DEFAULT_CALC_SYSTEM
+    calc_system = calc_system()
 
     users = await User.get_users()
 

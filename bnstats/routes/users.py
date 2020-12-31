@@ -193,9 +193,10 @@ async def show_user(request: Request):
 
     line_labels, line_datas = _create_nomination_chartdata(nominations)
 
-    calc_system = get_system(request.session.get("calc_system"))()
+    calc_system = get_system(request.session.get("calc_system"))
     if not calc_system:
         calc_system = DEFAULT_CALC_SYSTEM
+    calc_system = calc_system()
 
     user.score = await user.get_score(calc_system)
     user.score_modes = {}
