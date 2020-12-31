@@ -18,6 +18,7 @@ logger = logging.getLogger("bnstats")
 logger.info("Configuring routes.")
 routes = [
     Route("/", home.homepage, name="home"),
+    Route("/switch", home.switch, name="switch"),
     Mount("/users", users.router, name="users"),
     Mount("/qat", qat.router, name="qat"),
     Mount("/score", score.router, name="score"),

@@ -1,18 +1,23 @@
+from bnstats.config import DEFAULT_CALC_SYSTEM
 from datetime import datetime, timedelta
 
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.routing import Router
 
-from bnstats.config import CALC_SYSTEM
 from bnstats.models import User
 from bnstats.plugins import templates
+from bnstats.score import get_system
 
 router = Router()
 
 
 @router.route("/{user_id:int}", name="show")
 async def show_user(request: Request):
+    calc_system = get_system(request.session.get("calc_system"))()
+    if not calc_system:
+        calc_system = DEFAULT_CALC_SYSTEM
+
     uid: int = request.path_params["user_id"]
     mode: str = request.query_params.get("mode")
     if mode not in ["osu", "catch", "taiko", "mania"]:
@@ -32,9 +37,11 @@ async def show_user(request: Request):
     for nom in nominations:
         nom.map = await nom.get_map()
 
-    nominations.sort(key=lambda x: abs(x.score), reverse=True)
+    nominations.sort(
+        key=lambda x: abs(x.score[calc_system.name].total_score), reverse=True
+    )
     ctx = {
-        "calc_system": CALC_SYSTEM,
+        "calc_system": calc_system,
         "request": request,
         "user": user,
         "nominations": nominations,

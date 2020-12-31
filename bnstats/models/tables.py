@@ -6,6 +6,8 @@ from tortoise import fields, models
 
 from bnstats.bnsite.enums import Difficulty, Genre, Language, MapStatus, Mode
 from bnstats.helper import format_time
+from bnstats.models.fields import ScoreField
+
 
 if TYPE_CHECKING:
     from bnstats.score import CalculatorABC
@@ -135,11 +137,7 @@ class Nomination(models.Model):
     ambiguous_mode = fields.BooleanField(default=False)
 
     # Scoring
-    mapset_score = fields.FloatField(default=0.0)
-    mapper_score = fields.FloatField(default=0.0)
-    ranked_score = fields.FloatField(default=0.0)
-    penalty = fields.FloatField(default=0.0)
-    score = fields.FloatField(default=0.0)
+    score = ScoreField()
     map: BeatmapSet
 
     async def get_map(self) -> BeatmapSet:

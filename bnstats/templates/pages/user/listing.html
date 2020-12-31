@@ -34,13 +34,6 @@
                     <th class="no-sort">Attributes</th>
                     <th class="no-sort">Game mode</th>
                     <th class="number" id="nominationHead">Nominations</th>
-                    <th class="float">
-                        Rating
-                        <span class="tooltip" data-content="Rating is an experimental nomination scoring system."
-                            data-variation="inverted">
-                            <i class="question circle icon"></i>
-                        </span>
-                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -53,20 +46,6 @@
                     <td data-all="{{ counts[loop.index0] }}" data-threemo="{{ eval_counts[loop.index0] }}">
                         {{ counts[loop.index0] }}
                         <span class="ui small text" data-tooltip="Last 90 days">({{ eval_counts[loop.index0] }})</span>
-                    </td>
-
-                    <td data-sort-value="{{ '%d' | format(user.score * 100) }}">
-                        {{ '%0.2f' | format(user.score) }}
-
-                        {% set modes_count = user.modes | length %}
-                        {% if modes_count > 1 %}
-                        <span class="ui small text">(
-                            {% for k,v in user.score_modes.items() %}
-                            {{ '%0.2f' | format(v) }} {{ k }} {% if loop.index != modes_count %}, {% endif %}
-                            {% endfor %}
-                            )
-                        </span>
-                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}

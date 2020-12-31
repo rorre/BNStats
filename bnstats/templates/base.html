@@ -43,7 +43,7 @@
 
 <body>
     <!-- Navbar -->
-    <div class="ui inverted secondary menu" style="margin-bottom:0;">
+    <div class="ui stackable inverted secondary menu" style="margin-bottom:0;">
         <div class="ui container">
             <a href="{{ url_for('home') }}" class="item logo"><img src="/static/logo.png"></a>
             <a href="{{ url_for('home') }}" class="item">Home</a>
@@ -72,4 +72,15 @@
     <div class="ui main container">
         {% block content %}{% endblock %}
     </div>
+
+    {% set current_system = request.session.get("calc_system") or config.DEFAULT_CALC_SYSTEM.name %}
+    {% if current_system == "ren" %}
+    <a href="{{ url_for('switch') }}?system=naxess&next={{ request.url }}" class="ui primary button" id="switchButton">
+        Use naxess rating calculator
+    </a>
+    {% else %}
+    <a href="{{ url_for('switch') }}?system=ren&next={{ request.url }}" class="ui primary button" id="switchButton">
+        Use ren rating calculator
+    </a>
+    {% endif %}
 </body>

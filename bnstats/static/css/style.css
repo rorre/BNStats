@@ -161,3 +161,10 @@ select.ui.dropdown, .ui.selection.dropdown {
     color: white !important;
     background: #1f1d24 !important;
 }
+
+#switchButton {
+    position: fixed;
+    z-index: 1060;
+    bottom: 20px;
+    right: 20px;
+}
