@@ -23,7 +23,7 @@
             </thead>
             <tbody>
                 {% for user in users %}
-                <tr data-url="{{ url_for('users:show', user_id=user.osuId) }}">
+                <tr data-url="{{ url_for('score:show', user_id=user.osuId) }}">
                     <td class="center aligned">{{ loop.index }}</td>
                     <td>{{ user.username }}</td>
                     <td>{{ user.modes | join(', ') }}</td>
