@@ -7,6 +7,7 @@ from typing import Dict, List, Type, Union
 from bnstats.bnsite.enums import MapStatus, Mode
 from bnstats.helper import mode_to_db
 from bnstats.models import BeatmapSet, Nomination, User
+from bnstats.models.fields import Score
 
 logger = logging.getLogger("bnstats.score")
 
@@ -58,20 +59,27 @@ class CalculatorABC(ABC):
         pass
 
     @abstractmethod
-    async def calculate_nomination(
-        self, nom: Nomination, save_to_db: bool = True
-    ) -> Dict[str, float]:
+    async def calculate_nomination(self, nom: Nomination) -> Dict[str, float]:
         """Calculate a nomination's score.
 
         Args:
             nom (Nomination): Nomination to be calculated
-            save_to_db (bool, optional): Whether to save calculated nomination data to database.
-                Defaults to True.
 
         Returns:
             Dict[str, float]: Result of nomination calculation.
         """
         pass
+
+    async def _save_nomination_score(
+        self, nom: Nomination, score_data: Dict[str, float]
+    ):
+        new_data = nom.score
+        new_data[self.name] = Score(calculator_name=self.name, **score_data)
+
+        update_data = {"score": new_data}
+        logger.info("Saving nomination data.")
+        nom.update_from_dict(update_data)
+        await nom.save()
 
     async def calculate_user(
         self, user: User, save_to_db: bool = True
@@ -93,7 +101,11 @@ class CalculatorABC(ABC):
 
         scores = []
         for nom in activity:
-            scores.append(await self.calculate_nomination(nom, save_to_db))
+            nomination_score = await self.calculate_nomination(nom)
+            scores.append(nomination_score)
+
+            if save_to_db:
+                await self._save_nomination_score(nom, nomination_score)
         return scores
 
 
@@ -103,10 +115,12 @@ class NaxessCalculator(CalculatorABC):
     weight = 0.9
 
     def get_activity_score(self, nominations: List[Nomination]) -> float:
-        nominations.sort(key=lambda x: abs(x.score), reverse=True)
+        nominations.sort(
+            key=lambda x: abs(x.score[self.name].total_score), reverse=True
+        )
         total_score = 0
         for i, a in enumerate(nominations):
-            total_score += a.score * (self.weight ** i)
+            total_score += a.score[self.name].total_score * (self.weight ** i)
         return total_score
 
     def calculate_mapset(self, beatmap: BeatmapSet):
@@ -211,32 +225,29 @@ class NaxessCalculator(CalculatorABC):
         score -= penalty
         logger.debug(f"Final score: {score}")
 
-        update_data = {
+        score_data = {
             "ranked_score": ranked_score,
             "mapper_score": mapper_score,
             "mapset_score": mapset_score,
             "penalty": penalty,
-            "score": score,
+            "total_score": score,
         }
-
-        if save_to_db:
-            logger.info("Saving nomination data.")
-            nom.update_from_dict(update_data)
-            await nom.save()
-        return update_data
+        return score_data
 
 
 class RenCalculator(CalculatorABC):
     name = "ren"
-    BASE_SCORE = 0.5
+    BASE_SCORE = 1
     has_weight = True
-    weight = 0.975
+    weight = 0.95
 
     def get_activity_score(self, nominations: List[Nomination]) -> float:
-        nominations.sort(key=lambda x: abs(x.score), reverse=True)
+        nominations.sort(
+            key=lambda x: abs(x.score[self.name].total_score), reverse=True
+        )
         total_score = 0
         for i, a in enumerate(nominations):
-            total_score += a.score * (self.weight ** i)
+            total_score += a.score[self.name].total_score * (self.weight ** i)
         return total_score
 
     def calculate_mapset(self, beatmap: BeatmapSet):
@@ -264,7 +275,7 @@ class RenCalculator(CalculatorABC):
         for diff in beatmap.beatmaps:
             # Easier diffs tend to be much easier to check
             # Of course, this is extremely naive especially with how slider is treated.
-            bonus_drain += diff.hit_length * diff.difficultyrating / 5.5
+            bonus_drain += diff.hit_length * (diff.difficultyrating - 5.5) / 5.5
         bonus_drain *= math.log(beatmap.total_diffs, 8)
         logger.debug(f"Bonus drain: {bonus_drain}")
 
@@ -305,7 +316,7 @@ class RenCalculator(CalculatorABC):
 
         # For every found mapper, reduce the score by 75%.
         # Basically, (1/4)^n.
-        d = datetime.now() - timedelta(90)
+        d = datetime.now() - timedelta(180)
         mapper = beatmap.creator_id
         recurring_mapper_count = (
             await Nomination.filter(
@@ -319,7 +330,28 @@ class RenCalculator(CalculatorABC):
             .distinct()
             .count()
         )
+
+        # Look for other nominator's nominations on same mapper
+        # We can assume that if the mapper has more maps that have been nominated before,
+        # their sets are easier to check due to their experience in mapping scene.
+        other_nominator_noms = await Nomination.filter(
+            creatorId=mapper,
+            timestamp__gte=d,
+            timestamp__lt=nom.timestamp,
+            userId__not=user.osuId,
+            beatmapsetId__not=nom.beatmapsetId,
+        ).all()
+
+        other_nominator_count = 0
+        seen_maps = [nom.beatmapsetId]
+        for other_nom in other_nominator_noms:
+            if other_nom.beatmapsetId in seen_maps:
+                continue
+            other_nominator_count += 1
+            seen_maps.append(other_nom.beatmapsetId)
+
         mapper_score = 0.25 ** recurring_mapper_count
+        mapper_score *= 0.95 ** other_nominator_count
         logger.debug(f"Mapper value: {mapper_score}%")
 
         resets = await user.resets.filter(beatmapsetId=nom.beatmapsetId).all()
@@ -331,32 +363,32 @@ class RenCalculator(CalculatorABC):
                 penalty += (2 ** total) / 8
         logger.debug(f"Penalty: {penalty}")
 
-        ranked_score = (beatmap.status == MapStatus.Ranked) / 2
+        ranked_score = ((beatmap.status == MapStatus.Ranked) + 1) / 2
         mapper_score = mapper_score
         mapset_score = self.calculate_mapset(beatmap)
 
         # Final score
         score = round(self.BASE_SCORE * mapper_score * mapset_score, 2)
-        score += ranked_score
+        score *= ranked_score
         score -= penalty
         logger.debug(f"Final score: {score}")
 
-        update_data = {
+        score_data = {
             "ranked_score": ranked_score,
             "mapper_score": mapper_score,
             "mapset_score": self.calculate_mapset(beatmap),
             "penalty": penalty,
-            "score": score,
+            "total_score": score,
         }
-
-        if save_to_db:
-            logger.info("Saving nomination data.")
-            nom.update_from_dict(update_data)
-            await nom.save()
-        return update_data
+        return score_data
 
 
-def get_system(name: str) -> Type[CalculatorABC]:
+# fmt: off
+_AVAILABLE: Dict[str, Type[CalculatorABC]] = {
+    c.name: c for c in [NaxessCalculator, RenCalculator]
+}
+
+def get_system(name: str) -> Type[CalculatorABC]: # noqa
     """Get calculator system from name.
 
     Args:
@@ -365,7 +397,5 @@ def get_system(name: str) -> Type[CalculatorABC]:
     Returns:
         Type[CalculatorABC]: The calculator's class.
     """
-    _AVAILABLE: Dict[str, Type[CalculatorABC]] = {
-        c.name: c for c in [NaxessCalculator, RenCalculator]
-    }
-    return _AVAILABLE[name]
+    return _AVAILABLE.get(name)
+# fmt: on

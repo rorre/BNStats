@@ -1,0 +1,18 @@
+{
+  "upgrade": [
+    "ALTER TABLE \"nomination\" DROP COLUMN \"score\"",
+    "ALTER TABLE \"nomination\" DROP COLUMN \"mapset_score\"",
+    "ALTER TABLE \"nomination\" DROP COLUMN \"mapper_score\"",
+    "ALTER TABLE \"nomination\" DROP COLUMN \"ranked_score\"",
+    "ALTER TABLE \"nomination\" DROP COLUMN \"penalty\"",
+    "ALTER TABLE \"nomination\" ADD \"score\" JSONB"
+  ],
+  "downgrade": [
+    "ALTER TABLE \"nomination\" DROP COLUMN \"score\"",
+    "ALTER TABLE \"nomination\" ADD \"mapset_score\" DOUBLE PRECISION NOT NULL  DEFAULT 0",
+    "ALTER TABLE \"nomination\" ADD \"mapper_score\" DOUBLE PRECISION NOT NULL  DEFAULT 0",
+    "ALTER TABLE \"nomination\" ADD \"ranked_score\" DOUBLE PRECISION NOT NULL  DEFAULT 0",
+    "ALTER TABLE \"nomination\" ADD \"penalty\" DOUBLE PRECISION NOT NULL  DEFAULT 0",
+    "ALTER TABLE \"nomination\" ADD \"score\" DOUBLE PRECISION NOT NULL  DEFAULT 0"
+  ]
+}

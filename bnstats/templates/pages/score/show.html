@@ -52,20 +52,28 @@
                             <td colspan="4">Can't tell which mode the nominator is trying to nominate, please tell
                                 Keitaro!.</td>
                             {% else %}
-                            <td data-sort-value="{{ s.ranked_score }}">{{ '%d' | format(s.ranked_score * 100) }}%</td>
-                            <td data-sort-value="{{ s.mapper_score }}">{{ '%d' | format(s.mapper_score * 100) }}%</td>
-                            <td data-sort-value="{{ s.mapset_score }}">{{ '%d' | format(s.mapset_score * 100) }}%</td>
-                            <td>{{ '%0.2f' | format(s.penalty) }}</td>
+
+                            {% set score = s.score[calc_system.name] %}
+                            <td data-sort-value="{{ score.ranked_score }}">
+                                {{ '%d' | format(score.ranked_score * 100)}}%
+                            </td>
+                            <td data-sort-value="{{ score.mapper_score }}">
+                                {{ '%d' | format(score.mapper_score * 100) }}%
+                            </td>
+                            <td data-sort-value="{{ score.mapset_score }}">
+                                {{ '%d' | format(score.mapset_score * 100) }}%
+                            </td>
+                            <td>{{ '%0.2f' | format(score.penalty) }}</td>
 
                             {% if calc_system.has_weight %}
                             <td>
-                                {{ '%0.2f' | format(s.score * (calc_system.weight ** loop.index0)) }}
+                                {{ '%0.2f' | format(score.total_score * (calc_system.weight ** loop.index0)) }}
                                 <span class="ui small text" data-tooltip="Unweightened score">
-                                    ({{ '%0.2f' | format(s.score) }})
+                                    ({{ '%0.2f' | format(score.total_score) }})
                                 </span>
                             </td>
                             {% else %}
-                            <td>{{ '%0.2f' | format(s.score) }}</td>
+                            <td>{{ '%0.2f' | format(score.total_score) }}</td>
                             {% endif %}
                             {% endif %}
                         </tr>

@@ -7,12 +7,12 @@ from typing import Dict, List, Tuple, Union
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.routing import Router
-
+from bnstats.config import DEFAULT_CALC_SYSTEM
 from bnstats.bnsite.enums import Difficulty, Genre, Language
-from bnstats.config import CALC_SYSTEM
 from bnstats.helper import format_time
 from bnstats.models import BeatmapSet, Nomination, User
 from bnstats.plugins import templates
+from bnstats.score import get_system
 
 router = Router()
 
@@ -92,12 +92,6 @@ async def listing(request: Request):
     users = await User.get_users()
     counts = [await u.total_nominations() for u in users]
     eval_counts = [await u.total_nominations(90) for u in users]
-
-    for u in users:
-        u.score = await u.get_score(CALC_SYSTEM)
-        u.score_modes = {}
-        for mode in u.modes:
-            u.score_modes[mode] = await u.get_score(CALC_SYSTEM, mode=mode)
 
     ctx = {
         "request": request,
@@ -198,10 +192,15 @@ async def show_user(request: Request):
         graph_data["sr-all"].append(cnt)
 
     line_labels, line_datas = _create_nomination_chartdata(nominations)
-    user.score = await user.get_score(CALC_SYSTEM)
+
+    calc_system = get_system(request.session.get("calc_system"))()
+    if not calc_system:
+        calc_system = DEFAULT_CALC_SYSTEM
+
+    user.score = await user.get_score(calc_system)
     user.score_modes = {}
     for mode in user.modes:
-        user.score_modes[mode] = await user.get_score(CALC_SYSTEM, mode=mode)
+        user.score_modes[mode] = await user.get_score(calc_system, mode=mode)
 
     ctx = {
         "request": request,
