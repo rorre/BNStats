@@ -58,19 +58,36 @@ async def leaderboard(request: Request):
         calc_system = DEFAULT_CALC_SYSTEM
     calc_system = calc_system()
 
-    users = await User.get_users()
+    selected_mode = request.query_params.get("mode")
+    is_valid_mode = selected_mode and selected_mode in [
+        "osu",
+        "taiko",
+        "catch",
+        "mania",
+    ]
+    if is_valid_mode:
+        users = (
+            await User.filter(modes__contains=selected_mode).all().order_by("username")
+        )
+    else:
+        users = await User.get_users()
 
     for u in users:
         u.score = await u.get_score(calc_system)
         u.score_modes = {}
         for mode in u.modes:
             u.score_modes[mode] = await u.get_score(calc_system, mode=mode)
-    users.sort(key=lambda x: x.score, reverse=True)
+
+    if is_valid_mode:
+        users.sort(key=lambda x: x.score_modes[selected_mode], reverse=True)
+    else:
+        users.sort(key=lambda x: x.score, reverse=True)
 
     ctx = {
         "request": request,
         "users": users,
         "last_update": max(users, key=lambda x: x.last_updated).last_updated,
         "title": "Leaderboard",
+        "mode": selected_mode,
     }
     return templates.TemplateResponse("pages/score/leaderboard.html", ctx)

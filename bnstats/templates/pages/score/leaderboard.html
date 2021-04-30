@@ -11,6 +11,19 @@
         {% endif %}
     </p>
 
+    <form class="ui inverted form" id="leaderboardFilter">
+        <div class="field">
+            <label>Game mode</label>
+            <select name="mode" class="ui dropdown">
+                <option value="all" {% if not mode %}selected{% endif %}>All</option>
+                <option value="osu" {% if mode=='osu' %}selected{% endif %}>osu!</option>
+                <option value="taiko" {% if mode=='taiko' %}selected{% endif %}>Taiko</option>
+                <option value="catch" {% if mode=='catch' %}selected{% endif %}>Catch</option>
+                <option value="mania" {% if mode=='mania' %}selected{% endif %}>Mania</option>
+            </select>
+        </div>
+    </form>
+
     <div class="table-wrapper">
         <table class="ui celled padded inverted sortable unstackable selectable table">
             <thead>
@@ -27,6 +40,11 @@
                     <td class="center aligned">{{ loop.index }}</td>
                     <td>{{ user.username }}</td>
                     <td>{{ user.modes | join(', ') }}</td>
+                    {% if mode and mode in ["osu", "taiko", "catch", "mania"] %}
+                    <td data-sort-value="{{ '%d' | format(user.score_modes[mode] * 100) }}">
+                        {{ '%0.2f' | format(user.score_modes[mode]) }}
+                    </td>
+                    {% else %}
                     <td data-sort-value="{{ '%d' | format(user.score * 100) }}">
                         {{ '%0.2f' | format(user.score) }}
 
@@ -40,6 +58,7 @@
                         </span>
                         {% endif %}
                     </td>
+                    {% endif %}
                 </tr>
                 {% endfor %}
             </tbody>

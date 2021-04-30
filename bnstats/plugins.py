@@ -23,6 +23,7 @@ js_bundle = Bundle(
         "js/filter.js",
         "js/profile.js",
         "js/table.js",
+        "js/leaderboard.js",
     ),
     filters="rjsmin",
     output="bundle.%(version)s.js",
