@@ -4,21 +4,21 @@ from starlette.testclient import TestClient
 from bnstats.score import NaxessCalculator
 
 
-def test_homepage(client_without_middleware: TestClient):
-    assert client_without_middleware.get("/").status_code == 200
+def test_homepage(client: TestClient):
+    assert client.get("/").status_code == 200
 
 
-def test_user_listing(client_without_middleware: TestClient):
-    res = client_without_middleware.get("/users/")
+def test_user_listing(client: TestClient):
+    res = client.get("/users/")
     assert res.status_code == 200
 
     soup = BeautifulSoup(res.text, "html.parser")
     assert len(soup.select("tbody > tr")) == 1
 
 
-def test_user_profile(client_without_middleware: TestClient):
-    client_without_middleware.app.state.calc_system = NaxessCalculator()
-    res = client_without_middleware.get("/users/1")
+def test_user_profile(client: TestClient):
+    client.app.state.calc_system = NaxessCalculator()
+    res = client.get("/users/1")
     assert res.status_code == 200
 
     soup = BeautifulSoup(res.text, "html.parser")
@@ -30,19 +30,19 @@ def test_user_profile(client_without_middleware: TestClient):
     assert "3.08" in str(items[3])
 
 
-def test_user_404(client_without_middleware: TestClient):
-    res = client_without_middleware.get("/users/2")
+def test_user_404(client: TestClient):
+    res = client.get("/users/2")
     assert res.status_code == 404
 
 
-def test_user_score(client_without_middleware: TestClient):
-    res = client_without_middleware.get("/score/1")
+def test_user_score(client: TestClient):
+    res = client.get("/score/1")
     assert res.status_code == 200
 
     soup = BeautifulSoup(res.text, "html.parser")
     assert len(soup.select("tbody > tr")) == 2
 
 
-def test_user_score_404(client_without_middleware: TestClient):
-    res = client_without_middleware.get("/score/2")
+def test_user_score_404(client: TestClient):
+    res = client.get("/score/2")
     assert res.status_code == 404

@@ -7,7 +7,7 @@ from bnstats.routes import qat
 from bnstats.models import Nomination, Reset
 
 
-def test_first(client_without_middleware: TestClient, httpx_mock: HTTPXMock):
+def test_first(client: TestClient, httpx_mock: HTTPXMock):
     request.api_key = "testing"
     qat.QAT_KEY = "testing"
 
@@ -18,7 +18,7 @@ def test_first(client_without_middleware: TestClient, httpx_mock: HTTPXMock):
         )
 
     with open("tests/data/aiess/first.json") as f:
-        res = client_without_middleware.post(
+        res = client.post(
             "/qat/aiess", headers={"Authorization": "testing"}, json=json.load(f)
         )
         assert res.status_code == 200
@@ -27,13 +27,13 @@ def test_first(client_without_middleware: TestClient, httpx_mock: HTTPXMock):
     Nomination.filter(userId=1).get()
 
 
-def test_error(client_without_middleware: TestClient, httpx_mock: HTTPXMock):
+def test_error(client: TestClient, httpx_mock: HTTPXMock):
     httpx_mock.add_response(
         url="https://bn.mappersguild.com/users/relevantInfo", data="nope"
     )
 
     with open("tests/data/aiess/error.json") as f:
-        res = client_without_middleware.post(
+        res = client.post(
             "/qat/aiess", headers={"Authorization": "testing"}, json=json.load(f)
         )
         assert res.status_code == 500

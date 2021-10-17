@@ -1,11 +1,11 @@
-from typing import Union
 import json
 import os
+from typing import Union
 
 import aiofiles
 import httpx
 
-from bnstats.config import SITE_SESSION, INTEROP_PASSWORD, INTEROP_USERNAME
+from bnstats.config import INTEROP_PASSWORD, INTEROP_USERNAME, SITE_SESSION
 
 INTEROP_HEADERS = {"username": INTEROP_USERNAME, "secret": INTEROP_PASSWORD}
 s: httpx.AsyncClient = httpx.AsyncClient(timeout=60.0, headers=INTEROP_HEADERS)

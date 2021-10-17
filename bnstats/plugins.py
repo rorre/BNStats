@@ -1,8 +1,9 @@
-from bnstats import config
 from starlette.templating import Jinja2Templates
 from webassets import Bundle
 from webassets import Environment as AssetsEnvironment
 from webassets.ext.jinja2 import AssetsExtension
+
+from bnstats import config
 
 assets_env = AssetsEnvironment("./bnstats/static", "/static")
 templates = Jinja2Templates(directory="bnstats/templates")

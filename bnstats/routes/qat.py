@@ -23,7 +23,7 @@ if DEFAULT_KEY == QAT_KEY and not DEBUG:
 
 
 async def nomination_update(event: Dict[str, Any]):
-    event["timestamp"] = parse(event["timestamp"], ignoretz=True)
+    event["timestamp"] = parse(event["timestamp"])
     event["user"] = await User.get_or_none(osuId=event["userId"])
 
     if not event["user"]:
@@ -51,7 +51,7 @@ async def nomination_update(event: Dict[str, Any]):
 async def reset_update(event: Dict[str, Any]):
     if event["userId"] == 3:
         return
-    event["timestamp"] = parse(event["timestamp"], ignoretz=True)
+    event["timestamp"] = parse(event["timestamp"])
     db_event = await Reset.get_or_none(
         beatmapsetId=event["beatmapsetId"],
         userId=event["userId"],

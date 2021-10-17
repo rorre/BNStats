@@ -2,12 +2,11 @@ import logging
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any, Awaitable, List, Union
 
-from tortoise import fields, models
+from tortoise import fields, models, timezone
 
 from bnstats.bnsite.enums import Difficulty, Genre, Language, MapStatus, Mode
 from bnstats.helper import format_time
 from bnstats.models.fields import ScoreField
-
 
 if TYPE_CHECKING:
     from bnstats.score import CalculatorABC
@@ -131,13 +130,16 @@ class Nomination(models.Model):
     creatorName = fields.TextField(null=True)
     timestamp = fields.DatetimeField()
     user: fields.ForeignKeyRelation["User"] = fields.ForeignKeyField(
-        "models.User", related_name="nominations"
+        "models.User",
+        related_name="nominations",
+        null=True,
+        on_delete="SET NULL",
     )
     as_modes = fields.JSONField(null=True, default=[])
     ambiguous_mode = fields.BooleanField(default=False)
 
     # Scoring
-    score = ScoreField()
+    score = ScoreField(null=True)
     map: BeatmapSet
 
     async def get_map(self) -> BeatmapSet:
@@ -254,6 +256,6 @@ class User(models.Model):
         """
         # As we only redirect the function, we can just use def instead async def.
         if days:
-            d = datetime.now() - timedelta(days)
+            d = timezone.now() - timedelta(days)
             return Nomination.filter(userId=self.osuId, timestamp__gte=d).count()
         return Nomination.filter(userId=self.osuId).count()  # type: ignore

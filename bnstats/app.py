@@ -63,6 +63,8 @@ tortoise_config = {
             "default_connection": "default",
         },
     },
+    "use_tz": True,
+    "timezone": "UTC",
 }
 
 register_tortoise(

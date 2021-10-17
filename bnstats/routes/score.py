@@ -1,10 +1,11 @@
-from bnstats.config import DEFAULT_CALC_SYSTEM
 from datetime import datetime, timedelta
 
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.routing import Router
+from tortoise import timezone
 
+from bnstats.config import DEFAULT_CALC_SYSTEM
 from bnstats.models import User
 from bnstats.plugins import templates
 from bnstats.score import get_system
@@ -28,7 +29,7 @@ async def show_user(request: Request):
     if not user:
         raise HTTPException(404, "User not found.")
 
-    d = datetime.now() - timedelta(90)
+    d = timezone.now() - timedelta(90)
     nominations = await user.get_nomination_activity(d, mode=mode)
 
     if not nominations:

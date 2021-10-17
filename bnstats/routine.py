@@ -8,6 +8,7 @@ from typing import Any, Dict, List
 from urllib.parse import urlencode
 
 from dateutil.parser import parse
+from tortoise import timezone
 
 from bnstats.bnsite.enums import MapStatus
 from bnstats.bnsite.request import get
@@ -101,7 +102,7 @@ async def update_users_db():
     logger.info("Updating users.")
     users: List[User] = []
     for u in r:
-        u["last_updated"] = datetime.utcnow()
+        u["last_updated"] = timezone.now()
         user = await User.get_or_none(osuId=u["osuId"])
         if user:
             logger.debug(f"Updating user: {user.username}")
@@ -115,9 +116,12 @@ async def update_users_db():
     return users
 
 
+f = {}
+
+
 async def _insert_reset_event(event):
     event["id"] = event["_id"]
-    event["timestamp"] = parse(event["timestamp"], ignoretz=True)
+    event["timestamp"] = parse(event["timestamp"])
 
     # Hack because pishi mongodb zzz
     if "obviousness" in event and not event["obviousness"]:
@@ -142,7 +146,7 @@ async def _insert_reset_event(event):
         }
         db_event.update_from_dict(update_data)
         await db_event.save()
-
+    f[event["id"]] = event
     return db_event
 
 
@@ -162,7 +166,7 @@ async def update_events_db(user: User, days: int = 90):
             beatmapsetId=event["beatmapsetId"],
             userId=event["userId"],
         )
-        event["timestamp"] = parse(event["timestamp"], ignoretz=True)
+        event["timestamp"] = parse(event["timestamp"])
         event["user"] = user
 
         nomination_modes = []
@@ -308,7 +312,7 @@ async def update_user_details(user: User, maps: List[BeatmapSet]):
         "genre_favor": genre_favors,
         "lang_favor": lang_favors,
         "topdiff_favor": diff_favors,
-        "last_updated": datetime.utcnow(),
+        "last_updated": timezone.now(),
     }
     user.update_from_dict(updates)
     await user.save()

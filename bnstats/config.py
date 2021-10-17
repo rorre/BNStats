@@ -1,6 +1,6 @@
 from starlette.config import Config
 
-from bnstats.score import get_system, CalculatorABC
+from bnstats.score import CalculatorABC, get_system
 
 config = Config(".env")
 

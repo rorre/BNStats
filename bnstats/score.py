@@ -4,6 +4,8 @@ from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from typing import Dict, List, Type, Union
 
+from tortoise import timezone
+
 from bnstats.bnsite.enums import MapStatus, Mode
 from bnstats.helper import mode_to_db
 from bnstats.models import BeatmapSet, Nomination, User
@@ -42,7 +44,7 @@ class CalculatorABC(ABC):
         Returns:
             float: The user's score.
         """
-        date = datetime.utcnow() - timedelta(days)
+        date = timezone.now() - timedelta(days)
         activities = await user.get_nomination_activity(date, mode)
         return self.get_activity_score(activities)
 
@@ -96,7 +98,7 @@ class CalculatorABC(ABC):
         """
         logger.info(f"Calculating user: {user.username}")
         logger.info("Fetching activity for last 90 days.")
-        d = datetime.now() - timedelta(90)
+        d = timezone.now() - timedelta(90)
         activity = await user.get_nomination_activity(d)
 
         scores = []
@@ -170,7 +172,7 @@ class NaxessCalculator(CalculatorABC):
         mapper = beatmap.creator_id
 
         # Find if the nominator has nominated other maps from the same mapper
-        d = datetime.now() - timedelta(180)
+        d = timezone.now() - timedelta(180)
         current_nominator_count = (
             await Nomination.filter(
                 creatorId=mapper,
@@ -316,7 +318,7 @@ class RenCalculator(CalculatorABC):
 
         # For every found mapper, reduce the score by 75%.
         # Basically, (1/4)^n.
-        d = datetime.now() - timedelta(180)
+        d = timezone.now() - timedelta(180)
         mapper = beatmap.creator_id
         recurring_mapper_count = (
             await Nomination.filter(

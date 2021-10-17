@@ -1,7 +1,7 @@
 from starlette.requests import Request
+from starlette.responses import RedirectResponse
 
 from bnstats.plugins import templates
-from starlette.responses import RedirectResponse
 
 
 async def homepage(request: Request):

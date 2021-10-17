@@ -1,8 +1,9 @@
 import json
 from typing import Dict, Optional, Union
-from tortoise.fields import JSONField
-from tortoise.exceptions import FieldError
+
 from pydantic import BaseModel
+from tortoise.exceptions import FieldError
+from tortoise.fields import JSONField
 
 _AVAILABLE = ["ren", "naxess"]
 

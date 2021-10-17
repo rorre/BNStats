@@ -43,22 +43,6 @@ def client():
     return TestClient(app)
 
 
-# Starlette bug: encode/starlette#472
-# https://github.com/encode/starlette/issues/472#issuecomment-692599448
-@pytest.fixture
-def client_without_middleware(request):
-    def fin():
-        app.user_middleware = user_middleware
-        app.middleware_stack = app.build_middleware_stack()
-
-    user_middleware = app.user_middleware.copy()
-    app.user_middleware = []
-    app.middleware_stack = app.build_middleware_stack()
-
-    request.addfinalizer(fin)
-    return TestClient(app)
-
-
 @pytest.fixture(autouse=True)
 @freeze_time("2020-11-05")
 async def setup_db():
@@ -70,7 +54,7 @@ async def setup_db():
         noms = json.load(f)
         for nom in noms:
             nom["user"] = u
-            nom["timestamp"] = parse(nom["timestamp"], ignoretz=True)
+            nom["timestamp"] = parse(nom["timestamp"])
             nom_objs.append(Nomination(**nom))
 
         await Nomination.bulk_create(nom_objs)
@@ -78,7 +62,7 @@ async def setup_db():
     with open("tests/data/resets.json") as f:
         resets = json.load(f)
         for reset in resets:
-            reset["timestamp"] = parse(reset["timestamp"], ignoretz=True)
+            reset["timestamp"] = parse(reset["timestamp"])
             r = await Reset.create(**reset)
             await r.user_affected.add(u)
 

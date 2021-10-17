@@ -7,8 +7,10 @@ from typing import Dict, List, Tuple, Union
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.routing import Router
-from bnstats.config import DEFAULT_CALC_SYSTEM
+from tortoise import timezone
+
 from bnstats.bnsite.enums import Difficulty, Genre, Language
+from bnstats.config import DEFAULT_CALC_SYSTEM
 from bnstats.helper import format_time
 from bnstats.models import BeatmapSet, Nomination, User
 from bnstats.plugins import templates
@@ -123,7 +125,7 @@ async def show_user(request: Request):
 
     datetime_limit = None
     if day_limit and day_limit in (30, 90, 360):
-        datetime_limit = datetime.utcnow() - timedelta(day_limit)
+        datetime_limit = timezone.now() - timedelta(day_limit)
 
     nominations = await user.get_nomination_activity(datetime_limit)
 
