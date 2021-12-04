@@ -54,4 +54,4 @@ async def test_beatmap(ren_calculator: RenCalculator):
     m = await Nomination.get(beatmapsetId=1052074)
     beatmap = await m.get_map()
     score = ren_calculator.calculate_mapset(beatmap)
-    assert score == 2.2, "Incorrect score calculation for beatmap."
+    assert score == 2.09, "Incorrect score calculation for beatmap."

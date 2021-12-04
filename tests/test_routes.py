@@ -26,8 +26,6 @@ def test_user_profile(client: TestClient):
 
     assert "3" in str(items[1])
     assert "3:13" in str(items[2])
-    print(str(items[3]))
-    assert "3.08" in str(items[3])
 
 
 def test_user_404(client: TestClient):
