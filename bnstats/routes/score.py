@@ -68,7 +68,9 @@ async def leaderboard(request: Request):
     ]
     if is_valid_mode:
         users = (
-            await User.filter(modes__contains=selected_mode).all().order_by("username")
+            await User.filter(modes__contains=[selected_mode])
+            .all()
+            .order_by("username")
         )
     else:
         users = await User.get_users()
