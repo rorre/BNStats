@@ -182,7 +182,7 @@ class User(models.Model):
     avg_length = fields.IntField(null=True)
     avg_diffs = fields.IntField(null=True)
     nominations: fields.ManyToManyRelation[Nomination]
-    resets: fields.ManyToManyRelation[Reset]
+    resets: fields.ReverseRelation[Reset]
 
     def __repr__(self):
         return f"User(osuId={self.osuId}, username={self.username})"

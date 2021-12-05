@@ -79,6 +79,15 @@ async def fetch_events_api(user: User, days: int = 90):
 ################################
 
 
+async def reconnect_relations(user: User):
+    logger.info(f"Reconnecting relations for user {user.username}")
+    nominations = await Nomination.filter(userId=user.osuId).all()
+    for nom in nominations:
+        nom.user = user
+
+    Nomination.bulk_update(nominations, ["user"])
+
+
 async def update_users_db():
     if USE_INTEROP:
         fetcher = fetch_users_interop
@@ -96,7 +105,9 @@ async def update_users_db():
     logger.debug(f"BN site: {current_uids}")
     logger.debug(f"Kicked users: {deleted_users}")
     for u in deleted_users:
-        await (await User.get(osuId=u)).delete()
+        user = await User.get(osuId=u)
+        await user.resets.clear()
+        await user.delete()
 
     logger.info("Updating users.")
     users: List[User] = []
@@ -110,6 +121,7 @@ async def update_users_db():
         else:
             logger.debug(f"New user: {u['username']}")
             user = await User.create(**u)
+            await reconnect_relations(user)
 
         users.append(user)
     return users
