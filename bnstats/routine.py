@@ -3,7 +3,6 @@ import logging
 import time
 import warnings
 from collections import Counter
-from datetime import datetime
 from typing import Any, Dict, List
 from urllib.parse import urlencode
 
@@ -116,9 +115,6 @@ async def update_users_db():
     return users
 
 
-f = {}
-
-
 async def _insert_reset_event(event):
     event["id"] = event["_id"]
     event["timestamp"] = parse(event["timestamp"])
@@ -146,7 +142,7 @@ async def _insert_reset_event(event):
         }
         db_event.update_from_dict(update_data)
         await db_event.save()
-    f[event["id"]] = event
+
     return db_event
 
 
