@@ -197,7 +197,7 @@ async def update_events_db(user: User, days: int = 90):
         db_event = await _insert_reset_event(event)
 
         await db_event.fetch_related("user_affected")
-        if user not in db_event.user_affected:
+        if user and user not in db_event.user_affected:
             await db_event.user_affected.add(user)
 
     resets_done = activities["disqualifications"] + activities["pops"]
@@ -212,7 +212,7 @@ async def update_events_db(user: User, days: int = 90):
 
         for nom in map_nominations[:limit]:
             user = await nom.user
-            if user not in db_event.user_affected:
+            if user and user not in db_event.user_affected:
                 await db_event.user_affected.add(user)
 
         await db_event.save()
