@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Any, Awaitable, List, Union
+from typing import TYPE_CHECKING, Any, Awaitable, Dict, List, Union
 
 from tortoise import fields, models, timezone
 
@@ -184,6 +184,10 @@ class User(models.Model):
     nominations: fields.ManyToManyRelation[Nomination]
     resets: fields.ReverseRelation[Reset]
 
+    # Runtime variables
+    score: float
+    score_modes: Dict[str, float]
+
     def __repr__(self):
         return f"User(osuId={self.osuId}, username={self.username})"
 
@@ -211,14 +215,14 @@ class User(models.Model):
         Returns:
             List[Nomination]: Nominations from user from minimum date to current for specified game mode.
         """
-        filters = {"userId": self.osuId}
+        filters: Dict[str, Any] = {"userId": self.osuId}
         if date:
             filters["timestamp__gte"] = date
 
         if mode:
-            if type(mode) == Mode:
-                filters["as_modes__contains"] = Mode.value
-            elif type(mode) == str:
+            if isinstance(mode, Mode):
+                filters["as_modes__contains"] = mode.value
+            elif isinstance(mode, str):
                 filters["as_modes__contains"] = MODE_CONVERTER[mode]
             else:
                 filters["as_modes__contains"] = mode
@@ -232,7 +236,7 @@ class User(models.Model):
         system: "CalculatorABC",
         days: int = 90,
         mode: Mode = None,
-    ) -> float:
+    ) -> Awaitable[float]:
         """Get user's score using specified system.
 
         Args:

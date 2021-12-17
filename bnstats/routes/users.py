@@ -1,8 +1,8 @@
 import operator
 from collections import Counter
-from datetime import datetime, timedelta
+from datetime import timedelta
 from itertools import groupby
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Optional, Tuple
 
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
@@ -40,11 +40,11 @@ def _create_nomination_chartdata(nominations: List[Nomination]):
     grouped = groupby(sorted_nominations, f)
 
     Timestamp = Tuple[int, int]
-    nomination_groups: List[List[Union[Timestamp, List[Nomination]]]] = []
+    nomination_groups: List[Tuple[Timestamp, List[Nomination]]] = []
 
     k: Timestamp
-    for k, v in grouped:
-        nomination_groups.append([k, list(v)])
+    for k, v in grouped:  # type: ignore
+        nomination_groups.append((k, list(v)))
 
     # To anyone reading this:
     # If you know a better way to fill in the chart graph, then please let me know.
@@ -82,9 +82,9 @@ def _create_nomination_chartdata(nominations: List[Nomination]):
 
     labels = []
     datas = []
-    for k, v in nomination_groups:
+    for k, noms in nomination_groups:
         labels.append("/".join(map(str, k)))
-        datas.append(len(list(v)))
+        datas.append(len(noms))
 
     return labels, datas
 
@@ -116,12 +116,13 @@ async def show_user(request: Request):
     if not user:
         raise HTTPException(404, "User not found.")
 
-    day_limit: int = request.query_params.get("days")
-    if type(day_limit) == str:
-        if day_limit.isnumeric():
-            day_limit = int(day_limit)
-        else:
-            day_limit = None
+    day_limit_str = request.query_params.get("days")
+    day_limit: Optional[int] = None
+    if type(day_limit_str) == str:
+        if day_limit_str.isnumeric():
+            day_limit = int(day_limit_str)
+    elif type(day_limit_str) == int:
+        day_limit = day_limit_str
 
     datetime_limit = None
     if day_limit and day_limit in (30, 90, 360):
@@ -159,21 +160,18 @@ async def show_user(request: Request):
     }
 
     # Count for genres
-    elem: Genre
     counts_genre = Counter([nom.map.genre for nom in nominations])
     for elem, cnt in counts_genre.items():
         graph_labels["genre"].append(elem.name.replace("_", " "))
         graph_data["genre"].append(cnt)
 
     # Count for languages
-    elem: Language
     counts_lang = Counter([nom.map.language for nom in nominations])
     for elem, cnt in counts_lang.items():
         graph_labels["language"].append(elem.name)
         graph_data["language"].append(cnt)
 
     # Count for difficulty
-    elem: Difficulty
     counts_top = list(
         Counter([nom.map.top_difficulty.difficulty for nom in nominations]).items()
     )
@@ -195,13 +193,15 @@ async def show_user(request: Request):
 
     line_labels, line_datas = _create_nomination_chartdata(nominations)
 
-    calc_system = get_system(request.session.get("calc_system"))
-    if not calc_system:
-        calc_system = DEFAULT_CALC_SYSTEM
-    calc_system = calc_system()
+    calc_system_type = get_system(request.session.get("calc_system", ""))
+    if not calc_system_type:
+        calc_system_type = DEFAULT_CALC_SYSTEM
+    calc_system = calc_system_type()
 
     user.score = await user.get_score(calc_system)
     user.score_modes = {}
+
+    mode: str
     for mode in user.modes:
         user.score_modes[mode] = await user.get_score(calc_system, mode=mode)
 

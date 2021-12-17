@@ -11,9 +11,9 @@ async def homepage(request: Request):
 
 async def switch(request: Request):
     target = request.query_params.get("system")
-    print(target)
     if target in ("ren", "naxess"):
         request.session["calc_system"] = target
+
     return RedirectResponse(
         url=request.query_params.get("next", request.url_for("home"))
     )

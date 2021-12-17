@@ -170,7 +170,7 @@ async def update_events_db(user: User, days: int = 90):
         activities["uniqueNominations"] = []
 
     for event in activities["uniqueNominations"]:
-        db_event = await Nomination.get_or_none(
+        nom_event = await Nomination.get_or_none(
             beatmapsetId=event["beatmapsetId"],
             userId=event["userId"],
         )
@@ -183,39 +183,39 @@ async def update_events_db(user: User, days: int = 90):
                 nomination_modes.append(mode_to_db(mode))
 
         event["as_modes"] = nomination_modes
-        if not db_event:
+        if not nom_event:
             logger.info(
                 f"Creating new nomination event: {event['userId']} for mapset {event['beatmapsetId']}"
             )
-            db_event = await Nomination.create(**event)
+            nom_event = await Nomination.create(**event)
         else:
-            db_event.update_from_dict({"as_modes": nomination_modes})
-            await db_event.save()
+            nom_event.update_from_dict({"as_modes": nomination_modes})
+            await nom_event.save()
 
     resets = activities["nominationsDisqualified"] + activities["nominationsPopped"]
     for event in resets:
-        db_event = await _insert_reset_event(event)
+        reset_event = await _insert_reset_event(event)
 
-        await db_event.fetch_related("user_affected")
-        if user and user not in db_event.user_affected:
-            await db_event.user_affected.add(user)
+        await reset_event.fetch_related("user_affected")
+        if user and user not in reset_event.user_affected:
+            await reset_event.user_affected.add(user)
 
     resets_done = activities["disqualifications"] + activities["pops"]
     for event in resets_done:
-        db_event = await _insert_reset_event(event)
+        reset_event = await _insert_reset_event(event)
 
-        await db_event.fetch_related("user_affected")
+        await reset_event.fetch_related("user_affected")
         map_nominations = await Nomination.filter(
             beatmapsetId=event["beatmapsetId"]
         ).order_by("-timestamp")
-        limit = 1 + (db_event.type == "disqualify")
+        limit = 1 + (reset_event.type == "disqualify")
 
         for nom in map_nominations[:limit]:
             user = await nom.user
-            if user and user not in db_event.user_affected:
-                await db_event.user_affected.add(user)
+            if user and user not in reset_event.user_affected:
+                await reset_event.user_affected.add(user)
 
-        await db_event.save()
+        await reset_event.save()
 
 
 async def update_maps_db(nomination: Nomination):

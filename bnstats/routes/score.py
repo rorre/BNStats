@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
+from typing import Optional
 
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
@@ -15,13 +16,13 @@ router = Router()
 
 @router.route("/{user_id:int}", name="show")
 async def show_user(request: Request):
-    calc_system = get_system(request.session.get("calc_system"))
-    if not calc_system:
-        calc_system = DEFAULT_CALC_SYSTEM
-    calc_system = calc_system()
+    calc_system_type = get_system(request.session.get("calc_system", ""))
+    if not calc_system_type:
+        calc_system_type = DEFAULT_CALC_SYSTEM
+    calc_system = calc_system_type()
 
     uid: int = request.path_params["user_id"]
-    mode: str = request.query_params.get("mode")
+    mode: Optional[str] = request.query_params.get("mode")
     if mode not in ["osu", "catch", "taiko", "mania"]:
         mode = None
 
@@ -54,10 +55,10 @@ async def show_user(request: Request):
 
 @router.route("/leaderboard", name="leaderboard")
 async def leaderboard(request: Request):
-    calc_system = get_system(request.session.get("calc_system"))
-    if not calc_system:
-        calc_system = DEFAULT_CALC_SYSTEM
-    calc_system = calc_system()
+    calc_system_type = get_system(request.session.get("calc_system", ""))
+    if not calc_system_type:
+        calc_system_type = DEFAULT_CALC_SYSTEM
+    calc_system = calc_system_type()
 
     selected_mode = request.query_params.get("mode")
     is_valid_mode = selected_mode and selected_mode in [

@@ -1,8 +1,8 @@
 import logging
 import math
 from abc import ABC, abstractmethod
-from datetime import datetime, timedelta
-from typing import Dict, List, Type, Union
+from datetime import timedelta
+from typing import Dict, List, Optional, Type, Union
 
 from tortoise import timezone
 
@@ -61,7 +61,7 @@ class CalculatorABC(ABC):
         pass
 
     @abstractmethod
-    async def calculate_nomination(self, nom: Nomination) -> Dict[str, float]:
+    async def calculate_nomination(self, nom: Nomination) -> Optional[Dict[str, float]]:
         """Calculate a nomination's score.
 
         Args:
@@ -104,6 +104,8 @@ class CalculatorABC(ABC):
         scores = []
         for nom in activity:
             nomination_score = await self.calculate_nomination(nom)
+            if not nomination_score:
+                continue
             scores.append(nomination_score)
 
             if save_to_db:
@@ -130,7 +132,7 @@ class NaxessCalculator(CalculatorABC):
             beatmap.beatmaps, key=lambda x: x.hit_length, reverse=True
         )
 
-        multiplier = 0
+        multiplier = 0.0
         for i, b in enumerate(length_sorted):
             multiplier += b.hit_length * math.pow(0.8, i)
         multiplier /= 300
@@ -139,7 +141,7 @@ class NaxessCalculator(CalculatorABC):
 
     async def calculate_nomination(
         self, nom: Nomination, save_to_db: bool = True
-    ) -> Dict[str, float]:
+    ) -> Optional[Dict[str, float]]:
         logger.info(
             f"Calculating nomination score for beatmap: ({nom.beatmapsetId}) {nom.artistTitle} [{nom.creatorName})]"
         )
@@ -149,7 +151,7 @@ class NaxessCalculator(CalculatorABC):
         if not beatmap.beatmaps:
             logger.warning("Beatmap no longer exists in osu!. Skipping.")
             # Skip beatmaps that doesn't exist anymore.
-            return
+            return None
 
         # Filter beatmaps only to the mode being nominated.
         nomination_modes = nom.as_modes
@@ -209,7 +211,7 @@ class NaxessCalculator(CalculatorABC):
         logger.debug(f"Mapper%: {mapper_score}")
 
         resets = await user.resets.filter(beatmapsetId=nom.beatmapsetId).all()
-        penalty = 0
+        penalty = 0.0
         for r in resets:
             total = r.obviousness + r.severity
             # If total is 0 or 1, then don't bother calculating.
@@ -273,7 +275,7 @@ class RenCalculator(CalculatorABC):
 
         # Bigger mapset means extra checking for each difficulty
         # And with that, we give bonus to bigger sets.
-        bonus_drain = 0
+        bonus_drain = 0.0
         for diff in beatmap.beatmaps:
             # Easier diffs tend to be much easier to check
             # Of course, this is extremely naive especially with how slider is treated.
@@ -287,7 +289,7 @@ class RenCalculator(CalculatorABC):
 
     async def calculate_nomination(
         self, nom: Nomination, save_to_db: bool = True
-    ) -> Dict[str, float]:
+    ) -> Optional[Dict[str, float]]:
         logger.info(
             f"Calculating nomination score for beatmap: ({nom.beatmapsetId}) {nom.artistTitle} [{nom.creatorName})]"
         )
@@ -297,7 +299,7 @@ class RenCalculator(CalculatorABC):
         if not beatmap.beatmaps:
             logger.warning("Beatmap no longer exists in osu!. Skipping.")
             # Skip beatmaps that doesn't exist anymore.
-            return
+            return None
 
         # Filter beatmaps only to the mode being nominated.
         nomination_modes = nom.as_modes
@@ -386,11 +388,11 @@ class RenCalculator(CalculatorABC):
 
 
 # fmt: off
-_AVAILABLE: Dict[str, Type[CalculatorABC]] = {
-    c.name: c for c in [NaxessCalculator, RenCalculator]
-}
+_AVAILABLE: Dict[str, Type[CalculatorABC]] = {}
+for c in (NaxessCalculator, RenCalculator):
+    _AVAILABLE[c.name] = c  # type: ignore
 
-def get_system(name: str) -> Type[CalculatorABC]: # noqa
+def get_system(name: str) -> Optional[Type[CalculatorABC]]: # noqa
     """Get calculator system from name.
 
     Args:

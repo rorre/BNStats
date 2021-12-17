@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Optional, Union
+from typing import Dict, Optional
 
 from pydantic import BaseModel
 from tortoise.exceptions import FieldError
@@ -18,16 +18,17 @@ class Score(BaseModel):
 
 
 class ScoreField(JSONField):
-    def to_db_value(self, value: Dict[str, Score], instance) -> str:
+    def to_db_value(self, value: Dict[str, Score], instance):  # type: ignore[override]
+        db_json: Optional[Dict[str, str]]
         if value:
-            db_json: Dict[str, str] = {}
+            db_json = {}
             for k in value.keys():
                 db_json[k] = value[k].json()
         else:
             db_json = None
         return super().to_db_value(db_json, instance)
 
-    def to_python_value(self, value: Optional[Union[str, dict]]) -> Optional[Dict]:
+    def to_python_value(self, value: Optional[dict]) -> Optional[Dict]:  # type: ignore[override]
         if isinstance(value, str):
             try:
                 value = self.decoder(value)

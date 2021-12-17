@@ -44,7 +44,7 @@ async def cached_request(url, t, filename, is_json=True) -> Union[dict, str]:
             return json.loads(js_text) if is_json else js_text
 
     result = await get(url, is_json)
-    if is_json:
+    if isinstance(result, dict):
         result_str = json.dumps(result)
     else:
         result_str = result
