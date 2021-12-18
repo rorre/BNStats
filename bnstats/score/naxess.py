@@ -1,13 +1,12 @@
-import math
 import logging
+import math
 from datetime import timedelta
 from typing import Dict, List, Optional
 
-
-from bnstats.helper import mode_to_db
-from bnstats.bnsite.enums import MapStatus
 from tortoise import timezone
 
+from bnstats.bnsite.enums import MapStatus
+from bnstats.helper import mode_to_db
 from bnstats.models import BeatmapSet, Nomination
 from bnstats.score.base import CalculatorABC
 
@@ -53,7 +52,8 @@ class NaxessCalculator(CalculatorABC):
         self, nom: Nomination, save_to_db: bool = True
     ) -> Optional[Dict[str, float]]:
         logger.info(
-            f"Calculating nomination score for beatmap: ({nom.beatmapsetId}) {nom.artistTitle} [{nom.creatorName})]"
+            "Calculating nomination score for beatmap: "
+            + f"({nom.beatmapsetId}) {nom.artistTitle} [{nom.creatorName})]"
         )
 
         user = await nom.user

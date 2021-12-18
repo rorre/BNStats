@@ -1,12 +1,12 @@
-import math
 import logging
+import math
 from datetime import timedelta
 from typing import Dict, List, Optional
 
-from bnstats.helper import mode_to_db
-from bnstats.bnsite.enums import MapStatus
 from tortoise import timezone
 
+from bnstats.bnsite.enums import MapStatus
+from bnstats.helper import mode_to_db
 from bnstats.models import BeatmapSet, Nomination
 from bnstats.score.base import CalculatorABC
 
@@ -47,7 +47,8 @@ class RenCalculator(CalculatorABC):
 
     def calculate_mapset(self, beatmap: BeatmapSet):
         logger.info(
-            f"Calculating score for beatmap: ({beatmap.beatmapset_id}) {beatmap.artist} - {beatmap.title} [{beatmap.creator}]"
+            "Calculating score for beatmap: "
+            + f"({beatmap.beatmapset_id}) {beatmap.artist} - {beatmap.title} [{beatmap.creator}]"
         )
         drain_times = [diff.hit_length for diff in beatmap.beatmaps]
         drain_time = sum(drain_times)
@@ -82,7 +83,8 @@ class RenCalculator(CalculatorABC):
         self, nom: Nomination, save_to_db: bool = True
     ) -> Optional[Dict[str, float]]:
         logger.info(
-            f"Calculating nomination score for beatmap: ({nom.beatmapsetId}) {nom.artistTitle} [{nom.creatorName})]"
+            "Calculating nomination score for beatmap: "
+            + f"({nom.beatmapsetId}) {nom.artistTitle} [{nom.creatorName})]"
         )
 
         user = await nom.user

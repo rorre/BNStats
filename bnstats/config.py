@@ -1,5 +1,4 @@
 from pydantic import ConfigError
-
 from starlette.config import Config
 
 from bnstats.score import get_system

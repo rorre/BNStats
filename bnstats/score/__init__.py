@@ -1,4 +1,4 @@
-from typing import Dict, Type, Optional
+from typing import Dict, Optional, Type
 
 from bnstats.score.base import CalculatorABC
 from bnstats.score.naxess import NaxessCalculator
