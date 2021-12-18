@@ -246,13 +246,20 @@ class RenCalculator(CalculatorABC):
     weight = 0.95
 
     def get_activity_score(self, nominations: List[Nomination]) -> float:
+        if not nominations:
+            return 0.0
+
         nominations.sort(
             key=lambda x: abs(x.score[self.name].total_score), reverse=True
         )
         total_score = 0
         for i, a in enumerate(nominations):
             total_score += a.score[self.name].total_score * (self.weight ** i)
-        return total_score
+
+        mappers = set(nom.creatorId for nom in nominations)
+        uniqueness = len(mappers) / len(nominations)
+        logger.debug(f"Uniqueness: {uniqueness}")
+        return total_score * uniqueness
 
     def calculate_mapset(self, beatmap: BeatmapSet):
         logger.info(
@@ -319,7 +326,7 @@ class RenCalculator(CalculatorABC):
         beatmap = BeatmapSet(diffs)
 
         # For every found mapper, reduce the score by 75%.
-        # Basically, (1/4)^n.
+        # Basically, (4/5)^n.
         d = timezone.now() - timedelta(180)
         mapper = beatmap.creator_id
         recurring_mapper_count = (
@@ -354,7 +361,7 @@ class RenCalculator(CalculatorABC):
             other_nominator_count += 1
             seen_maps.append(other_nom.beatmapsetId)
 
-        mapper_score = 0.25 ** recurring_mapper_count
+        mapper_score = 0.8 ** recurring_mapper_count
         mapper_score *= 0.95 ** other_nominator_count
         logger.debug(f"Mapper value: {mapper_score}%")
 
