@@ -35,11 +35,10 @@
                     <thead>
                         <tr>
                             <th>Beatmap</th>
-                            <th class="float">Rank%</th>
-                            <th class="float">Mapper%</th>
-                            <th class="float">MapsetSize%</th>
-                            <th class="float">Penalty</th>
-                            <th class="float">Score</th>
+                            {% for attrib in calc_system.attributes %}
+                            <th class="float">{{ attrib }}</th>
+                            {% endfor %}
+                            <th class="float">Total</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -54,16 +53,15 @@
                             {% else %}
 
                             {% set score = s.score[calc_system.name] %}
+                            {% for attrib, fmt in calc_system.attributes.values() %}
+                            {% if fmt == "%d" %}
                             <td data-sort-value="{{ score.ranked_score }}">
-                                {{ '%d' | format(score.ranked_score * 100)}}%
+                                {{ fmt | format(score[attrib] * 100) }}%
                             </td>
-                            <td data-sort-value="{{ score.mapper_score }}">
-                                {{ '%d' | format(score.mapper_score * 100) }}%
-                            </td>
-                            <td data-sort-value="{{ score.mapset_score }}">
-                                {{ '%d' | format(score.mapset_score * 100) }}%
-                            </td>
-                            <td>{{ '%0.2f' | format(score.penalty) }}</td>
+                            {% else %}
+                            <td>{{ fmt | format(score[attrib]) }}</td>
+                            {% endif %}
+                            {% endfor %}
 
                             {% if calc_system.has_weight %}
                             <td>

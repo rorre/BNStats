@@ -1,13 +1,12 @@
 import logging
 from abc import ABC, abstractmethod
 from datetime import timedelta
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from tortoise import timezone
 
 from bnstats.bnsite.enums import Mode
 from bnstats.models import BeatmapSet, Nomination, User
-from bnstats.models.fields import Score
 
 logger = logging.getLogger("bnstats.score")
 
@@ -24,6 +23,7 @@ class CalculatorABC(ABC):
 
     name = "abstract"
     has_weight = False
+    attributes: Dict[str, Tuple[str, str]] = {}
 
     @abstractmethod
     def get_activity_score(self, nominations: List[Nomination]) -> float:
@@ -74,7 +74,7 @@ class CalculatorABC(ABC):
         self, nom: Nomination, score_data: Dict[str, float]
     ):
         new_data = nom.score
-        new_data[self.name] = Score(calculator_name=self.name, **score_data)
+        new_data[self.name] = dict(calculator_name=self.name, **score_data)
 
         update_data = {"score": new_data}
         logger.info("Saving nomination data.")

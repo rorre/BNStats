@@ -14,21 +14,31 @@ logger = logging.getLogger("bnstats.score")
 
 
 class RenCalculator(CalculatorABC):
-    name = "ren"
     BASE_SCORE = 1
+
+    name = "ren"
     has_weight = True
     weight = 0.95
+
+    attributes = {
+        "Ranked%": ("ranked_score", "%d"),
+        "Mapper%": ("mapper_score", "%d"),
+        "Map%": ("mapset_score", "%d"),
+        "Penalty": ("penalty", "%0.2f"),
+    }
 
     def get_activity_score(self, nominations: List[Nomination]) -> float:
         if not nominations:
             return 0.0
 
         nominations.sort(
-            key=lambda x: abs(x.score[self.name].total_score), reverse=True
+            key=lambda x: abs(x.score[self.name]["total_score"]),
+            reverse=True,
         )
+
         total_score = 0
         for i, a in enumerate(nominations):
-            total_score += a.score[self.name].total_score * (self.weight ** i)
+            total_score += a.score[self.name]["total_score"] * (self.weight ** i)
 
         mappers = set(nom.creatorId for nom in nominations)
         uniqueness = len(mappers) / len(nominations)

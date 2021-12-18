@@ -1,29 +1,19 @@
 import json
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
-from pydantic import BaseModel
 from tortoise.exceptions import FieldError
 from tortoise.fields import JSONField
 
 _AVAILABLE = ["ren", "naxess"]
 
 
-class Score(BaseModel):
-    mapset_score: float = 0.0
-    mapper_score: float = 0.0
-    ranked_score: float = 0.0
-    penalty: float = 0.0
-    total_score: float = 0.0
-    calculator_name: str
-
-
 class ScoreField(JSONField):
-    def to_db_value(self, value: Dict[str, Score], instance):  # type: ignore[override]
+    def to_db_value(self, value: Dict[str, Any], instance):  # type: ignore[override]
         db_json: Optional[Dict[str, str]]
         if value:
             db_json = {}
             for k in value.keys():
-                db_json[k] = value[k].json()
+                db_json[k] = value[k]
         else:
             db_json = None
         return super().to_db_value(db_json, instance)
@@ -36,14 +26,12 @@ class ScoreField(JSONField):
                 raise FieldError(f"Value {value} is invalid json value.")
 
         if not value:
-            return {k: Score(calculator_name=k) for k in _AVAILABLE}
+            return {k: dict(calculator_name=k) for k in _AVAILABLE}
 
-        output_dict: Dict[str, Score] = {}
+        output_dict: Dict[str, Any] = {}
         for k in value.keys():
-            if isinstance(value[k], Score):
+            if isinstance(value[k], dict):
                 output_dict[k] = value[k]
-            else:
-                if isinstance(value[k], str):
-                    value[k] = json.loads(value[k])
-                output_dict[k] = Score(**value[k])
+            elif isinstance(value[k], str):
+                output_dict[k] = json.loads(value[k])
         return output_dict

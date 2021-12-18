@@ -3,6 +3,7 @@ import logging
 from datetime import timedelta
 from typing import Dict, List, Optional
 
+
 from bnstats.helper import mode_to_db
 from bnstats.bnsite.enums import MapStatus
 from tortoise import timezone
@@ -18,13 +19,22 @@ class NaxessCalculator(CalculatorABC):
     has_weight = True
     weight = 0.9
 
+    attributes = {
+        "Ranked%": ("ranked_score", "%d"),
+        "Mapper%": ("mapper_score", "%d"),
+        "Map%": ("mapset_score", "%d"),
+        "Penalty": ("penalty", "%0.2f"),
+    }
+
     def get_activity_score(self, nominations: List[Nomination]) -> float:
         nominations.sort(
-            key=lambda x: abs(x.score[self.name].total_score), reverse=True
+            key=lambda x: abs(x.score[self.name]["total_score"]),
+            reverse=True,
         )
+
         total_score = 0
         for i, a in enumerate(nominations):
-            total_score += a.score[self.name].total_score * (self.weight ** i)
+            total_score += a.score[self.name]["total_score"] * (self.weight ** i)
         return total_score
 
     def calculate_mapset(self, beatmap: BeatmapSet):

@@ -41,8 +41,10 @@ async def show_user(request: Request):
         nom.map = await nom.get_map()
 
     nominations.sort(
-        key=lambda x: abs(x.score[calc_system.name].total_score), reverse=True
+        key=lambda x: abs(x.score[calc_system.name]["total_score"]),
+        reverse=True,
     )
+
     ctx = {
         "calc_system": calc_system,
         "request": request,
