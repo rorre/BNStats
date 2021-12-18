@@ -123,7 +123,7 @@ class RenCalculator(CalculatorABC):
             diffs.extend(list(filter(lambda x: x.mode == mode, beatmap.beatmaps)))
         beatmap = BeatmapSet(diffs)
 
-        # For every found mapper, reduce the score by 75%.
+        # For every found mapper, reduce the score by 20%.
         # Basically, (4/5)^n.
         d = timezone.now() - timedelta(180)
         mapper = beatmap.creator_id
