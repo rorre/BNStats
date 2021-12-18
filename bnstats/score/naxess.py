@@ -9,6 +9,7 @@ from bnstats.bnsite.enums import MapStatus
 from bnstats.helper import mode_to_db
 from bnstats.models import BeatmapSet, Nomination
 from bnstats.score.base import CalculatorABC
+from bnstats.score.object import Score
 
 logger = logging.getLogger("bnstats.score")
 
@@ -25,7 +26,7 @@ class NaxessCalculator(CalculatorABC):
         "Penalty": ("penalty", "%0.2f"),
     }
 
-    def get_activity_score(self, nominations: List[Nomination]) -> float:
+    def get_activity_score(self, nominations: List[Nomination]) -> Score:
         nominations.sort(
             key=lambda x: abs(x.score[self.name]["total_score"]),
             reverse=True,
@@ -34,7 +35,7 @@ class NaxessCalculator(CalculatorABC):
         total_score = 0
         for i, a in enumerate(nominations):
             total_score += a.score[self.name]["total_score"] * (self.weight ** i)
-        return total_score
+        return Score(total_score=total_score, attribs={})
 
     def calculate_mapset(self, beatmap: BeatmapSet):
         length_sorted = sorted(

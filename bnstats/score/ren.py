@@ -9,6 +9,7 @@ from bnstats.bnsite.enums import MapStatus
 from bnstats.helper import mode_to_db
 from bnstats.models import BeatmapSet, Nomination
 from bnstats.score.base import CalculatorABC
+from bnstats.score.object import Score
 
 logger = logging.getLogger("bnstats.score")
 
@@ -27,9 +28,12 @@ class RenCalculator(CalculatorABC):
         "Penalty": ("penalty", "%0.2f"),
     }
 
-    def get_activity_score(self, nominations: List[Nomination]) -> float:
+    def get_activity_score(self, nominations: List[Nomination]) -> Score:
         if not nominations:
-            return 0.0
+            return Score(
+                total_score=0.0,
+                attribs={"uniqueness": 0.0},
+            )
 
         nominations.sort(
             key=lambda x: abs(x.score[self.name]["total_score"]),
@@ -41,9 +45,17 @@ class RenCalculator(CalculatorABC):
             total_score += a.score[self.name]["total_score"] * (self.weight ** i)
 
         mappers = set(nom.creatorId for nom in nominations)
-        uniqueness = len(mappers) / len(nominations)
+        total_mappers = len(mappers)
+
+        uniqueness = total_mappers / len(nominations)
+        if total_mappers > 1:
+            uniqueness *= math.log10(total_mappers)
+
         logger.debug(f"Uniqueness: {uniqueness}")
-        return total_score * uniqueness
+        return Score(
+            total_score=total_score * uniqueness,
+            attribs={"uniqueness": uniqueness},
+        )
 
     def calculate_mapset(self, beatmap: BeatmapSet):
         logger.info(

@@ -9,7 +9,8 @@ from bnstats.helper import format_time
 from bnstats.models.fields import ScoreField
 
 if TYPE_CHECKING:
-    from bnstats.score import CalculatorABC
+    from bnstats.score.base import CalculatorABC
+    from bnstats.score.object import Score
 
 MODE_CONVERTER = {
     "osu": 0,
@@ -185,8 +186,8 @@ class User(models.Model):
     resets: fields.ReverseRelation[Reset]
 
     # Runtime variables
-    score: float
-    score_modes: Dict[str, float]
+    score: "Score"
+    score_modes: Dict[str, "Score"]
 
     def __repr__(self):
         return f"User(osuId={self.osuId}, username={self.username})"
@@ -236,7 +237,7 @@ class User(models.Model):
         system: "CalculatorABC",
         days: int = 90,
         mode: Mode = None,
-    ) -> Awaitable[float]:
+    ) -> Awaitable["Score"]:
         """Get user's score using specified system.
 
         Args:

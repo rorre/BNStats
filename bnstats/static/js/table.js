@@ -11,7 +11,7 @@ function createSortFunc(key) {
 
 $(function () {
     var $nominationTh = $("#nominationHead")
-    $('table').tablesort()
+    $('table.sortable').tablesort()
 
     $('thead th.number').data('sortBy', function (th, td, tablesort) {
         var num = td.data("sortValue") || td.text()

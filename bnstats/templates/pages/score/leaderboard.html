@@ -40,25 +40,31 @@
                     <td class="center aligned">{{ loop.index }}</td>
                     <td>{{ user.username }}</td>
                     <td>{{ user.modes | join(', ') }}</td>
+
                     {% if mode and mode in ["osu", "taiko", "catch", "mania"] %}
-                    <td data-sort-value="{{ '%d' | format(user.score_modes[mode] * 100) }}">
-                        {{ '%0.2f' | format(user.score_modes[mode]) }}
+                    <td data-sort-value="{{ '%d' | format(user.score_modes[mode].total_score * 100) }}">
+                        {{ '%0.2f' | format(user.score_modes[mode].total_score) }}
                     </td>
+
                     {% else %}
-                    <td data-sort-value="{{ '%d' | format(user.score * 100) }}">
-                        {{ '%0.2f' | format(user.score) }}
+
+                    <td data-sort-value="{{ '%d' | format(user.score.total_score * 100) }}">
+                        {{ '%0.2f' | format(user.score.total_score) }}
 
                         {% set modes_count = user.modes | length %}
                         {% if modes_count > 1 %}
                         <span class="ui small text">(
                             {% for k,v in user.score_modes.items() %}
-                            {{ '%0.2f' | format(v) }} {{ k }} {% if loop.index != modes_count %}, {% endif %}
+                            {{ '%0.2f' | format(v.total_score) }} {{ k }} {% if loop.index != modes_count %}, {% endif
+                            %}
                             {% endfor %}
                             )
                         </span>
                         {% endif %}
+
                     </td>
                     {% endif %}
+
                 </tr>
                 {% endfor %}
             </tbody>

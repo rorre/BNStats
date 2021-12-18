@@ -7,6 +7,7 @@ from tortoise import timezone
 
 from bnstats.bnsite.enums import Mode
 from bnstats.models import BeatmapSet, Nomination, User
+from bnstats.score.object import Score
 
 logger = logging.getLogger("bnstats.score")
 
@@ -26,12 +27,12 @@ class CalculatorABC(ABC):
     attributes: Dict[str, Tuple[str, str]] = {}
 
     @abstractmethod
-    def get_activity_score(self, nominations: List[Nomination]) -> float:
+    def get_activity_score(self, nominations: List[Nomination]) -> Score:
         pass
 
     async def get_user_score(
         self, user: User, days: int = 90, mode: Union[Mode, str] = None
-    ) -> float:
+    ) -> Score:
         """Calculate a user's score.
 
         Args:

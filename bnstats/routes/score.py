@@ -45,6 +45,7 @@ async def show_user(request: Request):
         reverse=True,
     )
 
+    user.score = calc_system.get_activity_score(nominations)
     ctx = {
         "calc_system": calc_system,
         "request": request,
