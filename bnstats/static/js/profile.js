@@ -151,7 +151,8 @@ function createLineChart(ctx, labels, data) {
                     ticks: {
                         precision: 0,
                         fontColor: "#fff"
-                    }
+                    },
+                    beginAtZero: true
                 }]
             }
         }
