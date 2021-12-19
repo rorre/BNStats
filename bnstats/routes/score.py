@@ -6,20 +6,15 @@ from starlette.requests import Request
 from starlette.routing import Router
 from tortoise import timezone
 
-from bnstats.config import DEFAULT_CALC_SYSTEM
 from bnstats.models import User
 from bnstats.plugins import templates
-from bnstats.score import get_system
 
 router = Router()
 
 
 @router.route("/{user_id:int}", name="show")
 async def show_user(request: Request):
-    calc_system_type = get_system(request.session.get("calc_system", ""))
-    if not calc_system_type:
-        calc_system_type = DEFAULT_CALC_SYSTEM
-    calc_system = calc_system_type()
+    calc_system = request.scope["calculator"]
 
     uid: int = request.path_params["user_id"]
     mode: Optional[str] = request.query_params.get("mode")
@@ -58,10 +53,7 @@ async def show_user(request: Request):
 
 @router.route("/leaderboard", name="leaderboard")
 async def leaderboard(request: Request):
-    calc_system_type = get_system(request.session.get("calc_system", ""))
-    if not calc_system_type:
-        calc_system_type = DEFAULT_CALC_SYSTEM
-    calc_system = calc_system_type()
+    calc_system = request.scope["calculator"]
 
     selected_mode = request.query_params.get("mode")
     is_valid_mode = selected_mode and selected_mode in [

@@ -9,6 +9,7 @@ from starlette.staticfiles import StaticFiles
 from tortoise.contrib.starlette import register_tortoise
 
 from bnstats.config import DB_URL, DEBUG, SECRET, SENTRY_URL
+from bnstats.middlewares.calculator import CalculatorMiddleware
 from bnstats.middlewares.maintenance import MaintenanceMiddleware
 from bnstats.routes import home, qat, score, users
 
@@ -39,6 +40,7 @@ finally:
 middlewares = [
     Middleware(MaintenanceMiddleware),
     Middleware(SessionMiddleware, secret_key=SECRET),
+    Middleware(CalculatorMiddleware),
     Middleware(GZipMiddleware, minimum_size=1000),
 ]
 

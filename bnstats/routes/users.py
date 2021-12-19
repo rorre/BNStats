@@ -10,11 +10,9 @@ from starlette.routing import Router
 from tortoise import timezone
 
 from bnstats.bnsite.enums import Difficulty, Genre, Language
-from bnstats.config import DEFAULT_CALC_SYSTEM
 from bnstats.helper import format_time
 from bnstats.models import BeatmapSet, Nomination, User
 from bnstats.plugins import templates
-from bnstats.score import get_system
 
 router = Router()
 
@@ -193,11 +191,7 @@ async def show_user(request: Request):
 
     line_labels, line_datas = _create_nomination_chartdata(nominations)
 
-    calc_system_type = get_system(request.session.get("calc_system", ""))
-    if not calc_system_type:
-        calc_system_type = DEFAULT_CALC_SYSTEM
-    calc_system = calc_system_type()
-
+    calc_system = request.scope["calculator"]
     user.score = await user.get_score(calc_system)
     user.score_modes = {}
 
