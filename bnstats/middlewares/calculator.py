@@ -4,7 +4,7 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from bnstats.config import DEFAULT_CALC_SYSTEM
-from bnstats.score import get_system
+from bnstats.score import get_system, _AVAILABLE
 
 
 @functools.cache
@@ -20,7 +20,10 @@ class CalculatorMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
-        request.scope["calculator"] = init_system(
-            request.session.get("calc_system", "")
-        )
+        system_name = request.session.get("calc_system", "")
+        if system_name in _AVAILABLE:
+            request.scope["calculator"] = init_system(system_name)
+        else:
+            request.scope["calculator"] = DEFAULT_CALC_SYSTEM()
+
         return await call_next(request)
