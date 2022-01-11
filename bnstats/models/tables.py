@@ -204,21 +204,26 @@ class User(models.Model):
 
     async def get_nomination_activity(
         self,
-        date: datetime = None,
+        date_min: datetime = None,
+        date_max: datetime = None,
         mode: Union[Mode, str, int] = None,
     ) -> List[Nomination]:
         """Fetch user's nomination activities.
 
         Args:
-            date (datetime, optional): Minimum date to fetch from. Defaults to None.
+            date_min (datetime, optional): Minimum date to fetch from. Defaults to None.
+            date_max (datetime, optional): Maximum date to fetch from. Defaults to None.
             mode (Union[Mode, str, int], optional): The game mode to fetch from. Defaults to all game mode.
 
         Returns:
             List[Nomination]: Nominations from user from minimum date to current for specified game mode.
         """
         filters: Dict[str, Any] = {"userId": self.osuId}
-        if date:
-            filters["timestamp__gte"] = date
+        if date_min:
+            filters["timestamp__gte"] = date_min
+
+        if date_max:
+            filters["timestamp__lte"] = date_max
 
         if mode:
             if isinstance(mode, Mode):

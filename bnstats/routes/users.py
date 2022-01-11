@@ -1,8 +1,8 @@
 import operator
 from collections import Counter
-from datetime import timedelta
+from datetime import datetime, timedelta
 from itertools import groupby
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
@@ -10,7 +10,7 @@ from starlette.routing import Router
 from tortoise import timezone
 
 from bnstats.bnsite.enums import Difficulty, Genre, Language
-from bnstats.helper import format_time
+from bnstats.helper import ensure_int, format_time
 from bnstats.models import BeatmapSet, Nomination, User
 from bnstats.plugins import templates
 
@@ -115,18 +115,27 @@ async def show_user(request: Request):
         raise HTTPException(404, "User not found.")
 
     day_limit_str = request.query_params.get("days")
-    day_limit: Optional[int] = None
-    if type(day_limit_str) == str:
-        if day_limit_str.isnumeric():
-            day_limit = int(day_limit_str)
-    elif type(day_limit_str) == int:
-        day_limit = day_limit_str
+    year_limit_str = request.query_params.get("year")
 
-    datetime_limit = None
-    if day_limit and day_limit in (30, 90, 360):
-        datetime_limit = timezone.now() - timedelta(day_limit)
+    nominations = None
+    if day_limit_str and day_limit_str != "0":
+        datetime_limit = None
+        day_limit = ensure_int(day_limit_str)
+        if day_limit and day_limit in (30, 90, 360):
+            datetime_limit = timezone.now() - timedelta(day_limit)
+            nominations = await user.get_nomination_activity(datetime_limit)
 
-    nominations = await user.get_nomination_activity(datetime_limit)
+    elif year_limit_str:
+        year_limit = ensure_int(year_limit_str)
+        if year_limit:
+            dt_min = timezone.make_aware(datetime(year_limit, 1, 1))
+            dt_max = timezone.make_aware(datetime(year_limit + 1, 1, 1))
+            nominations = await user.get_nomination_activity(
+                date_min=dt_min, date_max=dt_max
+            )
+
+    if nominations is None:
+        nominations = await user.get_nomination_activity()
 
     # No nominations present, what even to show?
     if not nominations:
@@ -180,8 +189,8 @@ async def show_user(request: Request):
 
     difficulties = []
     for nom in nominations:
-        for map in nom.map.beatmaps:
-            difficulties.append(map.difficulty)
+        for bmap in nom.map.beatmaps:
+            difficulties.append(bmap.difficulty)
 
     counts_diff = list(Counter(difficulties).items())
     counts_diff.sort(key=lambda x: x[0].value)
@@ -199,6 +208,11 @@ async def show_user(request: Request):
     for mode in user.modes:
         user.score_modes[mode] = await user.get_score(calc_system, mode=mode)
 
+    first_nom = await Nomination.filter(userId=user.osuId).order_by("timestamp").first()
+    first_year = first_nom.timestamp.year
+    limit_year = timezone.make_aware(datetime.now()).year
+    valid_years = list(map(str, range(first_year, limit_year + 1)))
+
     ctx = {
         "request": request,
         "user": user,
@@ -211,5 +225,6 @@ async def show_user(request: Request):
         "line_datas": line_datas,
         "last_update": user.last_updated,
         "title": user.username,
+        "valid_years": valid_years,
     }
     return templates.TemplateResponse("pages/user/show.html", ctx)

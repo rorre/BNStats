@@ -44,7 +44,7 @@ class CalculatorABC(ABC):
             float: The user's score.
         """
         date = timezone.now() - timedelta(days)
-        activities = await user.get_nomination_activity(date, mode)
+        activities = await user.get_nomination_activity(date, mode=mode)
         return self.get_activity_score(activities)
 
     @abstractmethod

@@ -11,15 +11,36 @@
         </div>
 
         {% set days = request.query_params['days'] | default(-1) %}
-        <form class="ui inverted form" id="timespanForm">
+        {% set selected_year = request.query_params['year'] | default(-1) %}
+        <form class="ui inverted form" id="timespanForm" style="padding-top:20px;">
+            <div class="ui message" id="formMessage">
+                You may only set either days or year.
+            </div>
             <div class="field">
-                <label>Timespan</label>
-                <select name="days" class="ui dropdown">
-                    <option value="0" {% if days == -1 %}selected{% endif %}>All time</option>
-                    <option value="30" {% if days == '30' %}selected{% endif %}>30 days</option>
-                    <option value="90" {% if days == '90' %}selected{% endif %}>90 days</option>
-                    <option value="360" {% if days == '360' %}selected{% endif %}>360 days</option>
-                </select>
+                <div class="two fields">
+                    <div class="field">
+                        <label>Timespan (in days)</label>
+                        <select name="days" class="ui dropdown">
+                            <option value="0" {% if days == -1 %}selected{% endif %}>All time</option>
+                            <option value="30" {% if days == '30' %}selected{% endif %}>30 days</option>
+                            <option value="90" {% if days == '90' %}selected{% endif %}>90 days</option>
+                            <option value="360" {% if days == '360' %}selected{% endif %}>360 days</option>
+                        </select>
+                    </div>
+                
+                    <div class="field">
+                        <label>Timespan (year)</label>
+                            <select name="year" class="ui dropdown">
+                            <option value="0" {% if year == -1 %}selected{% endif %}>All year</option>
+                            {% for year in valid_years %}
+                            <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="field">
+                <button type="submit" id="timestampSubmit" class="ui primary button">Set time limit</button>
             </div>
         </form>
     </div>

@@ -1,6 +1,7 @@
 import binascii
 import os
 import time
+from typing import Union, Optional
 
 MODES = {"osu": 0, "taiko": 1, "catch": 2, "mania": 3}
 
@@ -43,3 +44,15 @@ def mode_to_db(mode_str: str) -> int:
         int: Integer enum of the specified game mode.
     """
     return MODES[mode_str]
+
+
+def ensure_int(string: Union[str, int]) -> Optional[int]:
+    day_limit = None
+
+    if isinstance(string, str):
+        if string.isnumeric():
+            day_limit = int(string)
+    elif isinstance(string, int):
+        day_limit = string
+
+    return day_limit

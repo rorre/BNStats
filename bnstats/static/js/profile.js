@@ -161,7 +161,17 @@ function createLineChart(ctx, labels, data) {
 
 $(function () {
     $('select.dropdown').dropdown()
+    $("#formMessage").hide()
     $("#timespanForm, #modeForm").on('change', function () {
-        $(this).submit()
+        const daysValue = $("select[name='days']").val()
+        const yearValue = $("select[name='year']").val()
+
+        if (daysValue != '0' && yearValue != '0') {
+            $("#formMessage").show()
+            $("#timestampSubmit").attr("disabled", true)
+        } else {
+            $("#formMessage").hide()
+            $("#timestampSubmit").removeAttr("disabled")
+        }
     })
 })
