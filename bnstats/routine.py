@@ -83,9 +83,8 @@ async def reconnect_relations(user: User):
     logger.info(f"Reconnecting relations for user {user.username}")
     nominations = await Nomination.filter(userId=user.osuId).all()
     for nom in nominations:
-        nom.user = user
-
-    Nomination.bulk_update(nominations, ["user"])
+        nom.update_from_dict({"user": user})
+        await nom.save()
 
 
 async def update_users_db():
