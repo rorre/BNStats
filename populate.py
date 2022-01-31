@@ -85,7 +85,7 @@ async def run(days):
             c = len(users)
             for i, u in enumerate(users):
                 print(f">> Populating data for user: {u.username} ({i+1}/{c})")
-                process_user(u, days)
+                await process_user(u, days)
 
             if len(w):
                 e_msg = "\r\n".join(list(map(lambda x: str(x.message), w)))
