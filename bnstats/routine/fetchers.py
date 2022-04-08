@@ -26,7 +26,7 @@ async def fetch_users_api():
 
 
 async def fetch_users_interop():
-    url = INTEROP_URL + "/users"
+    url = INTEROP_URL + "/users/all"
     events: Dict[str, Any] = await get(url)
     return events
 
