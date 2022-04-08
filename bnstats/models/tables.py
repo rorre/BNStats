@@ -193,13 +193,34 @@ class User(models.Model):
         return f"User(osuId={self.osuId}, username={self.username})"
 
     @classmethod
-    async def get_users(cls) -> List["User"]:
-        """Get all users from database, sorted by username.
+    async def get_users(cls, limit: int = None, page: int = None) -> List["User"]:
+        """Get all users from database, sorted by username and paginated, if asked.
+
+        If limit is given, then it will use pagination. If page is not given, then
+        it will defaults to 0 if limit is defined.
+
+        Args:
+            limit (int, optional): Limit result to n users. Defaults to None.
+            page (int, optional): Sets the offset to page n. Defaults to None.
 
         Returns:
             List[User]: All users from database.
+
+        Raises:
+            ValueError: If page is given, but not limit.
         """
-        users = await cls.all().order_by("username")
+        if page is not None and not limit:
+            raise ValueError("Limit cannot be None or 0 if page is defined.")
+
+        if not limit:
+            users = await cls.all().order_by("username")
+            return users
+
+        if not page:
+            page = 0
+
+        offset = limit * page
+        users = await cls.all().limit(limit).offset(offset)
         return users
 
     async def get_nomination_activity(
