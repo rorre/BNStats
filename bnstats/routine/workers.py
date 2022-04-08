@@ -46,10 +46,10 @@ async def update_users_db():
     logger.debug(f"Database: {db_uids}")
     logger.debug(f"BN site: {current_uids}")
     logger.debug(f"Kicked users: {deleted_users}")
-    for u in deleted_users:
-        user = await User.get(osuId=u)
-        await user.resets.clear()
-        await user.delete()
+    # for u in deleted_users:
+    #     user = await User.get(osuId=u)
+    #     await user.resets.clear()
+    #     await user.delete()
 
     logger.info("Updating users.")
     users: List[User] = []
