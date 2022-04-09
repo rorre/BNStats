@@ -150,9 +150,11 @@ function UserTable(props) {
     const [ascending, setAscending] = useState(true)
 
     const { filter } = useContext(FilterCtx)
+    const { showFormer, filterDay } = props
 
     useEffect(() => {
-        let filtered = users
+        let filtered = users.filter((user) => user.isBn || user.isNat || showFormer)
+
         for (let [key, valToFilter] of Object.entries(filter)) {
             filtered = filtered.filter((user) => {
                 if (!user[key]) return false
@@ -166,7 +168,7 @@ function UserTable(props) {
         }
 
         setFilteredUsers(filtered)
-    }, [filter])
+    }, [filter, showFormer])
 
     useEffect(() => {
         let sorted = [...filteredUsers].sort((a, b) => {
@@ -175,7 +177,7 @@ function UserTable(props) {
             }
 
             if (sortKey == 'count') {
-                if (props.filterDay == -1) {
+                if (filterDay == -1) {
                     return counts[a.username] - counts[b.username]
                 } else {
                     return evalCounts[a.username] - evalCounts[b.username]
@@ -185,7 +187,7 @@ function UserTable(props) {
 
         if (!ascending) sorted = sorted.reverse()
         setSortedUsers(sorted)
-    }, [filteredUsers, sortKey, ascending, props])
+    }, [filteredUsers, sortKey, ascending, filterDay])
 
     const openUser = (user) => window.open('/users/' + user.osuId)
 
@@ -252,8 +254,10 @@ function UserTable(props) {
 
 function UserListing(props) {
     const [filterDay, setFilterDay] = useState(-1)
-    return html` <div>
-        <div class="ui horizontal list" id="nominationSortSelect" style="padding-top: 10px; padding-bottom: 10px;">
+    const [showFormer, setShowFormer] = useState(false)
+
+    return html` <div class="ui list">
+        <div class="ui horizontal list" style="padding-top: 10px;">
             <div class="item">Sort nominations from</div>
             <div class="item">
                 <div class="ui buttons">
@@ -266,7 +270,21 @@ function UserListing(props) {
                 </div>
             </div>
         </div>
-        <${UserTable} filterDay=${filterDay} />
+        <br />
+        <div class="ui horizontal list" style="padding-bottom: 10px;">
+            <div class="item">Show former BN/NAT/QAT</div>
+            <div class="item">
+                <div class="ui buttons">
+                    <button class="mini ui ${showFormer && 'active'} button" onClick=${() => setShowFormer(true)}>
+                        Yes
+                    </button>
+                    <button class="mini ui ${!showFormer && 'active'} button" onClick=${() => setShowFormer(false)}>
+                        No
+                    </button>
+                </div>
+            </div>
+        </div>
+        <${UserTable} filterDay=${filterDay} showFormer=${showFormer} />
     </div>`
 }
 
