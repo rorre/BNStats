@@ -14,6 +14,7 @@ from bnstats.routine import (
 )
 from bnstats.score import get_system
 from bnstats.models import User
+from rich.progress import Progress, TaskID
 
 config = Config(".env")
 DB_URL = config("DB_URL")
@@ -47,27 +48,28 @@ async def run_calculate():
             await calc_system.calculate_user(u)
 
 
-async def process_user(u: User, days: int):
-    print(f">>> Populating events for user: {u.username}")
+async def process_user(u: User, days: int, progress: Progress, task: TaskID):
     await update_events_db(u, days)
-    nominated_maps = []
+    progress.advance(task)
 
-    print(f">>> Populating maps for user: {u.username}")
     nominations = await u.get_nomination_activity()
-    c_maps = len(nominations)
-    for i, nom in enumerate(nominations):
-        print(f">>> Fetching: {nom.beatmapsetId} ({i+1}/{c_maps})")
+
+    maps_task = progress.add_task("Fetch maps")
+    nominated_maps = []
+    for nom in nominations:
         nominated_maps.append(await update_maps_db(nom))
+        progress.advance(maps_task)
+    progress.remove_task(maps_task)
+    progress.advance(task)
 
     if nominated_maps:
-        print(f">>> Updating details for user: {u.username}")
         await update_user_details(u, nominated_maps)
+    progress.advance(task)
 
-    print(f">>> Calculating score for user: {u.username}")
     for system_name in ("ren", "naxess"):
-        print(">>>> Using system:", system_name)
         calc_system = get_system(system_name)()  # type: ignore
         await calc_system.calculate_user(u)
+    progress.advance(task)
 
 
 async def run(days: int, skip_former: bool):
@@ -76,20 +78,22 @@ async def run(days: int, skip_former: bool):
         await Tortoise.init(db_url=DB_URL, modules={"models": ["bnstats.models"]})
         await Tortoise.generate_schemas()
 
-        with warnings.catch_warnings(record=True) as w:
+        with warnings.catch_warnings(record=True) as w, Progress() as progress:
             warnings.simplefilter("always")
-
-            print("> Populating users...")
             users: List[User] = await update_users_db()
 
-            c = len(users)
-            for i, u in enumerate(users):
-                print(f">> Populating data for user: {u.username} ({i+1}/{c})")
+            users_task = progress.add_task("Populating users...", total=len(users))
+            for u in users:
+                user_task = progress.add_task(f"Populating {u.username}", total=4)
                 if skip_former and not u.isBn and not u.isNat:
-                    print(">> Skipping former BN:", u.username)
+                    progress.console.print(">> Skipping former BN:", u.username)
+                    progress.remove_task(user_task)
+                    progress.advance(users_task)
                     continue
 
-                await process_user(u, days)
+                await process_user(u, days, progress, user_task)
+                progress.remove_task(user_task)
+                progress.advance(users_task)
 
             if len(w):
                 e_msg = "\r\n".join(list(map(lambda x: str(x.message), w)))
@@ -108,7 +112,10 @@ async def run_user(user: str, days: int):
     if user.isnumeric():
         qargs |= Q(osuId=user)
     u = await User.filter(qargs).get()
-    await process_user(u, days)
+
+    with Progress() as progress:
+        user_task = progress.add_task(f"Populating {u.username}", total=4)
+        await process_user(u, days, progress, user_task)
 
 
 if __name__ == "__main__":
