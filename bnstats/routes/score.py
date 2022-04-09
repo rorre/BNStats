@@ -5,6 +5,7 @@ from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.routing import Router
 from tortoise import timezone
+from tortoise.query_utils import Q
 
 from bnstats.models import User
 from bnstats.plugins import templates
@@ -64,12 +65,15 @@ async def leaderboard(request: Request):
     ]
     if is_valid_mode:
         users = (
-            await User.filter(modes__contains=[selected_mode])
+            await User.filter(
+                Q(isBn=True) | Q(isNat=True),
+                modes__contains=[selected_mode],
+            )
             .all()
             .order_by("username")
         )
     else:
-        users = await User.get_users()
+        users = await User.get_users(show_former=False)
 
     for u in users:
         u.score = await u.get_score(calc_system)
