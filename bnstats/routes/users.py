@@ -90,12 +90,12 @@ def _create_nomination_chartdata(nominations: List[Nomination]):
 @router.route("/", name="list")
 async def listing(request: Request):
     users = await User.get_users()
-    counts = [await u.total_nominations() for u in users]
-    eval_counts = [await u.total_nominations(90) for u in users]
+    counts = {u.username: await u.total_nominations() for u in users}
+    eval_counts = {u.username: await u.total_nominations(90) for u in users}
 
     ctx = {
         "request": request,
-        "users": users,
+        "users": [u.to_json() for u in users],
         "counts": counts,
         "genres": [g.name.replace("_", " ") for g in Genre],
         "languages": [lang.name for lang in Language],

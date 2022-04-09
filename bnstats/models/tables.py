@@ -1,3 +1,4 @@
+import json
 import logging
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any, Awaitable, Dict, List, Union
@@ -7,6 +8,7 @@ from tortoise import fields, models, timezone
 from bnstats.bnsite.enums import Difficulty, Genre, Language, MapStatus, Mode
 from bnstats.helper import format_time
 from bnstats.models.fields import ScoreField
+from tortoise.query_utils import Q
 
 if TYPE_CHECKING:
     from bnstats.score.base import CalculatorABC
@@ -213,14 +215,24 @@ class User(models.Model):
             raise ValueError("Limit cannot be None or 0 if page is defined.")
 
         if not limit:
-            users = await cls.all().order_by("username")
+            users = (
+                await cls.filter(Q(isBn=True) | Q(isNat=True))
+                .all()
+                .order_by("username")
+            )
             return users
 
         if not page:
             page = 0
 
         offset = limit * page
-        users = await cls.all().limit(limit).offset(offset)
+        users = (
+            await cls.filter(Q(isBn=True) | Q(isNat=True))
+            .limit(limit)
+            .offset(offset)
+            .order_by("username")
+            .all()
+        )
         return users
 
     async def get_nomination_activity(
@@ -290,3 +302,27 @@ class User(models.Model):
             d = timezone.now() - timedelta(days)
             return Nomination.filter(userId=self.osuId, timestamp__gte=d).count()
         return Nomination.filter(userId=self.osuId).count()  # type: ignore
+
+    def to_json(self):
+        fields = (
+            "_id",
+            "osuId",
+            "username",
+            "modesInfo",
+            "isNat",
+            "isBn",
+            "modes",
+            "genre_favor",
+            "lang_favor",
+            "topdiff_favor",
+            "size_favor",
+            "length_favor",
+            "avg_length",
+            "avg_diffs",
+        )
+
+        result = {}
+        for field in fields:
+            result[field] = getattr(self, field)
+
+        return result
