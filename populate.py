@@ -70,7 +70,7 @@ async def process_user(u: User, days: int):
         await calc_system.calculate_user(u)
 
 
-async def run(days):
+async def run(days: int, skip_former: bool):
     send_webhook("Population starts.")
     try:
         await Tortoise.init(db_url=DB_URL, modules={"models": ["bnstats.models"]})
@@ -85,6 +85,10 @@ async def run(days):
             c = len(users)
             for i, u in enumerate(users):
                 print(f">> Populating data for user: {u.username} ({i+1}/{c})")
+                if skip_former and not u.isBn and not u.isNat:
+                    print(">> Skipping former BN:", u.username)
+                    continue
+
                 await process_user(u, days)
 
             if len(w):
@@ -118,6 +122,11 @@ if __name__ == "__main__":
         "--only-recalculate", help="Only recalculate users.", action="store_true"
     )
     parser.add_argument("-u", "--user", help="Refetch a specific user")
+    parser.add_argument(
+        "--skip-former",
+        help="Whether or not to skip populating former user",
+        action="store_true",
+    )
 
     args = parser.parse_args()
     if args.only_recalculate:
@@ -126,4 +135,4 @@ if __name__ == "__main__":
         if args.user:
             run_async(run_user(args.user, args.days))
         else:
-            run_async(run(args.days))
+            run_async(run(args.days, args.skip_former))
