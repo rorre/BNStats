@@ -148,14 +148,15 @@ async def update_events_db(user: User, days: int = 90):
 
         await reset_event.fetch_related("user_affected")
         map_nominations = await Nomination.filter(
-            beatmapsetId=event["beatmapsetId"]
+            beatmapsetId=event["beatmapsetId"],
+            timestamp__lt=event["timestamp"]
         ).order_by("-timestamp")
         limit = 1 + (reset_event.type == "disqualify")
 
         for nom in map_nominations[:limit]:
-            user = await nom.user
-            if user and user not in reset_event.user_affected:
-                await reset_event.user_affected.add(user)
+            nominator = await nom.user
+            if nominator and nominator not in reset_event.user_affected:
+                await reset_event.user_affected.add(nominator)
 
         await reset_event.save()
 
