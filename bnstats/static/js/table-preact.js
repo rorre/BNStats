@@ -257,7 +257,7 @@ function UserListing(props) {
     const [showFormer, setShowFormer] = useState(false)
 
     return html` <div class="ui list">
-        <div class="ui horizontal list" style="padding-top: 10px;">
+        <div class="ui horizontal list" style="padding-top: 10px; padding-bottom: 10px;">
             <div class="item">Sort nominations from</div>
             <div class="item">
                 <div class="ui buttons">
@@ -271,6 +271,7 @@ function UserListing(props) {
             </div>
         </div>
         <br />
+        <!-- 
         <div class="ui horizontal list" style="padding-bottom: 10px;">
             <div class="item">Show former BN/NAT/QAT</div>
             <div class="item">
@@ -284,6 +285,7 @@ function UserListing(props) {
                 </div>
             </div>
         </div>
+        -->
         <${UserTable} filterDay=${filterDay} showFormer=${showFormer} />
     </div>`
 }
