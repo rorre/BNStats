@@ -1,5 +1,5 @@
-import { h, render, createContext } from 'https://cdn.skypack.dev/preact'
-import { useState, useEffect, useContext } from 'https://cdn.skypack.dev/preact/hooks'
+import { h, render, createContext } from 'https://cdn.skypack.dev/pin/preact@v10.9.0-sxzybx7sBosD3fXpfbt3/mode=imports,min/optimized/preact.js'
+import { useState, useEffect, useContext } from 'https://cdn.skypack.dev/pin/preact@v10.9.0-sxzybx7sBosD3fXpfbt3/mode=imports,min/optimized/preact/hooks.js'
 import htm from 'https://unpkg.com/htm?module'
 
 const html = htm.bind(h)
