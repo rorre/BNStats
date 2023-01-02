@@ -29,7 +29,7 @@ class Beatmap(models.Model):
     This class is used to represent a difficulty in an osu! beatmapset.
     """
 
-    beatmapset_id = fields.IntField()
+    beatmapset_id = fields.IntField(index=True)
     beatmap_id = fields.IntField()
     approved = fields.IntField()
     total_length = fields.IntField()
@@ -127,7 +127,7 @@ class BeatmapSet:
 
 class Nomination(models.Model):
     beatmapsetId = fields.IntField()
-    userId = fields.IntField()
+    userId = fields.IntField(index=True)
     artistTitle = fields.TextField()
     creatorId = fields.IntField(null=True)
     creatorName = fields.TextField(null=True)
@@ -173,8 +173,8 @@ class User(models.Model):
     osuId = fields.IntField(pk=True)
     username = fields.TextField()
     modesInfo = fields.JSONField()
-    isNat = fields.BooleanField()
-    isBn = fields.BooleanField()
+    isNat = fields.BooleanField(index=True)
+    isBn = fields.BooleanField(index=True)
     modes = fields.JSONField()
     last_updated = fields.DatetimeField(null=True)
     genre_favor = fields.JSONField(null=True)
