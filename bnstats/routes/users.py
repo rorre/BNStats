@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from itertools import groupby
 from typing import Dict, List, Tuple
 
+from dateutil.parser import parse
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.routing import Router
@@ -12,7 +13,7 @@ from tortoise import timezone
 from bnstats.bnsite.enums import Difficulty, Genre, Language
 from bnstats.helper import ensure_int, format_time
 from bnstats.models import BeatmapSet, Nomination, User
-from bnstats.plugins import templates
+from bnstats.plugins import templates, cache
 
 router = Router()
 
@@ -91,9 +92,16 @@ def _create_nomination_chartdata(nominations: List[Nomination]):
 async def listing(request: Request):
     COUNTS = [0, 90, 360]
     users = await User.get_users(show_former=False)
-    counts = {}
-    for u in users:
-        counts[u.username] = [await u.total_nominations(c) for c in COUNTS]
+    last_update = max(users, key=lambda x: x.last_updated).last_updated
+
+    counts = await cache.get("user-counts", None)
+    if not counts or parse(counts["+last_update"]) < last_update:
+        counts = {}
+        for u in users:
+            counts[u.username] = [await u.total_nominations(c) for c in COUNTS]
+
+        counts["+last_update"] = last_update.isoformat()
+        await cache.set("user-counts", counts)
 
     ctx = {
         "request": request,
@@ -102,7 +110,7 @@ async def listing(request: Request):
         "genres": [g.name.replace("_", " ") for g in Genre],
         "languages": [lang.name for lang in Language],
         "diffs": [diff.name for diff in Difficulty],
-        "last_update": max(users, key=lambda x: x.last_updated).last_updated,
+        "last_update": last_update,
         "title": "User Listing",
     }
     return templates.TemplateResponse("pages/user/listing.html", ctx)

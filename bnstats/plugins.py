@@ -1,3 +1,4 @@
+from aiocache import Cache
 from starlette.templating import Jinja2Templates
 from webassets import Bundle
 from webassets import Environment as AssetsEnvironment
@@ -32,3 +33,5 @@ js_bundle = Bundle(
 css_bundle = Bundle("css/*.css", filters="rcssmin", output="bundle.%(version)s.css")
 assets_env.register("js_all", js_bundle)
 assets_env.register("css_all", css_bundle)
+
+cache = Cache.from_url(config.REDIS_URI)

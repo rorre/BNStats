@@ -12,6 +12,8 @@ SITE_SESSION: str = config("BNSITE_SESSION")
 API_KEY: str = config("API_KEY")
 SENTRY_URL: str = config("SENTRY_URL", default="")
 
+REDIS_URI = config("REDIS_URI", default="")
+
 INTEROP_USERNAME: str = config("INTEROP_USERNAME", default="")
 INTEROP_PASSWORD: str = config("INTEROP_PASSWORD", default="")
 USE_INTEROP: bool = bool(INTEROP_USERNAME and INTEROP_PASSWORD)
