@@ -1,0 +1,6 @@
+tests/data
+bnstats/static/components
+bnstats/static/js/vendor
+bnstats/static/themes
+bnstats/static/css/semantic.css
+bnstats/static/css/chart.css
