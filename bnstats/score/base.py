@@ -31,7 +31,11 @@ class CalculatorABC(ABC):
         pass
 
     async def get_user_score(
-        self, user: User, days: int = 90, mode: Union[Mode, str] = None
+        self,
+        user: User,
+        days: int = 90,
+        mode: Union[Mode, str] = None,
+        activities: Optional[List[Nomination]] = None,
     ) -> Score:
         """Calculate a user's score.
 
@@ -44,7 +48,10 @@ class CalculatorABC(ABC):
             float: The user's score.
         """
         date = timezone.now() - timedelta(days)
-        activities = await user.get_nomination_activity(date, mode=mode)
+        if activities:
+            activities = list(filter(lambda x: x.timestamp >= date, activities))
+        elif activities is None:
+            activities = await user.get_nomination_activity(date, mode=mode)
         return self.get_activity_score(activities)
 
     @abstractmethod

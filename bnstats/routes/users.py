@@ -210,12 +210,14 @@ async def show_user(request: Request):
     line_labels, line_datas = _create_nomination_chartdata(nominations)
 
     calc_system = request.scope["calculator"]
-    user.score = await user.get_score(calc_system)
+    user.score = await calc_system.get_user_score(user, activities=nominations)
     user.score_modes = {}
 
     mode: str
     for mode in user.modes:
-        user.score_modes[mode] = await user.get_score(calc_system, mode=mode)
+        user.score_modes[mode] = await calc_system.get_user_score(
+            user, mode=mode, activities=nominations
+        )
 
     first_nom = await Nomination.filter(userId=user.osuId).order_by("timestamp").first()
     first_year = first_nom.timestamp.year
