@@ -9,7 +9,6 @@ const langs = JSON.parse(mountTarget.dataset.langs)
 const diffs = JSON.parse(mountTarget.dataset.diffs)
 const users = JSON.parse(mountTarget.dataset.users)
 const counts = JSON.parse(mountTarget.dataset.counts)
-const evalCounts = JSON.parse(mountTarget.dataset.evalcounts)
 
 const keyTransform = {
     genre: 'genre_favor',
@@ -177,10 +176,13 @@ function UserTable(props) {
             }
 
             if (sortKey == 'count') {
-                if (filterDay == -1) {
-                    return counts[a.username] - counts[b.username]
-                } else {
-                    return evalCounts[a.username] - evalCounts[b.username]
+                switch (filterDay) {
+                    case -1:
+                        return counts[a.username][0] - counts[b.username][0]
+                    case 90:
+                        return counts[a.username][1] - counts[b.username][1]
+                    case 360:
+                        return counts[a.username][2] - counts[b.username][2]
                 }
             }
         })
@@ -238,9 +240,9 @@ function UserTable(props) {
                                 <td>${user.modes.join(', ')}</td>
 
                                 <td>
-                                    ${counts[user.username]}
+                                    ${counts[user.username][0]}
                                     <span class="ui small text" data-tooltip="Last 90 days">
-                                        (${evalCounts[user.username]})
+                                        (${counts[user.username][1]})
                                     </span>
                                 </td>
                             </tr>
@@ -266,6 +268,9 @@ function UserListing(props) {
                     </button>
                     <button class="mini ui ${filterDay == 90 && 'active'} button" onClick=${() => setFilterDay(90)}>
                         90 days
+                    </button>
+                    <button class="mini ui ${filterDay == 360 && 'active'} button" onClick=${() => setFilterDay(360)}>
+                        360 days
                     </button>
                 </div>
             </div>

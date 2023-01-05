@@ -89,9 +89,11 @@ def _create_nomination_chartdata(nominations: List[Nomination]):
 
 @router.route("/", name="list")
 async def listing(request: Request):
+    COUNTS = [0, 90, 360]
     users = await User.get_users(show_former=False)
-    counts = {u.username: await u.total_nominations() for u in users}
-    eval_counts = {u.username: await u.total_nominations(90) for u in users}
+    counts = {}
+    for u in users:
+        counts[u.username] = [await u.total_nominations(c) for c in COUNTS]
 
     ctx = {
         "request": request,
@@ -102,7 +104,6 @@ async def listing(request: Request):
         "diffs": [diff.name for diff in Difficulty],
         "last_update": max(users, key=lambda x: x.last_updated).last_updated,
         "title": "User Listing",
-        "eval_counts": eval_counts,
     }
     return templates.TemplateResponse("pages/user/listing.html", ctx)
 
