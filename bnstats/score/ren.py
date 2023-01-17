@@ -29,6 +29,9 @@ class RenCalculator(CalculatorABC):
     }
 
     def get_activity_score(self, nominations: List[Nomination]) -> Score:
+        nominations = list(
+            filter(lambda x: x.score[self.name] is not None, nominations)
+        )
         if not nominations:
             return Score(
                 total_score=0.0,
@@ -42,7 +45,7 @@ class RenCalculator(CalculatorABC):
 
         total_score = 0
         for i, a in enumerate(nominations):
-            total_score += a.score[self.name]["total_score"] * (self.weight ** i)
+            total_score += a.score[self.name]["total_score"] * (self.weight**i)
 
         mappers = set(nom.creatorId for nom in nominations)
         total_mappers = len(mappers)
@@ -159,8 +162,8 @@ class RenCalculator(CalculatorABC):
             other_nominator_count += 1
             seen_maps.append(other_nom.beatmapsetId)
 
-        mapper_score = 0.8 ** recurring_mapper_count
-        mapper_score *= 0.95 ** other_nominator_count
+        mapper_score = 0.8**recurring_mapper_count
+        mapper_score *= 0.95**other_nominator_count
         logger.debug(f"Mapper value: {mapper_score}%")
 
         resets = await user.resets.filter(beatmapsetId=nom.beatmapsetId).all()
@@ -169,7 +172,7 @@ class RenCalculator(CalculatorABC):
             total = r.obviousness + r.severity
             # If total is 0, then don't bother calculating.
             if total:
-                penalty += (2 ** total) / 8
+                penalty += (2**total) / 8
         logger.debug(f"Penalty: {penalty}")
 
         ranked_score = ((beatmap.status == MapStatus.Ranked) + 1) / 2

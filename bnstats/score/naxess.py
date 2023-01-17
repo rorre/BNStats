@@ -27,6 +27,9 @@ class NaxessCalculator(CalculatorABC):
     }
 
     def get_activity_score(self, nominations: List[Nomination]) -> Score:
+        nominations = list(
+            filter(lambda x: x.score[self.name] is not None, nominations)
+        )
         nominations.sort(
             key=lambda x: abs(x.score[self.name]["total_score"]),
             reverse=True,
@@ -34,7 +37,7 @@ class NaxessCalculator(CalculatorABC):
 
         total_score = 0
         for i, a in enumerate(nominations):
-            total_score += a.score[self.name]["total_score"] * (self.weight ** i)
+            total_score += a.score[self.name]["total_score"] * (self.weight**i)
         return Score(total_score=total_score, attribs={})
 
     def calculate_mapset(self, beatmap: BeatmapSet):
@@ -115,7 +118,7 @@ class NaxessCalculator(CalculatorABC):
             other_nominator_count += 1
             seen_maps.append(other_nom.beatmapsetId)
 
-        mapper_score = (0.4 ** current_nominator_count) * (0.9 ** other_nominator_count)
+        mapper_score = (0.4**current_nominator_count) * (0.9**other_nominator_count)
         logger.debug(
             f"Self: {current_nominator_count} | Other: {other_nominator_count}"
         )
