@@ -19,20 +19,19 @@ asyncpg = ["asyncpg"]
 
 [[package]]
 name = "aiocache"
-version = "0.11.1"
+version = "0.12.1"
 description = "multi backend asyncio cache"
 category = "main"
 optional = false
 python-versions = "*"
 
 [package.dependencies]
-aioredis = {version = ">=1.0.0", optional = true, markers = "python_version >= \"3.7\" and extra == \"redis\""}
+redis = {version = ">=4.2.0", optional = true, markers = "extra == \"redis\""}
 
 [package.extras]
-dev = ["asynctest (>=0.11.0)", "codecov", "coverage", "flake8", "ipdb", "marshmallow", "pystache", "pytest", "pytest-asyncio", "pytest-mock", "sphinx", "sphinx-autobuild", "sphinx-rtd-theme", "black"]
 memcached = ["aiomcache (>=0.5.2)"]
 msgpack = ["msgpack (>=0.5.5)"]
-redis = ["aioredis (>=0.3.3)", "aioredis (>=1.0.0)"]
+redis = ["redis (>=4.2.0)"]
 
 [[package]]
 name = "aiofiles"
@@ -41,21 +40,6 @@ description = "File support for asyncio."
 category = "main"
 optional = false
 python-versions = "*"
-
-[[package]]
-name = "aioredis"
-version = "2.0.1"
-description = "asyncio (PEP 3156) Redis support"
-category = "main"
-optional = false
-python-versions = ">=3.6"
-
-[package.dependencies]
-async-timeout = "*"
-typing-extensions = "*"
-
-[package.extras]
-hiredis = ["hiredis (>=1.0)"]
 
 [[package]]
 name = "aiosqlite"
@@ -624,6 +608,21 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "redis"
+version = "4.5.5"
+description = "Python client for Redis database and key-value store"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+async-timeout = {version = ">=4.0.2", markers = "python_full_version <= \"3.11.2\""}
+
+[package.extras]
+hiredis = ["hiredis (>=1.0.0)"]
+ocsp = ["cryptography (>=36.0.1)", "pyopenssl (==20.0.1)", "requests (>=2.26.0)"]
+
+[[package]]
 name = "requests"
 version = "2.31.0"
 description = "Python HTTP for Humans."
@@ -837,7 +836,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "2219032ad84722199952ec02276cdcd71ddc5950cac59826f5ba31c40b70bc89"
+content-hash = "28e3ff189257f61e27a1841d379546958fa6d2f756d28f2f33386c4a29d27307"
 
 [metadata.files]
 aerich = [
@@ -849,7 +848,6 @@ aiofiles = [
     {file = "aiofiles-0.5.0-py3-none-any.whl", hash = "sha256:377fdf7815cc611870c59cbd07b68b180841d2a2b79812d8c218be02448c2acb"},
     {file = "aiofiles-0.5.0.tar.gz", hash = "sha256:98e6bcfd1b50f97db4980e182ddd509b7cc35909e903a8fe50d8849e02d815af"},
 ]
-aioredis = []
 aiosqlite = [
     {file = "aiosqlite-0.17.0-py3-none-any.whl", hash = "sha256:6c49dc6d3405929b1d08eeccc72306d3677503cc5e5e43771efc1e00232e8231"},
     {file = "aiosqlite-0.17.0.tar.gz", hash = "sha256:f0e6acc24bc4864149267ac82fb46dfb3be4455f99fe21df82609cc6e6baee51"},
@@ -994,6 +992,7 @@ python-dateutil = [
 ]
 pytz = []
 rcssmin = []
+redis = []
 requests = []
 rich = []
 rjsmin = []

@@ -25,7 +25,7 @@ uvloop = {version = "^0.17.0", platform = "linux"}
 pytest-httpx = "^0.22.0"
 sentry-sdk = "^0.19.2"
 rich = "^12.2.0"
-aiocache = {extras = ["redis"], version = "^0.11.1"}
+aiocache = {extras = ["redis"], version = "^0.12.1"}
 ujson = "^5.6.0"
 
 [tool.poetry.dev-dependencies]
