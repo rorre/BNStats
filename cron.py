@@ -10,6 +10,7 @@ from populate import run
 def job():
     print("-- Start cron " + datetime.datetime.now().isoformat())
     run_async(run(1, False))
+    print("-- End cron " + datetime.datetime.now().isoformat())
 
 while True:
     run_pending()
