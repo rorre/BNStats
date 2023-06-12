@@ -6,12 +6,12 @@ authors = ["Rendy Arya Kemal <rendyarya22@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-starlette = "^0.13.8"
-uvicorn = "^0.17.6"
+starlette = "^0.28.0"
+uvicorn = "^0.22.0"
 aiofiles = "^0.5.0"
 itsdangerous = "^1.1.0"
 Jinja2 = ">=3.0.0,<3.1.0"
-httpx = "^0.16.1"
+httpx = "^0.24.1"
 python-dateutil = "^2.8.1"
 tortoise-orm = "^0.17.8"
 aiosqlite = "^0.17.0"
@@ -21,8 +21,8 @@ webassets = "^2.0"
 rcssmin = "^1.0.6"
 rjsmin = "^1.1.0"
 gunicorn = {version = "^20.0.4", platform = "linux"}
-uvloop = {version = "^0.14.0", platform = "linux"}
-pytest-httpx = "^0.10.0"
+uvloop = {version = "^0.17.0", platform = "linux"}
+pytest-httpx = "^0.22.0"
 sentry-sdk = "^0.19.2"
 rich = "^12.2.0"
 aiocache = {extras = ["redis"], version = "^0.11.1"}
