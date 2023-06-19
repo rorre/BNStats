@@ -39,6 +39,12 @@
     <script type="text/javascript" src="{{ ASSET_URL }}"></script>
     {% endassets %}
 
+    {% if not config.DEBUG %}
+    <!-- Cloudflare Web Analytics -->
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "e103c1cbbcb6463fba4fa7f87cb48c5a"}'></script>
+    <!-- End Cloudflare Web Analytics -->
+    {% endif %}
+
 </head>
 
 <body>
