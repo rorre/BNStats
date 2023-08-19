@@ -1,4 +1,5 @@
 from collections import Counter
+import json
 import logging
 from typing import List
 from urllib.parse import urlencode
@@ -54,6 +55,16 @@ async def update_users_db():
     logger.info("Updating users.")
     users: List[User] = []
     for u in r:
+        # HACK: This is for no mode NAT. They can nominate anything, so they will be given any modes.
+        if "none" in u["modes"]:
+            u["modesInfo"] = [
+                {"mode": "mania", "level": "full"},
+                {"mode": "osu", "level": "full"},
+                {"mode": "taiko", "level": "full"},
+                {"mode": "catch", "level": "full"},
+            ]
+            u["modes"] = ["mania", "osu", "taiko", "catch"]
+
         u["last_updated"] = timezone.now()
         user = await User.get_or_none(osuId=u["osuId"])
         if user:
