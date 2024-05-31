@@ -8,7 +8,7 @@ import httpx
 from bnstats.config import INTEROP_PASSWORD, INTEROP_USERNAME, SITE_SESSION
 
 INTEROP_HEADERS = {"username": INTEROP_USERNAME, "secret": INTEROP_PASSWORD}
-s: httpx.AsyncClient = httpx.AsyncClient(timeout=60.0, headers=INTEROP_HEADERS)
+s: httpx.AsyncClient = httpx.AsyncClient(timeout=60.0, headers=INTEROP_HEADERS, follow_redirects=True)
 s.cookies.set(domain="bn.mappersguild.com", name="connect.sid", value=SITE_SESSION)
 
 
