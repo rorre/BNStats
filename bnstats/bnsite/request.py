@@ -27,6 +27,7 @@ async def get(url, is_json=True, attempts=5) -> Union[dict, str]:
 
         r.raise_for_status()
         break
+
     if is_json:
         _result = r.json()
     else:
